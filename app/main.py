@@ -15,7 +15,12 @@ app = FastAPI(title="Sistema de Gestão de Filas")
 app.include_router(queue_router.router, prefix="/queue", tags=["Queue"])
 # app.include_router(user_router.router, prefix="/users", tags=["Users"])
 app.include_router(biometric_router.router, prefix="/biometrics", tags=["Biometrics"])
-app.include_router(audit_router.router, prefix="/audit", tags=["Audit"])
+app.include_router(
+    audit_router.router,
+    prefix="/audit",
+    tags=["Audit"],
+    responses={404: {"description": "Registro não encontrado"}},
+)
 
 
 @app.get("/")

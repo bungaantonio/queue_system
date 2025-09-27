@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.crud import biometric_crud, queue_crud
 from app.exceptions.exceptions import BiometricException
 from app.schemas.biometric_schema import BiometricVerifyResponse
-from app.services import audit_service
+from app.services.audit_service import AuditService
 
 
 def verify_called_user(
@@ -38,7 +38,7 @@ def verify_called_user(
     queue_item = queue_crud.mark_as_being_served(db, current_called)
 
     # Auditoria
-    audit_service.log_action(
+    AuditService.log_action(
         db,
         action="QUEUE_VERIFIED",
         user_id=user_id,

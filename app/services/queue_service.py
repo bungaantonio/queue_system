@@ -10,7 +10,7 @@ from app.schemas.queue_schema import (
     QueueDetailResponse,
     RegisterRequest,
 )
-from app.services import audit_service
+from app.services.audit_service import AuditService
 from app.exceptions.exceptions import QueueException
 from app.helpers.queue_helpers import build_models as _build_models, format_queue_item
 from app.helpers import biometric_helpers
@@ -94,7 +94,7 @@ def call_next(db: Session) -> QueueItem:
 
     updated_item = queue_crud.mark_as_called(db, next_item)
 
-    audit_service.log_action(
+    AuditService.log_action(
         db,
         action="QUEUE_CALLED",
         user_id=updated_item.user_id,
@@ -115,7 +115,7 @@ def finish_current(db: Session) -> QueueItem:
 
     biometric_id = get_biometric_for_finished(db, done_item.id)
 
-    audit_service.log_action(
+    AuditService.log_action(
         db,
         action="QUEUE_FINISHED",
         user_id=done_item.user_id,
