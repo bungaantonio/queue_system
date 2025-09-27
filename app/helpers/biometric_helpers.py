@@ -14,8 +14,8 @@ def validate_biometric(template: str, bio: Biometric) -> None:
         raise BiometricException("biometric_mismatch")
 
 
-def identify_user(db: Session, template: str) -> int:
-    bio = biometric_crud.get_by_template(db, template)
+def identify_user(db: Session, biometric_id: str) -> int:
+    bio = biometric_crud.get_by_biometric_id(db, biometric_id)
     if not bio:
         raise BiometricException("biometric_not_found")
     return bio.user_id

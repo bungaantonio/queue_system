@@ -17,21 +17,22 @@ from app.helpers import biometric_helpers
 
 
 # ------------------ REGISTER USER ------------------
-def register_user(
-    db: Session, request: Optional[RegisterRequest], use_mock: bool
-) -> QueueCreateResponse:
-    user_model, biometric_model = _build_models(request, use_mock)
+def register_user(db: Session, request: RegisterRequest) -> QueueCreateResponse:
+    user_model, biometric_model = _build_models(request)
 
+    # cria usuário
     db_user = user_crud.create_user(db, user_model)
+
+    # cria biometria (somente com biometric_id e finger_index)
     db_bio = biometric_crud.create_biometric(
         db,
-        db_user.id,
-        template=biometric_model.template,
-        hash=biometric_model.hash,
+        user_id=db_user.id,
+        biometric_id=biometric_model.biometric_id,
         finger_index=biometric_model.finger_index,
     )
 
-    queue_item = queue_crud.create_queue_item(db, db_user.id)
+    # adiciona na fila
+    queue_item = queue_crud.get_queue_item(db, db_user.id)
 
     return QueueCreateResponse(
         status="success",
@@ -48,7 +49,7 @@ def manual_insert(db: Session, user_id: int) -> QueueCreateResponse:
     if not db_user:
         raise QueueException("queue_user_not_found")
 
-    queue_item = queue_crud.create_queue_item(db, db_user.id)
+    queue_item = queue_crud.get_queue_item(db, db_user.id)
 
     return QueueCreateResponse(
         status="success",
@@ -60,11 +61,17 @@ def manual_insert(db: Session, user_id: int) -> QueueCreateResponse:
 
 
 # ------------------- HANDLE BIOMETRIC SCAN ------------------
-def handle_biometric_scan(db: Session, template: str) -> QueueItem:
-    user_id = biometric_helpers.identify_user(db, template)
-
+def handle_biometric_scan(db: Session, biometric_id: str) -> QueueItem:
+    user_id = biometric_helpers.identify_user(db, biometric_id)
     queue_item = queue_crud.get_active_queue_item_by_user(db, user_id)
+
     if queue_item:
+        # Se estava aguardando verificação, atualiza para 'being_served'
+        if queue_item.status == "called_pending_verification":
+            queue_item.status = "being_served"
+            queue_item.timestamp = datetime.now(timezone.utc)
+            db.commit()
+            db.refresh(queue_item)
         return queue_item
 
     return queue_crud.insert_user_at_end(db, user_id)

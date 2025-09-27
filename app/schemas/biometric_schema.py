@@ -1,21 +1,22 @@
 from pydantic import BaseModel
+from typing import Optional, Dict
 
 
 class BiometricCreate(BaseModel):
-    template: str
-    hash: str
+    biometric_id: str
     finger_index: int
 
 
 class BiometricVerifyRequest(BaseModel):
-    user_id: int
-    template: str
+    queue_id: int
+    biometric_id: str  # sempre vem do middleware
 
 
 class BiometricVerifyResponse(BaseModel):
     user_id: int
     verified: bool
     message: str
+    score: Optional[float] = None  # opcional: nível de confiança do middleware
 
 
 class BiometricBase(BiometricCreate):
@@ -27,4 +28,5 @@ class BiometricBase(BiometricCreate):
 
 
 class BiometricScanRequest(BaseModel):
-    template: str
+    biometric_id: str
+    metadata: Optional[Dict[str, str]] = None

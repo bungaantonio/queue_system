@@ -25,4 +25,5 @@ BIOMETRIC_ERRORS = {
     "biometric_mismatch": (403, "Biometria não corresponde ao usuário chamado"),
     "user_not_called_in_queue": (404, "Usuário não está na fila ou não foi chamado"),
     "biometric_not_found": (404, "Template biométrico não encontrado no sistema"),
+    "biometric_already_registered": (409, "Usuário já possui biometria cadastrada"),
 }

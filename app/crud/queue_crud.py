@@ -25,7 +25,7 @@ def _insert_at_end(db: Session, user_id: int, status: str = "waiting") -> QueueI
 
 
 # ------------------- CRUD público -------------------
-def create_queue_item(db: Session, user_id: int, status: str = "waiting") -> QueueItem:
+def get_queue_item(db: Session, user_id: int, status: str = "waiting") -> QueueItem:
     """
     Cria um QueueItem, reaproveitando se já existir ativo.
     """
@@ -128,7 +128,11 @@ def get_called_pending(db: Session) -> Optional[QueueItem]:
     """
     Retorna o próximo usuário aguardando verificação biométrica.
     """
-    return db.query(QueueItem).filter(QueueItem.status == "called_pending_verification").first()
+    return (
+        db.query(QueueItem)
+        .filter(QueueItem.status == "called_pending_verification")
+        .first()
+    )
 
 
 def has_active_service(db: Session) -> bool:
@@ -150,6 +154,17 @@ def mark_as_called(db: Session, item: QueueItem) -> QueueItem:
     """
     item.status = "called_pending_verification"
     item.attempted_verification = False
+    item.timestamp = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+def mark_as_being_served(db: Session, item: QueueItem) -> QueueItem:
+    """
+    Atualiza o item para 'being_served'.
+    """
+    item.status = "being_served"
     item.timestamp = datetime.now(timezone.utc)
     db.commit()
     db.refresh(item)

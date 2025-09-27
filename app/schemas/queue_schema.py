@@ -1,8 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 
-from .user_schema import UserCreate
-from .user_schema import UserBase, UserShortResponse, UserFullResponse
+from .user_schema import UserCreate, UserBase, UserShortResponse, UserFullResponse
 from .biometric_schema import BiometricBase, BiometricCreate
 
 

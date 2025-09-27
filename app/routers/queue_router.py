@@ -25,10 +25,9 @@ router = APIRouter()
 @router.post("/register", response_model=QueueCreateResponse)
 def register_user_endpoint(
     db: Session = Depends(get_db),
-    use_mock: bool = Query(default=True),
-    request: RegisterRequest | None = Body(default=None),
+    request: RegisterRequest = Body(...),
 ):
-    return queue_service.register_user(db=db, request=request, use_mock=use_mock)
+    return queue_service.register_user(db=db, request=request)
 
 
 # ------------------ MANUAL INSERT ------------------
@@ -62,7 +61,7 @@ def scan_biometric_endpoint(
     request: BiometricScanRequest, db: Session = Depends(get_db)
 ):
     try:
-        queue_item = queue_service.handle_biometric_scan(db, request.template)
+        queue_item = queue_service.handle_biometric_scan(db, request.biometric_id)
     except BiometricException as e:
         raise HTTPException(status_code=404, detail=e.message)
     except QueueException as e:

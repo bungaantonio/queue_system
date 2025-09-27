@@ -9,5 +9,4 @@ router = APIRouter()
 
 @router.post("/verify_called_user", response_model=BiometricVerifyResponse)
 def verify_called_user(request: BiometricVerifyRequest, db: Session = Depends(get_db)):
-    # O router só chama o service e retorna — sem ifs, sem try/except
-    return biometric_service.verify_called_user(db, request.user_id, request.template)
+    return biometric_service.verify_called_user(db, request.queue_id, request.biometric_id)

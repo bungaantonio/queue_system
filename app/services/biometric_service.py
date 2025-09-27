@@ -1,35 +1,41 @@
 from sqlalchemy.orm import Session
-from app.crud import biometric_crud
-from app.services import audit_service, queue_service
-from app.exceptions.exceptions import BiometricException, QueueException
-from app.helpers import biometric_helpers
+from app.crud import biometric_crud, queue_crud
+from app.exceptions.exceptions import BiometricException
+from app.schemas.biometric_schema import BiometricVerifyResponse
+from app.services import audit_service
 
 
-# ------------------ REGISTER BIOMETRIC ------------------
-def register_biometric(
-    db: Session, user_id: int, template: str, hash: str, finger_index: int
-):
-    return biometric_crud.create_biometric(db, user_id, template, hash, finger_index)
-
-
-# ------------------ VERIFY USER ------------------
-def verify_called_user(db: Session, user_id: int, template: str) -> dict:
+def verify_called_user(
+    db: Session, queue_id: int, biometric_id: str
+) -> BiometricVerifyResponse:
     """
-    Orquestra a verificação biométrica do usuário chamado.
+    Verifica a biometria do usuário que foi chamado para atendimento.
+    Só permite autenticar o usuário que está em 'called_pending_verification'.
     """
+    # Pega o item atualmente chamado para verificação
+    current_called = queue_crud.get_called_pending(db)
+    if not current_called:
+        raise BiometricException("user_not_called_in_queue")
+
+    # Garante que o queue_id enviado corresponde ao item chamado
+    if current_called.id != queue_id:
+        raise BiometricException("biometric_mismatch")
+
+    user_id = current_called.user_id
+
+    # Recupera a biometria cadastrada
     bio = biometric_crud.get_by_user(db, user_id)
     if not bio:
         raise BiometricException("user_no_biometric")
 
-    # Validação biométrica
-    try:
-        biometric_helpers.validate_biometric(template, bio)
-    except BiometricException:
-        queue_service.mark_attempted_verification(db, user_id)
-        raise
+    # Verifica se a biometria capturada bate
+    if bio.biometric_id != biometric_id:
+        # Marca tentativa falha
+        queue_crud.mark_as_called(db, current_called)
+        raise BiometricException("biometric_mismatch")
 
-    # Atualizar status da fila
-    queue_item = queue_service.promote_to_being_served(db, user_id)
+    # Atualiza fila para "being_served"
+    queue_item = queue_crud.mark_as_being_served(db, current_called)
 
     # Auditoria
     audit_service.log_action(
@@ -41,4 +47,9 @@ def verify_called_user(db: Session, user_id: int, template: str) -> dict:
         details="Usuário autenticado e em atendimento",
     )
 
-    return {"user_id": user_id, "verified": True, "message": "Usuário autenticado"}
+    return BiometricVerifyResponse(
+        user_id=user_id,
+        verified=True,
+        message="Usuário autenticado com sucesso",
+        score=None,
+    )

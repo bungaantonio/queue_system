@@ -1,18 +1,18 @@
 from app.exceptions.exceptions import QueueException
-from app.mocks.user_mock import register_user_mock
 from app.models.queue_item import QueueItem
-from app.schemas.biometric_schema import BiometricCreate
 from app.schemas.queue_schema import QueueListResponse, RegisterRequest
-from app.schemas.user_schema import UserCreate, UserShortResponse
+from app.schemas.user_schema import UserShortResponse
 
 
-def build_models(request: RegisterRequest | None, use_mock: bool):
-    if use_mock:
-        mock_data = register_user_mock()
-        return UserCreate(**mock_data["user"]), BiometricCreate(**mock_data["biometric"])
+def build_models(request: RegisterRequest):
     if not request:
         raise QueueException("queue_missing_request_body")
+
+    if not request.biometric.biometric_id:
+        raise QueueException("queue_missing_biometric_id")
+
     return request.user, request.biometric
+
 
 def format_queue_item(item: QueueItem) -> QueueListResponse:
     user = item.user
