@@ -1,0 +1,79 @@
+### Registrar usuário com biometria (mock)
+POST http://127.0.0.1:8000/queue/register?use_mock=true
+
+### Registrar usuário com biometria (real) #1
+POST http://127.0.0.1:8000/queue/register?use_mock=false
+Content-Type: application/json
+
+{
+  "user": {
+    "name": "João Silva",
+    "id_number": "1234567LA033",
+    "phone": "+244912345678",
+    "birth_date": "1999-06-20"
+  },
+  "biometric": {
+    "template": "hmac-template",
+    "hash": "sha256hash",
+    "finger_index": 1
+  }
+}
+
+### Registrar usuário com biometria (real) #2
+POST http://127.0.0.1:8000/queue/register?use_mock=false
+Content-Type: application/json
+
+{
+  "user": {
+    "name": "John Doe",
+    "id_number": "007627611ML055",
+    "phone": "+244943456231",
+    "birth_date": "1989-06-20"
+  },
+  "biometric": {
+    "template": "base64-template",
+    "hash": "sha256hash",
+    "finger_index": 1
+  }
+}
+
+
+### Listar a fila
+GET http://127.0.0.1:8000/queue/list
+
+### Iniciar escaneamento biométrico
+POST http://127.0.0.1:8000/queue/scan
+Content-Type: application/json
+
+{
+  "template": "hmac-template"
+}
+
+### Chamar o próximo da fila
+PUT http://127.0.0.1:8000/queue/next
+
+### Verificar usuário chamado (mock)
+POST http://127.0.0.1:8000/biometrics/verify_called_user
+Content-Type: application/json
+
+{
+  "user_id": 2,
+  "template": "hmac-template"
+}
+
+### Pular o próximo da fila
+PUT http://127.0.0.1:8000/queue/skip
+
+### Finalizar atendimento
+PUT http://127.0.0.1:8000/queue/done
+
+### Listar auditorias
+GET http://127.0.0.1:8000/audit/
+
+### Verificar integridade da cadeia de auditoria
+GET http://127.0.0.1:8000/audit/verify
+
+### Verificar integridade de auditoria específica
+GET http://127.0.0.1:8000/audit/verify/2
+
+### É necessário validar a integridade de um registo específico (record_hash)
