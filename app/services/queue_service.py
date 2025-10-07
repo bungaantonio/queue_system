@@ -92,6 +92,7 @@ def get_current(db: Session) -> Optional[QueueListResponse]:
 
 # Implementar a formatação de get_current igual ao list_waiting_queue, se necessário
 
+
 # ------------------ CALL NEXT ------------------
 def call_next(db: Session) -> QueueItem:
     if queue_crud.has_active_service(db):
@@ -149,6 +150,7 @@ def skip_current(db: Session) -> QueueItem:
     queue_crud.mark_as_skipped(db, current)
 
     return new_item
+
 
 # ------------------ GET CALLED USER (pending verification) ------------------
 def get_called(db: Session) -> Optional[QueueListResponse]:

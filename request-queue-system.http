@@ -103,7 +103,7 @@ POST http://127.0.0.1:8000/biometrics/verify_called_user
 Content-Type: application/json
 
 {
-  "queue_id":7,
+  "queue_id":16,
   "biometric_id": "c13f9c04-0000-4bb8-9a7d-0e44fcd6b2c0"
 }
 

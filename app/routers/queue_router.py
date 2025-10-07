@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Body
+from fastapi import APIRouter, Depends, HTTPException, Query, Body, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.exceptions.exceptions import BiometricException, QueueException
 from app.services import biometric_service, queue_service
-from app.crud import user_crud, biometric_crud
+from app.helpers.queue_broadcast import broadcast_state
+from app.crud import user_crud
 from app.schemas.queue_schema import (
     QueueConsultResponse,
     QueueCreateResponse,
@@ -15,9 +16,8 @@ from app.schemas.queue_schema import (
     QueueInsertRequest,
     RegisterRequest,
 )
-from app.schemas.user_schema import UserCreate, UserFullResponse
-from app.schemas.biometric_schema import BiometricCreate, BiometricScanRequest
-from app.mocks.user_mock import register_user_mock
+from app.schemas.user_schema import UserFullResponse
+from app.schemas.biometric_schema import BiometricScanRequest
 
 router = APIRouter()
 
@@ -27,18 +27,30 @@ router = APIRouter()
 def register_user_endpoint(
     db: Session = Depends(get_db),
     request: RegisterRequest = Body(...),
+    background_tasks: BackgroundTasks = None,
 ):
-    return queue_service.register_user(db=db, request=request)
+    response = queue_service.register_user(db=db, request=request)
+
+    if background_tasks:
+        background_tasks.add_task(broadcast_state, db)
+
+    return response
 
 
 # ------------------ MANUAL INSERT ------------------
 @router.post("/manual_insert", response_model=QueueCreateResponse)
-def manual_insert(request: QueueInsertRequest, db: Session = Depends(get_db)):
+def manual_insert(
+    request: QueueInsertRequest, db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = None
+):
     db_user = user_crud.get_user(db, request.user_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    queue_item = queue_service.add_user_to_queue(db, db_user.id)
+    queue_item = queue_service.manual_insert(db, db_user.id)
+
+    if background_tasks:
+        background_tasks.add_task(broadcast_state, db)
 
     return QueueCreateResponse(
         status="success",
@@ -62,16 +74,7 @@ def get_current_user_endpoint(db: Session = Depends(get_db)):
     current_item = queue_service.get_current(db)
     if not current_item:
         raise HTTPException(status_code=404, detail="Nenhum usuário em atendimento")
-    return current_item  # já vem formatado pelo format_queue_item
-
-
-# ------------------ CALLED USER ------------------
-@router.get("/called", response_model=QueueListResponse)
-def get_called_user_endpoint(db: Session = Depends(get_db)):
-    called_item = queue_service.get_called(db)
-    if not called_item:
-        raise HTTPException(status_code=404, detail="Nenhum usuário chamado")
-    return called_item
+    return current_item
 
 
 # ------------------ CONSULT USER IN QUEUE ------------------
@@ -92,7 +95,9 @@ def consult_user_in_queue(
 # ------------------- SCAN BIOMETRIC ------------------
 @router.post("/scan", response_model=QueueDetailResponse)
 def scan_biometric_endpoint(
-    request: BiometricScanRequest, db: Session = Depends(get_db)
+    request: BiometricScanRequest,
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = None,
 ):
     try:
         queue_item = queue_service.handle_biometric_scan(db, request.biometric_id)
@@ -101,13 +106,23 @@ def scan_biometric_endpoint(
     except QueueException as e:
         raise HTTPException(status_code=400, detail=e.message)
 
+    if background_tasks:
+        background_tasks.add_task(broadcast_state, db)
+
     return QueueDetailResponse.from_orm(queue_item)
 
 
 # ------------------ NEXT ------------------
 @router.put("/next", response_model=QueueNextResponse)
-def call_next_endpoint(db: Session = Depends(get_db)):
+def call_next_endpoint(
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = None,
+):
     next_item = queue_service.call_next(db)
+
+    if background_tasks:
+        background_tasks.add_task(broadcast_state, db)
+
     return QueueNextResponse(
         message="Próximo chamado. Aguardando confirmação biométrica",
         queue=QueueDetailResponse.from_orm(next_item),
@@ -116,8 +131,15 @@ def call_next_endpoint(db: Session = Depends(get_db)):
 
 # ------------------ DONE ------------------
 @router.put("/done", response_model=QueueDoneResponse)
-def finish_service_endpoint(db: Session = Depends(get_db)):
+def finish_service_endpoint(
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = None,
+):
     done_item = queue_service.finish_current(db)
+
+    if background_tasks:
+        background_tasks.add_task(broadcast_state, db)
+
     return QueueDoneResponse(
         message="Atendimento concluído",
         queue=QueueDetailResponse.from_orm(done_item),
@@ -126,8 +148,14 @@ def finish_service_endpoint(db: Session = Depends(get_db)):
 
 # ------------------ SKIP ------------------
 @router.put("/skip", response_model=QueueSkipResponse)
-def skip_user(db: Session = Depends(get_db)):
+def skip_user(
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = None,
+):
     new_item = queue_service.skip_current(db)
+
+    if background_tasks:
+        background_tasks.add_task(broadcast_state, db)
 
     return QueueSkipResponse(
         message="Usuário ausente, reinserido no fim da fila",

@@ -1,7 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.exceptions.handlers import register_exception_handlers
-from app.routers import queue_router, biometric_router, audit_router
+from app.routers import (
+    queue_router,
+    biometric_router,
+    audit_router,
+    queue_stream_router,
+)
 
 from app.db.base import Base
 from app.db.database import engine
@@ -12,7 +17,6 @@ origins = [
     # depois pode adicionar o domínio real (ex: https://painel.fila.ao)
 ]
 # , user_router
-
 
 
 app = FastAPI(title="Sistema de Gestão de Filas")
@@ -32,6 +36,7 @@ app.add_middleware(
 
 
 app.include_router(queue_router.router, prefix="/queue", tags=["Queue"])
+app.include_router(queue_stream_router.router, prefix="/sse", tags=["Queue Stream"])
 # app.include_router(user_router.router, prefix="/users", tags=["Users"])
 app.include_router(biometric_router.router, prefix="/biometrics", tags=["Biometrics"])
 app.include_router(
