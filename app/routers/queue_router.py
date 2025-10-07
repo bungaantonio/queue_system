@@ -5,6 +5,7 @@ from app.exceptions.exceptions import BiometricException, QueueException
 from app.services import biometric_service, queue_service
 from app.crud import user_crud, biometric_crud
 from app.schemas.queue_schema import (
+    QueueConsultResponse,
     QueueCreateResponse,
     QueueDetailResponse,
     QueueListResponse,
@@ -53,6 +54,39 @@ def manual_insert(request: QueueInsertRequest, db: Session = Depends(get_db)):
 def list_queue_endpoint(db: Session = Depends(get_db)):
     queue = queue_service.list_waiting_queue(db)
     return {"queue": queue}
+
+
+# ------------------ CURRENT USER ------------------
+@router.get("/current", response_model=QueueListResponse)
+def get_current_user_endpoint(db: Session = Depends(get_db)):
+    current_item = queue_service.get_current(db)
+    if not current_item:
+        raise HTTPException(status_code=404, detail="Nenhum usuário em atendimento")
+    return current_item  # já vem formatado pelo format_queue_item
+
+
+# ------------------ CALLED USER ------------------
+@router.get("/called", response_model=QueueListResponse)
+def get_called_user_endpoint(db: Session = Depends(get_db)):
+    called_item = queue_service.get_called(db)
+    if not called_item:
+        raise HTTPException(status_code=404, detail="Nenhum usuário chamado")
+    return called_item
+
+
+# ------------------ CONSULT USER IN QUEUE ------------------
+@router.get("/consult", response_model=QueueConsultResponse)
+def consult_user_in_queue(
+    id_number: str = Query(None, description="Número de bilhete"),
+    phone: str = Query(None, description="Número de telefone"),
+    db: Session = Depends(get_db),
+):
+    try:
+        return queue_service.consult_user_in_queue_by_document_or_phone(
+            db, id_number, phone
+        )
+    except QueueException as e:
+        raise HTTPException(status_code=404, detail=e.args[0])
 
 
 # ------------------- SCAN BIOMETRIC ------------------

@@ -5,6 +5,7 @@ from app.helpers.audit_helpers import get_biometric_for_finished
 from app.models.queue_item import QueueItem
 from app.crud import queue_crud, user_crud, biometric_crud
 from app.schemas.queue_schema import (
+    QueueConsultResponse,
     QueueListResponse,
     QueueCreateResponse,
     QueueDetailResponse,
@@ -83,6 +84,14 @@ def list_waiting_queue(db: Session) -> list[QueueListResponse]:
     return [format_queue_item(item) for item in queue_items]
 
 
+# ------------------ GET CURRENT USER BEING SERVED ------------------
+def get_current(db: Session) -> Optional[QueueListResponse]:
+    item = queue_crud.get_current_being_served(db)
+    return format_queue_item(item) if item else None
+
+
+# Implementar a formatação de get_current igual ao list_waiting_queue, se necessário
+
 # ------------------ CALL NEXT ------------------
 def call_next(db: Session) -> QueueItem:
     if queue_crud.has_active_service(db):
@@ -141,6 +150,11 @@ def skip_current(db: Session) -> QueueItem:
 
     return new_item
 
+# ------------------ GET CALLED USER (pending verification) ------------------
+def get_called(db: Session) -> Optional[QueueListResponse]:
+    item = queue_crud.get_called_pending(db)
+    return format_queue_item(item) if item else None
+
 
 # ------------------ MARK ATTEMPTED VERIFICATION ------------------
 def mark_attempted_verification(db: Session, user_id: int) -> None:
@@ -161,3 +175,28 @@ def promote_to_being_served(db: Session, user_id: int) -> QueueItem:
     db.commit()
     db.refresh(queue_item)
     return queue_item
+
+
+def consult_user_in_queue_by_document_or_phone(
+    db: Session, id_number: str = None, phone: str = None
+) -> QueueConsultResponse:
+    if id_number:
+        user = user_crud.get_user_by_id_number(db, id_number)
+    elif phone:
+        user = user_crud.get_user_by_phone(db, phone)
+    else:
+        raise QueueException("Informe o número de bilhete ou telefone")
+
+    if not user:
+        raise QueueException("Usuário não encontrado")
+
+    queue_status = queue_crud.get_active_queue_item_by_user(db, user.id)
+    if not queue_status:
+        return QueueConsultResponse(in_queue=False, message="Usuário não está na fila")
+
+    return QueueConsultResponse(
+        in_queue=True,
+        position=queue_status.position,
+        status=queue_status.status,
+        message="Usuário está na fila",
+    )

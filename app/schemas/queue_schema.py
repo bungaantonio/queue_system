@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
+from typing import Optional
 
 from .user_schema import UserCreate, UserBase, UserShortResponse, UserFullResponse
 from .biometric_schema import BiometricBase, BiometricCreate
@@ -56,3 +57,10 @@ class QueueDoneResponse(BaseModel):
 class RegisterRequest(BaseModel):
     user: UserCreate
     biometric: BiometricCreate
+
+
+class QueueConsultResponse(BaseModel):
+    in_queue: bool
+    position: Optional[int] = None
+    status: Optional[str] = None
+    message: str

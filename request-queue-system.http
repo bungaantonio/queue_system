@@ -1,3 +1,4 @@
+### Parte do middleware C#
 ### Registrar usuário com biometria #1
 POST http://127.0.0.1:8000/queue/register 
 Content-Type: application/json
@@ -32,8 +33,39 @@ Content-Type: application/json
   }
 }
 
-### Listar a fila
-GET http://127.0.0.1:8000/queue/list
+### Registrar usuário com biometria #2
+POST http://127.0.0.1:8000/queue/register
+Content-Type: application/json
+
+{
+  "user": {
+    "name": "Francisco Canda",
+    "id_number": "00876563LA077",
+    "phone": "+244923456789",
+    "birth_date": "1995-04-12"
+  },
+  "biometric": {
+    "biometric_id": "c13f9c04-0000-4bb8-9a7d-0e44fcd6b2c0",
+    "finger_index": 1
+  }
+}
+
+### Registrar usuário com biometria #3
+POST http://127.0.0.1:8000/queue/register
+Content-Type: application/json
+
+{
+  "user": {
+    "name": "Isabel Mucanda",
+    "id_number": "00991122BO088",
+    "phone": "+244923456789",
+    "birth_date": "1995-04-12"
+  },
+  "biometric": {
+    "biometric_id": "c13f9c04-1111-4bb8-9a7d-0e44fcd6b2c0",
+    "finger_index": 1
+  }
+}
 
 ### Iniciar escaneamento biométrico
 POST http://127.0.0.1:8000/queue/scan
@@ -43,6 +75,26 @@ Content-Type: application/json
   "biometric_id": "c13f9c04-6c88-4bb8-9a7d-0e44fcd6b2c0"
 }
 
+### Parte do frontend 
+### Listar a fila
+GET http://127.0.0.1:8000/queue/list
+
+### Verificar usuário chamado (pendente de verificação)
+GET http://127.0.0.1:8000/queue/called
+
+
+### Verificar usuário em atendimento
+GET http://127.0.0.1:8000/queue/current
+
+
+### Consultar posição na fila
+### Usando número de identificação
+GET http://127.0.0.1:8000/queue/consult?id_number=9876563LA055
+
+### Usando número de telefone
+GET http://127.0.0.1:8000/queue/consult?phone=+244923456789
+
+
 ### Chamar o próximo da fila
 PUT http://127.0.0.1:8000/queue/next
 
@@ -51,8 +103,8 @@ POST http://127.0.0.1:8000/biometrics/verify_called_user
 Content-Type: application/json
 
 {
-  "queue_id":4,
-  "biometric_id": "c13f9c04-6c88-4bb8-9a7d-0e44fcd6b2c0"
+  "queue_id":7,
+  "biometric_id": "c13f9c04-0000-4bb8-9a7d-0e44fcd6b2c0"
 }
 
 
