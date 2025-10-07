@@ -35,7 +35,6 @@ async def queue_stream(request: Request, db: Session = Depends(get_db)):
                 if await request.is_disconnected():
                     break
                 data = await q.get()
-                print("🔔 Enviando SSE [QUEUE ROUTER]:", data)
                 yield {"data": json.dumps(data)}
         finally:
             queue_notifier.unsubscribe(q)

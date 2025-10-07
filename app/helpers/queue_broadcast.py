@@ -4,6 +4,7 @@ from app.helpers.queue_notifier import queue_notifier
 import json
 from datetime import datetime
 
+
 def json_serializer(obj):
     """
     Serializador customizado para tipos não compatíveis com JSON nativo.
@@ -12,6 +13,7 @@ def json_serializer(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()
     raise TypeError(f"Type {type(obj)} not serializable")
+
 
 async def broadcast_state(db: Session):
     """
@@ -27,9 +29,6 @@ async def broadcast_state(db: Session):
         "called": called.dict() if called else None,
         "queue": [u.dict() for u in queue],
     }
-
-    # Log para debugging
-    print("🔔 Enviando SSE [QUEUE BROADCAST]:", state)
 
     # Serializa de forma segura antes de enviar
     serialized_state = json.loads(json.dumps(state, default=json_serializer))
