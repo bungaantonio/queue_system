@@ -113,7 +113,7 @@ def get_next_waiting_item(db: Session) -> Optional[QueueItem]:
     )
 
 
-def get_current_being_served(db: Session) -> Optional[QueueItem]:
+def get_active_item(db: Session) -> Optional[QueueItem]:
     """
     Retorna o usuário atualmente em atendimento.
     """
@@ -125,7 +125,7 @@ def get_current_being_served(db: Session) -> Optional[QueueItem]:
     )
 
 
-def get_called_pending(db: Session) -> Optional[QueueItem]:
+def get_pending_verification_item(db: Session) -> Optional[QueueItem]:
     """
     Retorna o próximo usuário aguardando verificação biométrica.
     """

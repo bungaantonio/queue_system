@@ -1,16 +1,16 @@
 QUEUE_ERRORS = {
-    "queue_empty": (404, "Não há usuários aguardando na fila"),
-    "queue_blocked_pending_verification": (
+    "empty": (404, "Não há usuários aguardando na fila"),
+    "blocked_pending_verification": (
         409,
         "Há usuário pendente de verificação. Use /skip ou aguarde a validação",
     ),
-    "queue_user_not_found": (
+    "user_not_found": (
         404,
         "Usuário não existe",
     ),  # continua usado no manual_insert
-    "queue_no_active_service": (404, "Nenhum usuário está em atendimento"),
-    "queue_no_called_user": (404, "Nenhum usuário foi chamado"),
-    "queue_user_attempted_verification": (
+    "no_active_service": (404, "Nenhum usuário está em atendimento"),
+    "no_called_user": (404, "Nenhum usuário foi chamado"),
+    "user_attempted_verification": (
         400,
         "Usuário tentou verificação. Não pode ser pulado",
     ),

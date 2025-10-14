@@ -13,7 +13,7 @@ def verify_called_user(
     Só permite autenticar o usuário que está em 'called_pending_verification'.
     """
     # Pega o item atualmente chamado para verificação
-    current_called = queue_crud.get_called_pending(db)
+    current_called = queue_crud.get_pending_verification_item(db)
     if not current_called:
         raise BiometricException("user_not_called_in_queue")
 

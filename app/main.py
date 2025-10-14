@@ -13,6 +13,15 @@ from app.routers import (
 from app.db.base import Base
 from app.db.database import engine
 
+
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,  # ou INFO em produção
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+
+
 origins = [
     "http://localhost:5173",  # frontend em dev
     "http://127.0.0.1:5173",

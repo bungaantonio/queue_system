@@ -1,19 +1,31 @@
 from datetime import datetime
-from pydantic import BaseModel
 from typing import Optional
-from .user_schema import UserCreate, UserBase, UserFullResponse
+from pydantic import BaseModel
+
+from .user_schema import UserCreate, UserFullResponse
 from .biometric_schema import BiometricBase, BiometricCreate
 
-# ------------------ REQUESTS ------------------
+# ============================================================
+# =============== QUEUE REQUEST MODELS ========================
+# ============================================================
+
 class QueueInsertRequest(BaseModel):
+    """Requisição simples para inserir usuário existente na fila."""
     user_id: int
 
-class RegisterRequest(BaseModel):
+
+class QueueRegisterRequest(BaseModel):
+    """Registro completo: cria usuário e biometria, e insere na fila."""
     user: UserCreate
     biometric: BiometricCreate
 
-# ------------------ BASE QUEUE ------------------
+
+# ============================================================
+# =============== BASE & COMMON MODELS ========================
+# ============================================================
+
 class QueueBase(BaseModel):
+    """Modelo base compartilhado entre responses."""
     id: int
     position: int
     status: str
@@ -21,55 +33,70 @@ class QueueBase(BaseModel):
 
     model_config = {"from_attributes": True}
 
-# ------------------ RESPONSE SCHEMAS ------------------
 
-# Lista resumida de fila (para list_waiting_queue / SSE)
+# ============================================================
+# =============== QUEUE RESPONSE MODELS =======================
+# ============================================================
+
+# ---------- LISTAGEM / CONSULTA SIMPLES ----------
 class QueueListResponse(QueueBase):
+    """Item resumido para listas e atualizações em tempo real (SSE)."""
     name: str
     id_hint: Optional[str] = None
 
-# Detalhe completo de fila (para endpoints que retornam item específico)
+
+# ---------- DETALHE COMPLETO ----------
 class QueueDetailResponse(QueueBase):
+    """Item detalhado com dados do usuário."""
     name: str
     id_number: Optional[str] = None
     phone: Optional[str] = None
     birth_date: Optional[datetime] = None
 
-# Skip, Create, Next, Done
-class QueueSkipResponse(BaseModel):
-    message: str
-    old_id: int
-    new_id: int
-    position: int
-    status: str
 
-class QueueCreateResponse(BaseModel):
-    status: str
+# ============================================================
+# =============== ACTION RESPONSES (PADRONIZADOS) =============
+# ============================================================
+
+class QueueActionResponse(BaseModel):
+    """Resposta genérica para ações sobre a fila."""
     message: str
+    queue: QueueDetailResponse
+
+
+class QueueCreateResponse(QueueActionResponse):
+    """Resposta para criação de fila com novo registro de usuário."""
+    status: str
     user: UserFullResponse
     biometric: Optional[BiometricBase] = None
-    queue: QueueDetailResponse
 
-class QueueNextResponse(BaseModel):
-    message: str
-    queue: QueueDetailResponse
 
-class QueueDoneResponse(BaseModel):
-    message: str
-    queue: QueueDetailResponse
+# Alias semântico para legibilidade nos routers:
+QueueNextResponse = QueueActionResponse
+QueueDoneResponse = QueueActionResponse
+QueueSkipResponse = QueueActionResponse
 
-# Consult / Verify
+
+# ============================================================
+# =============== CONSULTAS / VERIFICAÇÃO ====================
+# ============================================================
+
 class QueueConsultResponse(BaseModel):
+    """Resposta para consulta por documento ou telefone."""
     in_queue: bool
     position: Optional[int] = None
     status: Optional[str] = None
     message: str
 
+
 class QueueCalledOut(BaseModel):
+    """Usuário chamado para verificação biométrica."""
     queue_id: int
     user_id: int
     status: str
 
+
 class QueueVerifyIn(BaseModel):
+    """Entrada de verificação biométrica (scan)."""
     queue_id: int
     biometric_id: str
