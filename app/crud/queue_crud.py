@@ -12,16 +12,24 @@ def _insert_at_end(db: Session, user_id: int, status: str = "waiting") -> QueueI
     Reuso para create, insert e reinsert.
     """
     max_position = db.query(func.max(QueueItem.position)).scalar() or 0
+
     item = QueueItem(
         user_id=user_id,
         status=status,
         position=max_position + 1,
         timestamp=datetime.now(timezone.utc),
     )
+
     db.add(item)
     db.commit()
-    db.refresh(item)
-    return item
+
+    # ⚙️ Recarrega o item com o relacionamento `user`
+    return (
+        db.query(QueueItem)
+        .options(joinedload(QueueItem.user))
+        .filter(QueueItem.id == item.id)
+        .first()
+    )
 
 
 # ------------------- CRUD público -------------------
@@ -36,11 +44,16 @@ def get_queue_item(db: Session, user_id: int, status: str = "waiting") -> QueueI
 
 
 def get_queue(db: Session) -> Sequence[QueueItem]:
-    return db.query(QueueItem).all()
+    return db.query(QueueItem).options(joinedload(QueueItem.user)).all()
 
 
 def get_by_user(db: Session, user_id: int) -> Optional[QueueItem]:
-    return db.query(QueueItem).filter(QueueItem.user_id == user_id).first()
+    return (
+        db.query(QueueItem)
+        .options(joinedload(QueueItem.user))
+        .filter(QueueItem.user_id == user_id)
+        .first()
+    )
 
 
 def get_active_queue_item_by_user(db: Session, user_id: int) -> Optional[QueueItem]:
@@ -49,6 +62,7 @@ def get_active_queue_item_by_user(db: Session, user_id: int) -> Optional[QueueIt
     """
     return (
         db.query(QueueItem)
+        .options(joinedload(QueueItem.user))
         .filter(
             QueueItem.user_id == user_id,
             QueueItem.status.in_(
@@ -65,6 +79,7 @@ def get_all_waiting(db: Session) -> Sequence[QueueItem]:
     """
     return (
         db.query(QueueItem)
+        .options(joinedload(QueueItem.user))
         .filter(QueueItem.status == "waiting")
         .order_by(asc(QueueItem.position))
         .all()
@@ -110,26 +125,13 @@ def get_current_being_served(db: Session) -> Optional[QueueItem]:
     )
 
 
-def get_called_pending_by_user(db: Session, user_id: int) -> Optional[QueueItem]:
-    """
-    Retorna o QueueItem de um usuário em 'called_pending_verification'.
-    """
-    return (
-        db.query(QueueItem)
-        .filter(
-            QueueItem.user_id == user_id,
-            QueueItem.status == "called_pending_verification",
-        )
-        .first()
-    )
-
-
 def get_called_pending(db: Session) -> Optional[QueueItem]:
     """
     Retorna o próximo usuário aguardando verificação biométrica.
     """
     return (
         db.query(QueueItem)
+        .options(joinedload(QueueItem.user))
         .filter(QueueItem.status == "called_pending_verification")
         .first()
     )

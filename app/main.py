@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.exceptions.handlers import register_exception_handlers
 from app.routers import (
+    auth_router,
+    operators_router,
     queue_router,
     biometric_router,
     audit_router,
@@ -39,6 +41,8 @@ app.include_router(queue_router.router, prefix="/queue", tags=["Queue"])
 app.include_router(queue_stream_router.router, prefix="/sse", tags=["Queue Stream"])
 # app.include_router(user_router.router, prefix="/users", tags=["Users"])
 app.include_router(biometric_router.router, prefix="/biometrics", tags=["Biometrics"])
+app.include_router(auth_router.router, prefix="/auth", tags=["auth"])
+app.include_router(operators_router.router, prefix="/operators", tags=["operators"])
 app.include_router(
     audit_router.router,
     prefix="/audit",

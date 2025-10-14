@@ -1,3 +1,12 @@
+
+POST http://127.0.0.1:8000/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123"
+}
+
 ### Parte do middleware C#
 ### Registrar usuário com biometria #1
 POST http://127.0.0.1:8000/queue/register 
@@ -75,12 +84,12 @@ Content-Type: application/json
   "biometric_id": "c13f9c04-6c88-4bb8-9a7d-0e44fcd6b2c0"
 }
 
+### Verificar usuário chamado (pendente de verificação)
+GET http://127.0.0.1:8000/queue/called
+
 ### Parte do frontend 
 ### Listar a fila
 GET http://127.0.0.1:8000/queue/list
-
-### Verificar usuário chamado (pendente de verificação)
-GET http://127.0.0.1:8000/queue/called
 
 
 ### Verificar usuário em atendimento
@@ -103,8 +112,8 @@ POST http://127.0.0.1:8000/biometrics/verify_called_user
 Content-Type: application/json
 
 {
-  "queue_id":16,
-  "biometric_id": "c13f9c04-0000-4bb8-9a7d-0e44fcd6b2c0"
+  "queue_id":43,
+  "biometric_id": "c13f9c04-6c88-4bb8-9a7d-0e44fcd6b2c0"
 }
 
 

@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from app.db.base import Base
 from sqlalchemy.orm import relationship
 
-
 class QueueItem(Base):
     __tablename__ = "queue_items"
 
@@ -13,8 +12,11 @@ class QueueItem(Base):
     position = Column(Integer, nullable=False)
     timestamp = Column(DateTime, default=datetime.now(timezone.utc))
 
-    # NOVO: indica se o usuário tentou a verificação biométrica
     attempted_verification = Column(Boolean, default=False)
 
-    # relação direta com User
-    user = relationship("User", back_populates="queue_items")
+    # Garantir carregamento automático do relacionamento
+    user = relationship(
+        "User",
+        back_populates="queue_items",
+        lazy="joined",        # força JOIN automático
+    )

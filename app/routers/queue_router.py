@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body, BackgroundTa
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.exceptions.exceptions import BiometricException, QueueException
-from app.services import biometric_service, queue_service
+from app.helpers.queue_helpers import map_to_queue_detail, map_to_queue_list
+from app.services import queue_service
 from app.helpers.queue_broadcast import broadcast_state
 from app.crud import user_crud
 from app.schemas.queue_schema import (
@@ -37,44 +38,31 @@ def register_user_endpoint(
     return response
 
 
-# ------------------ MANUAL INSERT ------------------
-@router.post("/manual_insert", response_model=QueueCreateResponse)
-def manual_insert(
-    request: QueueInsertRequest, db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = None
-):
-    db_user = user_crud.get_user(db, request.user_id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    queue_item = queue_service.manual_insert(db, db_user.id)
-
-    if background_tasks:
-        background_tasks.add_task(broadcast_state, db)
-
-    return QueueCreateResponse(
-        status="success",
-        message="User added to the queue (admin)",
-        user=UserFullResponse.from_orm(db_user),
-        biometric=None,
-        queue=QueueDetailResponse.from_orm(queue_item),
-    )
-
-
 # ------------------ LIST ------------------
-@router.get("/list", response_model=dict[str, list[QueueListResponse]])
-def list_queue_endpoint(db: Session = Depends(get_db)):
-    queue = queue_service.list_waiting_queue(db)
-    return {"queue": queue}
+@router.get("/list", response_model=list[QueueListResponse])
+def list_queue(db: Session = Depends(get_db)):
+    """
+    Endpoint que retorna a fila atual.
+    """
+    return queue_service.list_waiting_queue(db)
 
 
 # ------------------ CURRENT USER ------------------
-@router.get("/current", response_model=QueueListResponse)
+@router.get("/current")
 def get_current_user_endpoint(db: Session = Depends(get_db)):
-    current_item = queue_service.get_current(db)
-    if not current_item:
-        raise HTTPException(status_code=404, detail="Nenhum usuário em atendimento")
-    return current_item
+    queue_item = queue_service.get_current(db)
+    if not queue_item:
+        raise QueueException("queue_not_found")
+    return queue_item
+
+
+# ------------------ CALLED USER (PENDING VERIFICATION) ------------------
+@router.get("/called", response_model=QueueDetailResponse)
+def get_called_user(db: Session = Depends(get_db)):
+    called = queue_service.get_called(db)
+    if not called:
+        raise QueueException("queue_not_found")
+    return called
 
 
 # ------------------ CONSULT USER IN QUEUE ------------------
@@ -92,7 +80,6 @@ def consult_user_in_queue(
         raise HTTPException(status_code=404, detail=e.args[0])
 
 
-# ------------------- SCAN BIOMETRIC ------------------
 @router.post("/scan", response_model=QueueDetailResponse)
 def scan_biometric_endpoint(
     request: BiometricScanRequest,
@@ -100,7 +87,7 @@ def scan_biometric_endpoint(
     background_tasks: BackgroundTasks = None,
 ):
     try:
-        queue_item = queue_service.handle_biometric_scan(db, request.biometric_id)
+        queue_dict = queue_service.handle_biometric_scan(db, request.biometric_id)
     except BiometricException as e:
         raise HTTPException(status_code=404, detail=e.message)
     except QueueException as e:
@@ -109,7 +96,7 @@ def scan_biometric_endpoint(
     if background_tasks:
         background_tasks.add_task(broadcast_state, db)
 
-    return QueueDetailResponse.from_orm(queue_item)
+    return QueueDetailResponse(**queue_dict)
 
 
 # ------------------ NEXT ------------------
@@ -135,14 +122,14 @@ def finish_service_endpoint(
     db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = None,
 ):
-    done_item = queue_service.finish_current(db)
+    done_item_dict = queue_service.finish_current(db)
 
     if background_tasks:
         background_tasks.add_task(broadcast_state, db)
 
     return QueueDoneResponse(
         message="Atendimento concluído",
-        queue=QueueDetailResponse.from_orm(done_item),
+       queue=QueueDetailResponse(**done_item_dict),
     )
 
 
