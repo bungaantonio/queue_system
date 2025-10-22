@@ -1,4 +1,3 @@
-from typing import Optional, Sequence
 from sqlalchemy.orm import Session
 from app.exceptions.exceptions import BiometricException
 from app.models.biometric import Biometric
@@ -19,18 +18,5 @@ def create_biometric(
         finger_index=finger_index,
     )
     db.add(biometric)
-    db.commit()
-    db.refresh(biometric)
+    db.flush()
     return biometric
-
-
-def get_all_by_user(db: Session, user_id: int) -> Sequence[Biometric]:
-    return db.query(Biometric).filter(Biometric.user_id == user_id).all()
-
-
-def get_by_user(db: Session, user_id: int) -> Optional[Biometric]:
-    return db.query(Biometric).filter(Biometric.user_id == user_id).first()
-
-
-def get_by_biometric_id(db: Session, biometric_id: str) -> Optional[Biometric]:
-    return db.query(Biometric).filter(Biometric.biometric_id == biometric_id).first()

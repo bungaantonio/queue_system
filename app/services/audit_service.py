@@ -24,7 +24,7 @@ class AuditService:
         Verifica a validade de um registro de auditoria individual.
         Checa se o hash armazenado corresponde ao recalculado e se o previous_hash confere.
         """
-        recalculated = audit.compute_hash()
+        recalculated = audit.hashed_compute()
         previous_matches = audit.previous_hash == previous_hash
         valid = (recalculated == audit.record_hash) and previous_matches
 

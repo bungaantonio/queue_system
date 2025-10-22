@@ -1,6 +1,5 @@
 from app.messages.messages import QUEUE_ERRORS, BIOMETRIC_ERRORS
 
-
 class QueueException(Exception):
     """Exceções relacionadas à fila de atendimento."""
 

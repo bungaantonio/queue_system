@@ -5,19 +5,18 @@ from app.schemas.user_schema import UserCreate, UserUpdate
 
 def create_user(db: Session, user: UserCreate):
     # primeiro verifica se já existe
-    db_user = db.query(User).filter(User.id_number == user.id_number).first()
+    db_user = db.query(User).filter(User.id_number == user.document_id).first()
     if db_user:
         return db_user
     # cria novo
     new_user = User(
         name=user.name,
-        id_number=user.id_number,
+        id_number=user.document_id,
         phone=user.phone,
         birth_date=user.birth_date,
     )
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    db.flush()
     return new_user
 
 
@@ -31,8 +30,7 @@ def update_user(db: Session, user_id: int, user: UserUpdate):
         return None
     for key, value in user.dict(exclude_unset=True).items():
         setattr(db_user, key, value)
-    db.commit()
-    db.refresh(db_user)
+    db.flush()
     return db_user
 
 

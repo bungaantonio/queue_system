@@ -1,6 +1,7 @@
 # app/routers/queue_stream_router.py
 import json
 from fastapi import APIRouter, Request, Depends
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sse_starlette.sse import EventSourceResponse
 from app.db.database import get_db
@@ -8,6 +9,7 @@ from app.helpers.queue_notifier import queue_notifier
 from app.helpers.queue_broadcast import build_queue_state
 
 router = APIRouter()
+
 
 @router.get("/stream")
 async def queue_stream(request: Request, db: Session = Depends(get_db)):
@@ -20,8 +22,8 @@ async def queue_stream(request: Request, db: Session = Depends(get_db)):
             while True:
                 if await request.is_disconnected():
                     break
-                data = await q.get()
-                yield {"data": json.dumps(data)}
+                raw_data = await q.get()
+                yield {"data": json.dumps(jsonable_encoder(raw_data))}
         finally:
             queue_notifier.unsubscribe(q)
 

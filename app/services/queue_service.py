@@ -6,7 +6,7 @@ from app.helpers.queue_helpers import map_to_queue_detail, map_to_queue_list
 from app.models.queue_item import QueueItem
 from app.crud import queue_crud, user_crud, biometric_crud
 from app.schemas.queue_schema import (
-    QueueConsultResponse,
+    QueueConsult,
     QueueDetailResponse,
     QueueRegisterRequest,
 )

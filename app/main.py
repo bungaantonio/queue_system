@@ -2,10 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.exceptions.handlers import register_exception_handlers
 from app.routers import (
+    _biometric_router,
     auth_router,
     operators_router,
-    queue_router,
-    biometric_router,
     audit_router,
     queue_stream_router,
 )
@@ -13,7 +12,8 @@ from app.routers import (
 from app.db.base import Base
 from app.db.database import engine
 
-
+from app.routers.queue_router import queue_api
+from app.routers.biometric_router import biometrics_api
 import logging
 
 logging.basicConfig(
@@ -34,6 +34,7 @@ app = FastAPI(title="Sistema de Gestão de Filas")
 
 
 # Apenas cria as tabelas se ainda não existirem
+#Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 # Configuração do CORS
@@ -46,10 +47,12 @@ app.add_middleware(
 )
 
 
-app.include_router(queue_router.router, prefix="/queue", tags=["Queue"])
+app.include_router(queue_api.router, prefix="/api/v1/queue", tags=["Queue"])
 app.include_router(queue_stream_router.router, prefix="/sse", tags=["Queue Stream"])
 # app.include_router(user_router.router, prefix="/users", tags=["Users"])
-app.include_router(biometric_router.router, prefix="/biometrics", tags=["Biometrics"])
+app.include_router(
+    biometrics_api.router, prefix="/api/v1/biometrics", tags=["Biometrics"]
+)
 app.include_router(auth_router.router, prefix="/auth", tags=["auth"])
 app.include_router(operators_router.router, prefix="/operators", tags=["operators"])
 app.include_router(

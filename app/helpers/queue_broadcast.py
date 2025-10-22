@@ -2,17 +2,23 @@
 
 import asyncio
 import logging
+import time
 from datetime import datetime, date
 from sqlalchemy.orm import Session
-from app.services import queue_service
+
+from app.db.database import SessionLocal
 from app.helpers.queue_notifier import queue_notifier
+from app.services.queue_service import consult
 from app.exceptions.exceptions import QueueException
 
 logger = logging.getLogger(__name__)
 
 
+# ------------------------------------------------------------------------------
+# 🔧 Utilitário de serialização segura
+# ------------------------------------------------------------------------------
 def serialize_dates(obj):
-    """Converte recursivamente datetime/date em ISO strings dentro de dict/list."""
+    """Converte datetime/date em ISO 8601 recursivamente (para JSON)."""
     if isinstance(obj, dict):
         return {k: serialize_dates(v) for k, v in obj.items()}
     if isinstance(obj, list):
@@ -22,10 +28,13 @@ def serialize_dates(obj):
     return obj
 
 
+# ------------------------------------------------------------------------------
+# 🧠 Construção do estado da fila
+# ------------------------------------------------------------------------------
 def build_queue_state(db: Session) -> dict:
-    """Constrói o estado atual da fila (para SSE/JSON)."""
+    """Constrói snapshot consistente do estado da fila."""
     try:
-        current = queue_service.get_active_queue_item(db)
+        current = consult.get_active_user(db)
     except QueueException as e:
         logger.debug(f"Nenhum usuário em atendimento ativo ({e}).")
         current = None
@@ -34,7 +43,7 @@ def build_queue_state(db: Session) -> dict:
         current = None
 
     try:
-        called = queue_service.get_pending_verification_item(db)
+        called = consult.get_pending_verification_user(db)
     except QueueException as e:
         logger.debug(f"Nenhum usuário chamado pendente ({e}).")
         called = None
@@ -43,7 +52,7 @@ def build_queue_state(db: Session) -> dict:
         called = None
 
     try:
-        queue = queue_service.list_waiting_and_called_items(db) or []
+        queue = consult.list_waiting_and_called_items(db) or []
     except Exception as e:
         logger.exception(f"Erro ao listar itens da fila: {e}")
         queue = []
@@ -57,25 +66,46 @@ def build_queue_state(db: Session) -> dict:
     )
 
 
-async def broadcast_state(db: Session):
-    """Publica o estado atual da fila em tempo real via SSE/WebSocket."""
+# ------------------------------------------------------------------------------
+# 🚀 Função principal de broadcast
+# ------------------------------------------------------------------------------
+async def broadcast_state():
+    """
+    Executa leitura pós-commit e publica estado da fila.
+    Usa sessão própria e isolada (segura para BackgroundTasks).
+    """
+    start = time.perf_counter()
+    session = SessionLocal()
     try:
-        serialized_state = build_queue_state(db)
+        logger.debug("Iniciando broadcast_state() com sessão isolada.")
+        serialized_state = build_queue_state(session)
         await queue_notifier.publish(serialized_state)
-        logger.debug("Estado da fila transmitido com sucesso.")
+        elapsed = (time.perf_counter() - start) * 1000
+        logger.debug(f"Broadcast concluído com sucesso ({elapsed:.1f} ms).")
     except Exception as e:
-        logger.exception(f"Erro ao transmitir estado da fila: {e}")
+        logger.exception(f"Erro durante broadcast_state(): {e}")
+    finally:
+        session.close()
+        logger.debug("Sessão SQLAlchemy encerrada após broadcast_state().")
 
 
-def broadcast_state_sync(db: Session):
-    """Executa broadcast_state() de forma segura dentro de BackgroundTasks."""
+# ------------------------------------------------------------------------------
+# 🧱 Interface síncrona segura (para uso em endpoints)
+# ------------------------------------------------------------------------------
+def broadcast_state_sync():
+    """
+    Executa broadcast_state() de forma segura, mesmo fora de loop assíncrono.
+    Ideal para uso com FastAPI BackgroundTasks.
+    """
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(broadcast_state(db))
-            logger.debug("Broadcast assíncrono agendado (loop em execução).")
-        else:
-            asyncio.run(broadcast_state(db))
-            logger.debug("Broadcast executado diretamente (novo loop).")
+        try:
+            # tenta usar loop atual (se existir)
+            loop = asyncio.get_running_loop()
+            loop.create_task(broadcast_state())
+            logger.debug("Broadcast agendado no loop existente.")
+        except RuntimeError:
+            # se não há loop (ex: AnyIO worker), cria e executa um novo
+            logger.debug("Nenhum loop ativo — criando novo event loop para broadcast.")
+            asyncio.run(broadcast_state())
     except Exception as e:
-        logger.exception(f"Erro no broadcast_state_sync: {e}")
+        logger.exception(f"Erro no broadcast_state_sync(): {e}")

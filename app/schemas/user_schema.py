@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class UserCreate(BaseModel):
     name: str
-    id_number: str
+    document_id: str
     phone: str | None = None
     birth_date: date | None = None
 
