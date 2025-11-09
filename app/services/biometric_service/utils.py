@@ -3,14 +3,14 @@ import hashlib
 import uuid
 from datetime import datetime, timedelta, timezone
 
-TOKEN_EXPIRATION_MINUTES = 2
-SERVER_SECRET = "change-me"  # ideal: carregar do env
+from app.core.config import settings
 
 
 # --- Biometric hash ---
 def make_biometric_hash(biometric_id: str) -> str:
+    secret_value = settings.SERVER_SECRET.get_secret_value()
     return hmac.new(
-        SERVER_SECRET.encode(), biometric_id.encode(), hashlib.sha256
+        secret_value.encode(), biometric_id.encode(), hashlib.sha256
     ).hexdigest()
 
 
@@ -19,7 +19,7 @@ def verify_biometric_hash(presented_hash: str, stored_hash: str) -> bool:
 
 
 # --- Call token ---
-def generate_call_token(expiration_minutes: int = TOKEN_EXPIRATION_MINUTES):
+def generate_call_token(expiration_minutes: int = settings.TOKEN_EXPIRATION_MINUTES):
     token = str(uuid.uuid4())
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=expiration_minutes)
     return token, expires_at

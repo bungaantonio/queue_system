@@ -9,7 +9,7 @@ from app.helpers.sla_policy import calculate_sla
 from app.models.enums import QueueStatus, AttendanceType, AuditAction
 from app.models.queue_item import QueueItem
 
-from . import consult
+from . import read
 
 
 def _insert(
@@ -26,7 +26,7 @@ def _insert(
     NÃO faz commit — transação deve ser controlada pelo serviço chamador.
     """
     # Verifica se o usuário já possui item ativo na fila
-    existing_item = consult.get_existing_queue_item(db, user_id=user.id)
+    existing_item = read.get_existing_queue_item(db, user_id=user.id)
     if existing_item:
         return existing_item  # Evita duplicação
 
@@ -93,7 +93,7 @@ def enqueue_user(
     """
     Insere o cidadão na fila, caso ainda não esteja.
     """
-    existing = consult.get_existing_queue_item(db, user.id)
+    existing = read.get_existing_queue_item(db, user.id)
     if existing:
         return existing
 

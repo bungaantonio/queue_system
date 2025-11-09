@@ -1,7 +1,6 @@
 import uuid
 from datetime import datetime, timedelta, timezone
-
-TOKEN_EXPIRATION_MINUTES = 2
+from app.core.config import settings
 
 
 class CallTokenService:
@@ -10,7 +9,7 @@ class CallTokenService:
     def generate():
         token = str(uuid.uuid4())
         expires_at = datetime.now(timezone.utc) + timedelta(
-            minutes=TOKEN_EXPIRATION_MINUTES
+            minutes=settings.TOKEN_EXPIRATION_MINUTES
         )
         return token, expires_at
 

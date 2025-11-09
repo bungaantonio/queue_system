@@ -1,4 +1,19 @@
+### Backend - Operadores
+### Criar primeiro operador (bootstrap)
+POST http://127.0.0.1:8000/operators/bootstrap
+Content-Type: application/json
 
+{
+  "username": "admin",
+  "password": "123",
+  "role": "admin"
+}
+
+###
+GET http://127.0.0.1:8000/operators/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzYxMTg0Njg1LCJzdWIiOiJhZG1pbiIsImlhdCI6MTc2MTE4MTA4NX0.aGlzyy7ryejOhrH4zyB8kNUzDn8s2HRERDZuO0hswwc
+
+### Login
 POST http://127.0.0.1:8000/auth/login
 Content-Type: application/json
 
@@ -7,6 +22,7 @@ Content-Type: application/json
   "password": "123"
 }
 
+### Middleware - Biometria
 ### Parte do middleware C#
 ### Registrar usuário com biometria #1
 POST http://127.0.0.1:8000/api/v1/queue/register 
@@ -96,15 +112,6 @@ Content-Type: application/json
   "operator_id": 26
 }
 
-
-### Parte do frontend 
-### Listar a fila com usuários em espera e chamados em espera de verificação
-GET http://127.0.0.1:8000/api/v1/queue/waiting-and-called
-
-
-### Chamar o próximo da fila
-POST http://127.0.0.1:8000/api/v1/queue/call-next
-
 ### Entrada rapida na fila
 POST http://127.0.0.1:8000/api/v1/biometrics/quick-entry
 Content-Type: application/json
@@ -113,6 +120,7 @@ Content-Type: application/json
   "biometric_id": "BIO005",
   "attendance_type": "priority"
 }
+
 
 ### Autenticar user chamado
 POST http://127.0.0.1:8000/api/v1/biometrics/authenticate
@@ -125,11 +133,15 @@ Content-Type: application/json
   "operator_id": 42
 }
 
-### Verificar usuário em atendimento
-GET http://127.0.0.1:8000/api/v1/queue/current
+
+### Backend - Gestão da Fila
+
+### Chamar o próximo da fila
+POST http://127.0.0.1:8000/api/v1/queue/call-next
 
 ### Finalizar atendimento
 POST http://127.0.0.1:8000/api/v1/queue/finish
+
 
 ### Cancelar atendimento
 POST http://127.0.0.1:8000/api/v1/queue/cancel
@@ -154,8 +166,18 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/api/v1/queue/skip
 
 
+### Parte do frontend 
+### Listar a fila com usuários em espera e chamados em espera de verificação
+GET http://127.0.0.1:8000/api/v1/queue/waiting-and-called
 
-################################ OLD ################################ 
+
+### Verificar usuário em atendimento
+GET http://127.0.0.1:8000/api/v1/queue/current
+
+
+
+
+################################ OLD | LEGACY ################################ 
 
 ### Verificar usuário chamado (pendente de verificação)
 GET http://127.0.0.1:8000/queue/called

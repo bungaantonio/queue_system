@@ -6,7 +6,7 @@ from app.helpers.audit_helpers import audit_queue_action
 from app.models.enums import QueueStatus, AuditAction
 from app.models.queue_item import QueueItem
 
-from app.crud.biometric_crud import consult
+from app.crud.biometric import get_first_biometric_by_user
 from app.services.biometric_service import utils
 
 
@@ -22,7 +22,7 @@ def mark_as_called(
     item.timestamp = datetime.now(timezone.utc)
 
     # Biometric hash
-    biometric = consult.get_first_biometric_by_user(db, item.user_id)
+    biometric = get_first_biometric_by_user(db, item.user_id)
     if not biometric:
         raise ValueError(f"Usuário {item.user_id} não possui biometria registrada.")
     item.biometric_hash = utils.make_biometric_hash(biometric.biometric_id)

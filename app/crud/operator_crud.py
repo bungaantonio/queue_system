@@ -6,7 +6,7 @@ from app.helpers.password import get_password_hash
 
 def create_operator(db: Session, username: str, password: str, role: str) -> Operator:
     hashed = get_password_hash(password)
-    user = Operator(username=username, password_hash=hashed, role=role, ativo=True)
+    user = Operator(username=username, hashed_password=hashed, role=role, active=True)
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -28,7 +28,7 @@ def get_all_operators(db: Session) -> List[Operator]:
 def deactivate_operator(db: Session, operator_id: int) -> Optional[Operator]:
     operator = db.query(Operator).filter(Operator.id == operator_id).first()
     if operator:
-        operator.ativo = False
+        operator.active = False
         db.commit()
         db.refresh(operator)
     return operator

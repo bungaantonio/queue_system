@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import Depends, HTTPException, status
@@ -14,18 +14,31 @@ from app.crud.operator_crud import get_operator_by_username
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
+def _get_secret_key_value() -> str:
+    """
+    Retorna a SECRET_KEY como str — aceita SecretStr ou str.
+    """
+    secret = settings.SECRET_KEY
+    # pydantic SecretStr tem método get_secret_value()
+    if hasattr(secret, "get_secret_value"):
+        return secret.get_secret_value()
+    return str(secret)
+
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + (
+    expire = datetime.now(timezone.utc) + (
         expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    to_encode.update({"exp": expire, "sub": data.get("username")})
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    to_encode.update({"exp": expire, "sub": data.get("username"), "iat": datetime.now(timezone.utc)})
+    secret_key = _get_secret_key_value()
+    return jwt.encode(to_encode, secret_key, algorithm=settings.ALGORITHM)
 
 
 def decode_access_token(token: str) -> dict:
     try:
-        return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        secret_key = _get_secret_key_value()
+        return jwt.decode(token, secret_key, algorithms=[settings.ALGORITHM])
     except JWTError:
         return {}
 

@@ -1,11 +1,12 @@
 from sqlalchemy.orm import Session
-from app.crud.biometric_crud.update import (
+
+from app.exceptions.exceptions import QueueException
+from app.crud.biometric import (
     mark_as_being_served,
     mark_biometric_attempt,
     mark_biometric_verified,
+    get_called_pending_by_user,
 )
-from app.exceptions.exceptions import QueueException
-from app.crud.queue_crud import consult
 from app.models.queue_item import QueueItem
 
 from app.services.biometric_service import utils
@@ -26,7 +27,7 @@ class BiometricAuthService:
         """
 
         # 1️⃣ Recupera o item chamado
-        item = consult.get_called_pending_by_user(db, user_id)
+        item = get_called_pending_by_user(db, user_id)
         if not item:
             raise QueueException("user_not_called_or_not_pending")
 

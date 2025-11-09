@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.exceptions.handlers import register_exception_handlers
 from app.routers import (
-    _biometric_router,
     auth_router,
     operators_router,
     audit_router,
@@ -27,14 +26,13 @@ origins = [
     "http://127.0.0.1:5173",
     # depois pode adicionar o domínio real (ex: https://painel.fila.ao)
 ]
-# , user_router
 
 
 app = FastAPI(title="Sistema de Gestão de Filas")
 
 
 # Apenas cria as tabelas se ainda não existirem
-#Base.metadata.drop_all(bind=engine)
+# Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 # Configuração do CORS

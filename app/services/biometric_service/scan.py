@@ -7,8 +7,8 @@ from app.schemas.biometric_schema.response import QuickQueueEntryBiometric
 from app.schemas.biometric_schema.request import BiometricScan
 
 
-from app.crud.queue_crud import consult, insert
-from app.crud.user_crud import get_user
+from app.crud.user import get_user
+from app.crud.queue import enqueue_user, get_existing_queue_item
 
 
 def quick_entry(
@@ -26,9 +26,9 @@ def quick_entry(
     if not user:
         raise QueueException("user_not_found")
 
-    queue_item = consult.get_existing_queue_item(db, user_id)
+    queue_item = get_existing_queue_item(db, user_id)
     if not queue_item:
-        queue_item = insert.enqueue_user(
+        queue_item = enqueue_user(
             db,
             user=user,
             operator_id=operator_id,

@@ -1,6 +1,6 @@
 # app/helpers/biometric_validator.py
 from sqlalchemy.orm import Session
-from app.crud import biometric_crud
+from app.crud.biometric import get_by_biometric_id
 from app.models.biometric import Biometric
 from app.exceptions.exceptions import BiometricException
 
@@ -15,7 +15,7 @@ def validate_biometric(template: str, bio: Biometric) -> None:
 
 
 def identify_user(db: Session, biometric_id: str) -> int:
-    bio = biometric_crud.get_by_biometric_id(db, biometric_id)
+    bio = get_by_biometric_id(db, biometric_id)
     if not bio:
         raise BiometricException("biometric_not_found")
     return bio.user_id

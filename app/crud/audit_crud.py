@@ -47,7 +47,6 @@ def create_audit(
 
     db.add(audit)
     db.flush()
-    db.refresh(audit)
     return audit
 
 

@@ -9,7 +9,7 @@ class OperatorCreate(OperatorBase):
 
 class OperatorOut(OperatorBase):
     id: int
-    ativo: bool
+    active: bool
 
     class Config:
         from_attributes = True
