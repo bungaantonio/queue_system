@@ -148,7 +148,7 @@ POST http://127.0.0.1:8000/api/v1/queue/cancel
 Content-Type: application/json
 
 {
-  "user_id":1
+  "user_id":2
 }
 
 ### Reagendar
@@ -156,11 +156,10 @@ POST http://127.0.0.1:8000/api/v1/queue/requeue
 Content-Type: application/json
 
 {
-  "user_id": 1,
+  "user_id": 2,
   "attendance_type": "normal",
   "operator_id": 26
 }
-
 
 ### Pular o próximo da fila
 POST http://127.0.0.1:8000/api/v1/queue/skip
@@ -174,8 +173,8 @@ GET http://127.0.0.1:8000/api/v1/queue/waiting-and-called
 ### Verificar usuário em atendimento
 GET http://127.0.0.1:8000/api/v1/queue/current
 
-
-
+###
+GET http://127.0.0.1:8000/api/v1/queue/next-called-for-client
 
 ################################ OLD | LEGACY ################################ 
 

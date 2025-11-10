@@ -71,6 +71,16 @@ def call_next(
     return next_user_item
 
 
+## -- Endpoint interno para clientes confiáveis --
+@router.get("/next-called-for-client", response_model=QueueCalledItem)
+def next_called_for_client(db: Session = Depends(get_db), operator_id: int = None):
+    """Retorna próximo usuário chamado com tokens, apenas para clientes confiáveis."""
+    return consult.get_next_called_with_tokens(db, operator_id)
+
+
+## -- Fim do endpoint interno --
+
+
 @router.get("/current", response_model=QueueDetailItem)
 def get_current_user(db: Session = Depends(get_db)):
     """

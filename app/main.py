@@ -46,7 +46,7 @@ app.add_middleware(
 
 
 app.include_router(queue_api.router, prefix="/api/v1/queue", tags=["Queue"])
-app.include_router(queue_stream_router.router, prefix="/sse", tags=["Queue Stream"])
+app.include_router(queue_stream_router.router, prefix="/api/v1/sse", tags=["Queue Stream"])
 # app.include_router(user_router.router, prefix="/users", tags=["Users"])
 app.include_router(
     biometrics_api.router, prefix="/api/v1/biometrics", tags=["Biometrics"]

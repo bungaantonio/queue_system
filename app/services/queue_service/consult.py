@@ -12,7 +12,11 @@ from app.crud import (
     get_next_waiting_item,
     get_pending_verification_item,
 )
-from app.schemas.queue_schema.response import QueueDetailItem, QueueListItem
+from app.schemas.queue_schema.response import (
+    QueueDetailItem,
+    QueueListItem,
+    QueueCalledItem,
+)
 
 
 def get_user_queue_status_by_identity(
@@ -86,3 +90,17 @@ def get_pending_verification_user(db: Session) -> QueueDetailItem:
     if not item:
         raise QueueException("no_called_user")
     return QueueDetailItem.from_orm_item(item)
+
+
+def get_next_called_with_tokens(
+    db: Session, operator_id: int = None
+) -> QueueCalledItem:
+    """
+    Próximo usuário chamado pendente de verificação, retornando call_token e biometric_hash.
+    Para uso apenas por clientes confiáveis (internos / backend).
+    """
+    item = get_pending_verification_item(db)
+    if not item:
+        raise QueueException("no_called_user")
+
+    return QueueCalledItem.from_orm_item(item)
