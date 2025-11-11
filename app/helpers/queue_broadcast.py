@@ -1,17 +1,17 @@
 # app/helpers/queue_broadcast.py
 
 import asyncio
-import logging
 import time
 from datetime import datetime, date
 from sqlalchemy.orm import Session
 
 from app.db.database import SessionLocal
+from app.helpers.logger import get_logger
 from app.helpers.queue_notifier import queue_notifier
 from app.services.queue_service import consult
 from app.exceptions.exceptions import QueueException
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 # ------------------------------------------------------------------------------
@@ -33,37 +33,62 @@ def serialize_dates(obj):
 # ------------------------------------------------------------------------------
 def build_queue_state(db: Session) -> dict:
     """Constrói snapshot consistente do estado da fila."""
+    state = {"current": None, "called": None, "queue": []}
+
     try:
-        current = consult.get_active_user(db)
+        state["current"] = consult.get_active_user(db)
+        current_user_id = getattr(state["current"], "id", None)
+        logger.debug(
+            "Usuário em atendimento ativo recuperado",
+            extra={"extra_data": {"current_user_id": current_user_id}},
+        )
     except QueueException as e:
-        logger.debug(f"Nenhum usuário em atendimento ativo ({e}).")
-        current = None
+        logger.debug(
+            "Nenhum usuário em atendimento ativo",
+            extra={"extra_data": {"exception": str(e)}},
+        )
+        state["current"] = None
     except Exception as e:
-        logger.exception(f"Erro inesperado ao obter item ativo: {e}")
-        current = None
+        logger.exception(
+            "Erro inesperado ao obter item ativo",
+            extra={"extra_data": {"exception": str(e)}},
+        )
+        state["current"] = None
 
     try:
-        called = consult.get_pending_verification_user(db)
+        state["called"] = consult.get_pending_verification_user(db)
+        called_user_id = getattr(state["called"], "id", None)
+        logger.debug(
+            "Usuário chamado pendente recuperado",
+            extra={"extra_data": {"called_user_id": called_user_id}},
+        )
     except QueueException as e:
-        logger.debug(f"Nenhum usuário chamado pendente ({e}).")
-        called = None
+        logger.debug(
+            "Nenhum usuário chamado pendente",
+            extra={"extra_data": {"exception": str(e)}},
+        )
+        state["called"] = None
     except Exception as e:
-        logger.exception(f"Erro inesperado ao obter item pendente: {e}")
-        called = None
+        logger.exception(
+            "Erro inesperado ao obter item pendente",
+            extra={"extra_data": {"exception": str(e)}},
+        )
+        state["called"] = None
 
     try:
-        queue = consult.list_waiting_and_called_items(db) or []
+        state["queue"] = consult.list_waiting_and_called_items(db) or []
+        logger.debug(
+            "Lista de itens da fila obtida",
+            extra={"extra_data": {"queue_size": len(state["queue"])}},
+        )
     except Exception as e:
-        logger.exception(f"Erro ao listar itens da fila: {e}")
-        queue = []
+        logger.exception(
+            "Erro ao listar itens da fila",
+            extra={"extra_data": {"exception": str(e)}},
+        )
+        state["queue"] = []
 
-    return serialize_dates(
-        {
-            "current": current,
-            "called": called,
-            "queue": queue,
-        }
-    )
+    return serialize_dates(state)
 
 
 # ------------------------------------------------------------------------------
@@ -77,16 +102,36 @@ async def broadcast_state():
     start = time.perf_counter()
     session = SessionLocal()
     try:
-        logger.debug("Iniciando broadcast_state() com sessão isolada.")
+        logger.debug("Iniciando broadcast_state() com sessão isolada")
+
         serialized_state = build_queue_state(session)
+
         await queue_notifier.publish(serialized_state)
-        elapsed = (time.perf_counter() - start) * 1000
-        logger.debug(f"Broadcast concluído com sucesso ({elapsed:.1f} ms).")
+
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        logger.info(
+            "Broadcast concluído com sucesso",
+            extra={
+                "extra_data": {
+                    "elapsed_ms": elapsed_ms,
+                    "queue_size": len(serialized_state.get("queue", [])),
+                    "current_user_id": serialized_state.get("current", {}).get("id")
+                    if isinstance(serialized_state.get("current"), dict)
+                    else None,
+                    "called_user_id": serialized_state.get("called", {}).get("id")
+                    if isinstance(serialized_state.get("called"), dict)
+                    else None,
+                }
+            },
+        )
     except Exception as e:
-        logger.exception(f"Erro durante broadcast_state(): {e}")
+        logger.exception(
+            "Erro durante broadcast_state()",
+            extra={"extra_data": {"exception": str(e)}},
+        )
     finally:
         session.close()
-        logger.debug("Sessão SQLAlchemy encerrada após broadcast_state().")
+        logger.debug("Sessão SQLAlchemy encerrada após broadcast_state()")
 
 
 # ------------------------------------------------------------------------------
@@ -99,13 +144,14 @@ def broadcast_state_sync():
     """
     try:
         try:
-            # tenta usar loop atual (se existir)
             loop = asyncio.get_running_loop()
             loop.create_task(broadcast_state())
-            logger.debug("Broadcast agendado no loop existente.")
+            logger.debug("Broadcast agendado no loop existente")
         except RuntimeError:
-            # se não há loop (ex: AnyIO worker), cria e executa um novo
-            logger.debug("Nenhum loop ativo — criando novo event loop para broadcast.")
+            logger.debug("Nenhum loop ativo — criando novo event loop para broadcast")
             asyncio.run(broadcast_state())
     except Exception as e:
-        logger.exception(f"Erro no broadcast_state_sync(): {e}")
+        logger.exception(
+            "Erro no broadcast_state_sync()",
+            extra={"extra_data": {"exception": str(e)}},
+        )

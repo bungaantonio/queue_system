@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
-from typing import Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+from app.helpers.logger import get_logger
 from app.helpers.priority_policy import calculate_priority
 from app.helpers.audit_helpers import audit_queue_action
 from app.helpers.sla_policy import calculate_sla
@@ -10,6 +10,8 @@ from app.models.enums import QueueStatus, AttendanceType, AuditAction
 from app.models.queue_item import QueueItem
 
 from . import read
+
+logger = get_logger(__name__)
 
 
 def _insert(
@@ -28,6 +30,10 @@ def _insert(
     # Verifica se o usuário já possui item ativo na fila
     existing_item = read.get_existing_queue_item(db, user_id=user.id)
     if existing_item:
+        logger.debug(
+            "Usuário já possui item ativo na fila, evitando duplicação",
+            extra={"extra_data": {"user_id": user.id, "item_id": existing_item.id}},
+        )
         return existing_item  # Evita duplicação
 
     # Calcula posição
@@ -40,11 +46,23 @@ def _insert(
     sla_minutes, sla_reason = calculate_sla(user, attendance_type)
 
     # --- DEBUG ---
-    print(f"[DEBUG] Inserindo usuário {user.name} ({user.id})")
-    print(f"[DEBUG]   Birth date: {user.birth_date}, Attendance: {attendance_type}")
-    print(f"[DEBUG]   Priority score: {priority_score}, Reason: {priority_reason}")
-    print(f"[DEBUG]   SLA: {sla_minutes} minutos, Reason: {sla_reason}")
-    print(f"[DEBUG]   Max position atual: {max_position}")
+    logger.debug(
+        "Inserindo novo item na fila",
+        extra={
+            "extra_data": {
+                "user_id": user.id,
+                "user_name": user.name,
+                "birth_date": user.birth_date.isoformat() if user.birth_date else None,
+                "attendance_type": attendance_type.value,
+                "priority_score": priority_score,
+                "priority_reason": priority_reason,
+                "sla_minutes": sla_minutes,
+                "sla_reason": sla_reason,
+                "max_position": max_position,
+                "status": status.value,
+            }
+        },
+    )
     # --------------
 
     # Cria o item de fila
@@ -75,6 +93,17 @@ def _insert(
         f"status={status}, priority={priority_score}, SLA={sla_minutes}min",
     )
 
+    logger.info(
+        "Item de fila criado com sucesso",
+        extra={
+            "extra_data": {
+                "user_id": user.id,
+                "item_id": item.id,
+                "position": item.position,
+            }
+        },
+    )
+
     # Retorna o item com relacionamento carregado
     return (
         db.query(QueueItem)
@@ -95,6 +124,10 @@ def enqueue_user(
     """
     existing = read.get_existing_queue_item(db, user.id)
     if existing:
+        logger.debug(
+            "enqueue_user: usuário já na fila",
+            extra={"extra_data": {"user_id": user.id, "item_id": existing.id}},
+        )
         return existing
 
     return _insert(
@@ -115,6 +148,12 @@ def requeue_user(
     """
     Reinsere o cidadão na fila (novo registro, mesmo usuário).
     """
+    logger.debug(
+        "Reenfileirando usuário",
+        extra={
+            "extra_data": {"user_id": user.id, "attendance_type": attendance_type.value}
+        },
+    )
     return _insert(
         db,
         user,

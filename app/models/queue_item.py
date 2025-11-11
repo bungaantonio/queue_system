@@ -3,6 +3,7 @@ from sqlalchemy import (
     Column,
     Integer,
     String,
+    Enum,
     DateTime,
     ForeignKey,
     Index,
@@ -22,7 +23,7 @@ class QueueItem(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
-    status = Column(String(32), nullable=False, default=QueueStatus.WAITING)
+    status = Column(Enum(QueueStatus, native_enum=False), nullable=False, default=QueueStatus.WAITING)
     position = Column(Integer, nullable=False)
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 

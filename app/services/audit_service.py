@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from app.models.audit import Audit
 from app.crud import audit_crud
 from app.schemas.audit_schema import AuditVerificationDetail
-import logging
+from app.helpers.logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AuditService:
@@ -29,8 +29,8 @@ class AuditService:
         valid = (recalculated == audit.record_hash) and previous_matches
 
         logger.debug(
-            "Audit %s verification: recalculated=%s, stored=%s, prev_match=%s, valid=%s",
-            audit.id, recalculated, audit.record_hash, previous_matches, valid
+            f"Audit {audit.id} verification: recalculated={recalculated}, stored={audit.record_hash}, prev_match={previous_matches}, valid={valid}",
+            extra={"extra_data": {"audit_id": audit.id}},
         )
 
         return AuditVerificationDetail(
@@ -53,7 +53,10 @@ class AuditService:
             results.append(result)
             last_hash = audit.record_hash
 
-        logger.info("Audit chain verification completed: %d records checked", len(results))
+        logger.info(
+            f"Audit chain verification completed: {len(results)} records checked",
+            extra={"extra_data": {"total_records": len(results)}},
+        )
         return results
 
     @staticmethod
@@ -63,7 +66,10 @@ class AuditService:
         """Valida um único registro de auditoria pelo ID."""
         audit = audit_crud.get_audit_by_id(db, audit_id)
         if not audit:
-            logger.warning("Audit ID %d not found", audit_id)
+            logger.warning(
+                f"Audit ID {audit_id} not found",
+                extra={"extra_data": {"audit_id": audit_id}},
+            )
             return None
 
         previous_audit = audit_crud.get_previous_audit(db, audit.id)
@@ -100,5 +106,14 @@ class AuditService:
             report.append(AuditService._verify_single(audit, last_hash))
             last_hash = audit.record_hash
 
-        logger.info("Audit report generated: %d records", len(report))
+        logger.info(
+            f"Audit report generated: {len(report)} records",
+            extra={
+                "extra_data": {
+                    "user_id": user_id,
+                    "action": action,
+                    "records": len(report),
+                }
+            },
+        )
         return report
