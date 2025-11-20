@@ -1,25 +1,26 @@
 # Queue Management System
 
-Este monorepo contém todos os componentes do sistema de gestão de filas desenvolvido para a monografia.
+Este monorepo reúne todos os componentes do sistema de gestão de filas desenvolvido no âmbito da monografia.
+Cada módulo é independente, com responsabilidades bem definidas e preparado para desenvolvimento, testes e deploy isolados.
 
 ## Estrutura do Repo
 
 ### Apps
 
-- **ui/**: Frontend React para apresentação da fila.
+- **ui/**: Interface React orientada ao público, responsável pela apresentação do estado da fila em tempo real.
 - **ui-admin/**: Frontend React Admin para administração da fila, operadores e relatórios.
-- **api/**: FastAPI que gerencia a fila, autenticação, notificações.
-- **middleware/**: Middleware em C# responsável pela leitura biométrica.
+- **api/**: Serviço FastAPI que centraliza a lógica de negócio: gestão de tickets, autenticação, notificações e integração com outros módulos.
+- **middleware/**: Serviço em C# dedicado à leitura biométrica e comunicação entre dispositivos físicos e a API.
 
 ### Package
 
-- **ui/**: Design System compartilhado, com tokens de estilo e componentes reutilizáveis.
+- **ds/**: Design System partilhado, contendo tokens de estilo, componentes reutilizáveis e guidelines de interface.
 
 ### Docs
 
-- **architecture.md**: Documentação da arquitetura do sistema.
-- **api-contracts.md**: Resumo dos endpoints da API.
-- **design-system.md**: Guia do Design System.
+- **architecture.md**: Visão geral da arquitectura, fluxos principais e decisões estruturais.
+- **api-contracts.md**: Especificação dos endpoints expostos pela API.
+- **design-system.md**: Convenções, padrões visuais e regras do Design System.
 
 ### Infra
 
