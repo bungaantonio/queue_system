@@ -179,17 +179,6 @@ GET http://127.0.0.1:8000/api/v1/queue/current
 
 ################################ OLD | LEGACY ################################ 
 
-### Verificar usuário chamado (pendente de verificação)
-GET http://127.0.0.1:8000/queue/called
-
-### Iniciar escaneamento biométrico
-POST http://127.0.0.1:8000/queue/scan
-Content-Type: application/json
-
-{
-  "biometric_id": "c13f9c04-6c88-4bb8-9a7d-0e44fcd6b2c0"
-}
-
 ### Consultar posição na fila
 ### Usando número de identificação
 GET http://127.0.0.1:8000/queue/consult?id_number=9876563LA055
