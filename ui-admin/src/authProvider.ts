@@ -1,70 +1,70 @@
-// src/authProvider.ts
-interface LoginParams {
-  username: string;
-  password: string;
-}
+const API_URL = "http://127.0.0.1:8000/auth/login";
 
-interface AuthProvider {
-  login: (params: LoginParams) => Promise<void>;
-  logout: () => Promise<void>;
-  checkAuth: () => Promise<void>;
-  checkError: (error: any) => Promise<void>;
-  getPermissions: () => Promise<string[]>;
-  getIdentity: () => Promise<{ id: string; fullName: string }>;
-  getAuthHeader: () => string;
-}
-
-const authProvider: AuthProvider = {
-  login: async ({ username, password }) => {
-    const response = await fetch("http://127.0.0.1:8000/auth/login", {
+export const authProvider = {
+  login: async ({ username, password }: { username: string; password: string }) => {
+    const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.detail || "Login failed");
+
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      throw new Error(errorBody.detail || "Credenciais inválidas");
     }
+
+    const data = await res.json();
+
     localStorage.setItem("token", data.access_token);
+    localStorage.setItem("role", data.role || "attendant");
     localStorage.setItem("username", username);
+
+    return Promise.resolve();
   },
 
-  logout: async () => {
+  logout: () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
     localStorage.removeItem("username");
     return Promise.resolve();
   },
 
-  checkAuth: async () => {
-    return localStorage.getItem("token")
-      ? Promise.resolve()
-      : Promise.reject();
-  },
+  checkAuth: () =>
+    localStorage.getItem("token") ? Promise.resolve() : Promise.reject(new Error("Não autenticado")),
 
-  checkError: async (error) => {
-    // Se a API responder com 401 ou 403, força logout
-    const status = error.status || (error.response && error.response.status);
-    if (status === 401 || status === 403) {
+  checkError: async (error: any) => {
+    if (error.status === 401) {
       localStorage.removeItem("token");
-      return Promise.reject();
+      localStorage.removeItem("role");
+      localStorage.removeItem("username");
+      return Promise.reject(new Error("Sessão expirada"));
     }
+
+    if (error.status === 403) {
+      return Promise.reject(new Error("Não autorizado"));
+    }
+
     return Promise.resolve();
   },
 
-  getPermissions: async () => {
-    // Podes expandir isto para roles
-    return Promise.resolve([]);
+
+  getPermissions: () => {
+    const role = localStorage.getItem("role");
+    return Promise.resolve(role);
   },
 
-  getIdentity: async () => {
+  getIdentity: () => {
     const username = localStorage.getItem("username");
-    return Promise.resolve({ id: username || "", fullName: username || "" });
-  },
+    const role = localStorage.getItem("role");
 
-  getAuthHeader: () => {
-    const token = localStorage.getItem("token");
-    return token ? `Bearer ${token}` : "";
+    if (!username) {
+      return Promise.reject(new Error("Identidade não encontrada"));
+    }
+
+    return Promise.resolve({
+      id: username,
+      fullName: username,
+      role: role || "attendant",
+    });
   },
 };
-
-export default authProvider;
