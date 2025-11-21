@@ -1,18 +1,19 @@
-// src/operators/OperatorEdit.tsx
-import { Edit, SimpleForm, TextInput, SelectInput } from "react-admin";
+import { Edit, SimpleForm, TextInput, SelectInput, PasswordInput } from "react-admin";
 
 export const OperatorEdit = () => (
     <Edit>
         <SimpleForm>
-            <TextInput source="username" />
-            <TextInput source="password" type="password" placeholder="Deixe vazio para não alterar" />
+            <TextInput source="username" disabled />
+
             <SelectInput
                 source="role"
                 choices={[
                     { id: "admin", name: "Admin" },
-                       { id: "attendant", name: "Attendant" },
+                    { id: "attendant", name: "Attendant" },
                 ]}
             />
+
+            <PasswordInput source="password" />
         </SimpleForm>
     </Edit>
 );

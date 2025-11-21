@@ -1,12 +1,13 @@
-// src/operators/OperatorList.tsx
-import { List, Datagrid, TextField, DeleteButton } from "react-admin";
+import { List, Datagrid, TextField, BooleanField, EditButton, DeleteButton, SearchInput } from "react-admin";
 
 export const OperatorList = () => (
-    <List>
+    <List title="Operadores" filters={[<SearchInput source="q" alwaysOn />]}>
         <Datagrid rowClick="edit">
             <TextField source="id" />
             <TextField source="username" />
             <TextField source="role" />
+            <BooleanField source="active" />
+            <EditButton />
             <DeleteButton />
         </Datagrid>
     </List>

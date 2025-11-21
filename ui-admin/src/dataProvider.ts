@@ -10,7 +10,11 @@ const operatorDataProvider: DataProvider = {
         const res = await fetch(API_URL, {
             headers: { Authorization: `Bearer ${getToken()}` },
         });
-        if (!res.ok) throw new Error("Erro ao listar operadores");
+        if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw { message: "Erro ao listar operadores", status: res.status, body };
+        }
+
         const data = await res.json();
         return { data, total: data.length };
     },
