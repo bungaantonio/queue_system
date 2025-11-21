@@ -1,31 +1,38 @@
-// src/dataProvider.ts
 import { DataProvider } from "react-admin";
+import { authProvider } from "./authProvider";
 
 const API_URL = "http://127.0.0.1:8000/operators";
 
 const getToken = () => localStorage.getItem("token") || "";
 
-const operatorDataProvider: DataProvider = {
-    getList: async () => {
-        const res = await fetch(API_URL, {
-            headers: { Authorization: `Bearer ${getToken()}` },
-        });
-        if (!res.ok) {
-            const body = await res.json().catch(() => ({}));
-            throw { message: "Erro ao listar operadores", status: res.status, body };
+const handleResponse = async (res: Response) => {
+    if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        const error = { status: res.status, body };
+
+        try {
+            await authProvider.checkError(error);
+        } catch (err: any) {
+            throw new Error(err.message || "Não autorizado");
         }
 
-        const data = await res.json();
+        throw new Error(body.detail || "Erro na operação");
+    }
+
+    return res.json();
+};
+
+
+const operatorDataProvider: DataProvider = {
+    getList: async () => {
+        const res = await fetch(API_URL, { headers: { Authorization: `Bearer ${getToken()}` } });
+        const data = await handleResponse(res);
         return { data, total: data.length };
     },
 
     getOne: async (_resource, { id }) => {
-        const res = await fetch(`${API_URL}/${id}`, {
-            headers: { Authorization: `Bearer ${getToken()}` },
-        });
-        if (!res.ok) throw new Error("Operador não encontrado");
-        const data = await res.json();
-        return { data };
+        const res = await fetch(`${API_URL}/${id}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+        return { data: await handleResponse(res) };
     },
 
     create: async (_resource, { data }) => {
@@ -37,12 +44,9 @@ const operatorDataProvider: DataProvider = {
             },
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error("Erro ao criar operador");
-        const responseData = await res.json();
-        return { data: responseData };
+        return { data: await handleResponse(res) };
     },
 
-    // Atualizar operador
     update: async (_resource, { id, data }) => {
         const res = await fetch(`${API_URL}/${id}`, {
             method: "PUT",
@@ -52,9 +56,7 @@ const operatorDataProvider: DataProvider = {
             },
             body: JSON.stringify(data),
         });
-        if (!res.ok) throw new Error("Erro ao atualizar operador");
-        const responseData = await res.json();
-        return { data: responseData };
+        return { data: await handleResponse(res) };
     },
 
     delete: async (_resource, { id }) => {
@@ -62,16 +64,13 @@ const operatorDataProvider: DataProvider = {
             method: "DELETE",
             headers: { Authorization: `Bearer ${getToken()}` },
         });
-        if (!res.ok) throw new Error("Erro ao deletar operador");
-        const data = await res.json();
-        return { data };
+        return { data: await handleResponse(res) };
     },
 
-    // Não implementados ainda
-    updateMany: async () => { throw new Error("Não implementado"); },
-    getMany: async () => { throw new Error("Não implementado"); },
-    getManyReference: async () => { throw new Error("Não implementado"); },
-    deleteMany: async () => { throw new Error("Não implementado"); },
+    updateMany: async () => Promise.reject(new Error("updateMany Não implementado")),
+    getMany: async () => Promise.reject(new Error("getMany Não implementado")),
+    getManyReference: async () => Promise.reject(new Error("getManyReference Não implementado")),
+    deleteMany: async () => Promise.reject(new Error("deleteMany Não implementado")),
 };
 
 export default operatorDataProvider;
