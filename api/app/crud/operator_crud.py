@@ -32,3 +32,33 @@ def deactivate_operator(db: Session, operator_id: int) -> Optional[Operator]:
         db.commit()
         db.refresh(operator)
     return operator
+
+
+def update_operator(
+    db: Session,
+    operator_id: int,
+    username: Optional[str] = None,
+    password: Optional[str] = None,
+    role: Optional[str] = None,
+) -> Optional[Operator]:
+    """
+    Atualiza campos de um operador.
+    - Se username, password ou role forem fornecidos, atualiza esses campos.
+    - Password será sempre guardada com hash.
+    """
+    operator = db.query(Operator).filter(Operator.id == operator_id).first()
+    if not operator:
+        return None
+
+    if username is not None:
+        setattr(operator, "username", username)
+    if role is not None:
+        setattr(operator, "role", role)
+    if password:
+        from app.helpers.password import get_password_hash
+
+        setattr(operator, "hashed_password", get_password_hash(password))
+
+    db.commit()
+    db.refresh(operator)
+    return operator

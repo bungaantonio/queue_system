@@ -1,12 +1,18 @@
-import { Admin } from "react-admin";
-import { Layout } from "./Layout";
+import { Admin, Resource } from "react-admin";
 import authProvider from "./authProvider";
 import dataProvider from "./dataProvider";
+import { OperatorList } from "./operators/OperatorList";
+import { OperatorCreate } from "./operators/OperatorCreate";
+import { OperatorEdit } from "./operators/OperatorEdit";
 
 export const App = () => (
-    <Admin
-        layout={Layout}
-        authProvider={authProvider}
-        dataProvider={dataProvider}
-    />
+    <Admin authProvider={authProvider} dataProvider={dataProvider}>
+        <Resource
+            name="operators"
+            list={OperatorList}
+            create={OperatorCreate}
+            edit={OperatorEdit}
+        // edit pode ser adicionado futuramente
+        />
+    </Admin>
 );

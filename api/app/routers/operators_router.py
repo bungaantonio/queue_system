@@ -2,12 +2,13 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.schemas.operator_schema import OperatorCreate, OperatorOut
+from app.schemas.operator_schema import OperatorCreate, OperatorUpdate, OperatorOut
 from app.crud.operator_crud import (
     create_operator,
     get_operator_by_id,
     get_all_operators,
     deactivate_operator,
+    update_operator,
 )
 from app.db.database import get_db
 from app.core.security import get_current_user
@@ -36,7 +37,7 @@ def bootstrap_admin(operator: OperatorCreate, db: Session = Depends(get_db)):
 
 
 # 🔹 Criar operador (admin autenticado)
-@router.post("/create", response_model=OperatorOut)
+@router.post("/", response_model=OperatorOut)
 def create_new_operator(
     operator: OperatorCreate,
     db: Session = Depends(get_db),
@@ -94,3 +95,31 @@ def disable_operator(
     if not operator:
         raise HTTPException(status_code=404, detail="Operator not found")
     return operator
+
+
+@router.put("/{operator_id}", response_model=OperatorOut)
+def update_operator_endpoint(
+    operator_id: int,
+    operator_data: OperatorUpdate,
+    db: Session = Depends(get_db),
+    current_user: Operator = Depends(get_current_user),
+):
+    # 🔹 Verifica se o utilizador atual é admin
+    if getattr(current_user, "role", None) != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
+        )
+
+    # 🔹 Verifica se o operador existe
+    operator = get_operator_by_id(db, operator_id)
+    if not operator:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Operator not found"
+        )
+
+    # 🔹 Atualiza apenas os campos enviados
+    updated_operator = update_operator(
+        db, operator_id, role=operator_data.role, password=operator_data.password
+    )
+
+    return updated_operator
