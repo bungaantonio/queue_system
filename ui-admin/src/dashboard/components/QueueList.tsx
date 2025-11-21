@@ -28,7 +28,9 @@ export const QueueList = () => {
             {loading ? <p>Carregando...</p> : (
                 <ul>
                     {queue.map((item) => (
-                        <li key={item.user_id}>{item.user_name} - {item.status}</li>
+                        <li key={item.id}>
+                            {item.name} - {item.status}
+                        </li>
                     ))}
                 </ul>
             )}
