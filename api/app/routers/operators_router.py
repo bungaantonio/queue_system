@@ -42,7 +42,7 @@ def create_new_operator(
     db: Session = Depends(get_db),
     current_user: Operator = Depends(get_current_user),
 ):
-    if current_user.role != "admin":
+    if getattr(current_user, "role", None) != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
         )
@@ -55,7 +55,7 @@ def list_operators(
     db: Session = Depends(get_db),
     current_user: Operator = Depends(get_current_user),
 ):
-    if current_user.role != "admin":
+    if getattr(current_user, "role", None) != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
         )
@@ -69,7 +69,7 @@ def get_operator(
     db: Session = Depends(get_db),
     current_user: Operator = Depends(get_current_user),
 ):
-    if current_user.role != "admin":
+    if getattr(current_user, "role", None) != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
         )
@@ -86,7 +86,7 @@ def disable_operator(
     db: Session = Depends(get_db),
     current_user: Operator = Depends(get_current_user),
 ):
-    if current_user.role != "admin":
+    if getattr(current_user, "role", None) != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
         )
