@@ -1,11 +1,9 @@
-// src/operators/OperatorCreate.tsx
-import { Create, SimpleForm, TextInput, SelectInput } from "react-admin";
+import { Create, SimpleForm, TextInput, SelectInput, PasswordInput } from "react-admin";
 
 export const OperatorCreate = () => (
     <Create>
         <SimpleForm>
             <TextInput source="username" />
-            <TextInput source="password" type="password" />
             <SelectInput
                 source="role"
                 choices={[
@@ -13,6 +11,7 @@ export const OperatorCreate = () => (
                     { id: "attendant", name: "Attendant" },
                 ]}
             />
+            <PasswordInput source="password" />
         </SimpleForm>
     </Create>
 );
