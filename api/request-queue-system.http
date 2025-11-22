@@ -128,9 +128,9 @@ Content-Type: application/json
 
 {
   "user_id": 1,
-  "biometric_hash": "4dba513896b762c702594f3080eb6c45b19aef5a671a0e39fd1993878fa08e6a",
-  "call_token": "cf21590c-06e7-4a1e-b4c9-21b96d9667a5",
-  "operator_id": 42
+  "biometric_hash": "9cc7773313b33c8e67af00cedea1f995a9824a5b725e43b339bedf7a0a311c2c",
+  "call_token": "1978af88-24a1-4a2b-8d63-c47199dac0b2",
+  "operator_id": 26
 }
 
 
@@ -156,7 +156,7 @@ POST http://127.0.0.1:8000/api/v1/queue/requeue
 Content-Type: application/json
 
 {
-  "user_id": 2,
+  "user_id": 3,
   "attendance_type": "normal",
   "operator_id": 26
 }

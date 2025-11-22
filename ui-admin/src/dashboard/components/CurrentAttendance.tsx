@@ -1,4 +1,5 @@
 import { useQueue } from "../hooks/useQueue";
+import { QueueActions } from "./QueueActions";
 
 export const CurrentAttendance = () => {
     const { current, loading } = useQueue();
@@ -11,6 +12,8 @@ export const CurrentAttendance = () => {
             <h2>Atendimento Atual</h2>
             <p>{current.name} - {current.status}</p>
             <p>Chegada: {new Date(current.timestamp).toLocaleTimeString()}</p>
+
+            <QueueActions userId={current.id} status={current.status} />
         </div>
     );
 };
