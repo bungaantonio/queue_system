@@ -134,7 +134,7 @@ Content-Type: application/json
 }
 
 
-### Backend - Gestão da Fila
+### React Admin - Gestão da Fila
 
 ### Chamar o próximo da fila
 POST http://127.0.0.1:8000/api/v1/queue/call-next
@@ -165,7 +165,8 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/api/v1/queue/skip
 
 
-### Parte do frontend 
+### React - Display Público 
+
 ### Listar a fila com usuários em espera e chamados em espera de verificação
 GET http://127.0.0.1:8000/api/v1/queue/waiting-and-called
 
@@ -173,6 +174,8 @@ GET http://127.0.0.1:8000/api/v1/queue/waiting-and-called
 ### Verificar usuário em atendimento
 GET http://127.0.0.1:8000/api/v1/queue/current
 
+
+Parte do middleware C#
 ###
 GET http://127.0.0.1:8000/api/v1/queue/next-called-for-client
 
