@@ -1,41 +1,22 @@
-// src/dashboard/components/QueueList.tsx
-import { useEffect, useState } from "react";
-import { queueDataProvider } from "../data/queueDataProvider";
+import { useQueue } from "../hooks/useQueue";
 
 export const QueueList = () => {
-    const [queue, setQueue] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { queue, loading, callNext, skip } = useQueue();
 
-    const loadQueue = async () => {
-        setLoading(true);
-        try {
-            const { data } = await queueDataProvider.listWaitingAndCalled();
-            setQueue(data);
-        } catch (err: any) {
-            console.error("Erro ao carregar fila:", err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadQueue();
-    }, []);
+    if (loading) return <p>Carregando fila...</p>;
 
     return (
         <div>
             <h2>Fila de Atendimento</h2>
-            {loading ? <p>Carregando...</p> : (
-                <ul>
-                    {queue.map((item) => (
-                        <li key={item.id}>
-                            {item.name} - {item.status}
-                        </li>
-                    ))}
-                </ul>
-            )}
-            <button onClick={() => queueDataProvider.callNext().then(loadQueue)}>Chamar Próximo</button>
-            <button onClick={() => queueDataProvider.skip().then(loadQueue)}>Pular</button>
+            <ul>
+                {queue.map((item) => (
+                    <li key={item.id}>
+                        {item.name} - {item.status}
+                    </li>
+                ))}
+            </ul>
+            <button onClick={callNext}>Chamar Próximo</button>
+            <button onClick={skip}>Pular</button>
         </div>
     );
 };
