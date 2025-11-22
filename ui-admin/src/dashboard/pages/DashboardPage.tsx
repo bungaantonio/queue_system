@@ -1,4 +1,3 @@
-// src/dashboard/pages/DashboardPage.tsx
 import { CurrentAttendance } from "../components/CurrentAttendance";
 import { QueueList } from "../components/QueueList";
 

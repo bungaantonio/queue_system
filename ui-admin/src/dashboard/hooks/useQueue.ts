@@ -1,11 +1,20 @@
-// src/dashboard/hooks/useQueue.ts
 import { useEffect, useState } from "react";
 import { queueDataProvider } from "../data/queueDataProvider";
+import { authProvider } from "../../operators/authProvider";
+
+export type UserStatus = "WAITING" | "CALLED_PENDING" | "BEING_SERVED" | "DONE" | "CANCELLED";
+
+export interface QueueUser {
+    id: number;
+    name: string;
+    status: UserStatus;
+    timestamp: string;
+}
 
 export const useQueue = () => {
-    const [queue, setQueue] = useState<any[]>([]);
-    const [current, setCurrent] = useState<any | null>(null);
-    const [called, setCalled] = useState<any[] | null>(null);
+    const [queue, setQueue] = useState<QueueUser[]>([]);
+    const [called, setCalled] = useState<QueueUser[]>([]);
+    const [current, setCurrent] = useState<QueueUser | null>(null);
     const [loading, setLoading] = useState(true);
 
     // SSE streaming
@@ -14,9 +23,12 @@ export const useQueue = () => {
 
         evtSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            setQueue(data.queue || []);
-            setCurrent(data.current || null);
-            setCalled(data.called || null);
+
+            const allQueue: QueueUser[] = data.queue || [];
+
+            setQueue(allQueue.filter(u => u.status === "WAITING"));
+            setCalled(allQueue.filter(u => u.status === "CALLED_PENDING"));
+            setCurrent(allQueue.find(u => u.status === "BEING_SERVED") || null);
             setLoading(false);
         };
 
@@ -28,7 +40,7 @@ export const useQueue = () => {
         return () => evtSource.close();
     }, []);
 
-    // ações da fila
+    // Ações da fila
     const callNext = async () => {
         try {
             await queueDataProvider.callNext();
@@ -53,8 +65,9 @@ export const useQueue = () => {
         }
     };
 
-    const requeue = async (userId: number, attendanceType: string, operatorId: number) => {
+    const requeue = async (userId: number, attendanceType: string) => {
         try {
+            const operatorId = authProvider.getIdentity?.()?.id || 0;
             await queueDataProvider.requeue(userId, attendanceType, operatorId);
         } catch (err: any) {
             console.error(err.message);
