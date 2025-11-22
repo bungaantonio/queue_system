@@ -22,8 +22,10 @@ logging.basicConfig(
 
 
 origins = [
-    "http://localhost:5173",  # frontend em dev
-    "http://127.0.0.1:5173",
+    "http://localhost:3001",
+    "http://localhost:3002",
+    "http://127.0.0.1:3001",
+    "http://127.0.0.1:3002",
     # depois pode adicionar o domínio real (ex: https://painel.fila.ao)
 ]
 
@@ -46,7 +48,9 @@ app.add_middleware(
 
 
 app.include_router(queue_api.router, prefix="/api/v1/queue", tags=["Queue"])
-app.include_router(queue_stream_router.router, prefix="/api/v1/sse", tags=["Queue Stream"])
+app.include_router(
+    queue_stream_router.router, prefix="/api/v1/sse", tags=["Queue Stream"]
+)
 # app.include_router(user_router.router, prefix="/users", tags=["Users"])
 app.include_router(
     biometrics_api.router, prefix="/api/v1/biometrics", tags=["Biometrics"]
