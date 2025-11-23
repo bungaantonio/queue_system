@@ -2,13 +2,11 @@ from typing import Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from app.crud import (
-    create_user,
-    create_biometric,
-    get_user,
-    get_existing_queue_item,
-    enqueue_user,
-)
+from app.crud.user.create import create_user
+from app.crud.user.read import get_user
+from app.crud.queue.create import enqueue_user
+from app.crud.queue.read import get_existing_queue_item
+from app.crud.biometric.create import create_biometric
 from app.models.queue_item import QueueItem
 from app.schemas.queue_schema.request import QueueRegister
 

@@ -30,7 +30,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     expire = datetime.now(timezone.utc) + (
         expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    to_encode.update({"exp": expire, "sub": data.get("username"), "iat": datetime.now(timezone.utc)})
+    to_encode.update(
+        {"exp": expire, "sub": data.get("username"), "iat": datetime.now(timezone.utc)}
+    )
     secret_key = _get_secret_key_value()
     return jwt.encode(to_encode, secret_key, algorithm=settings.ALGORITHM)
 
@@ -62,3 +64,10 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+
+def get_operator_id(current_user=Depends(get_current_user)) -> int:
+    """
+    Retorna apenas o ID do operador logado.
+    """
+    return current_user.id

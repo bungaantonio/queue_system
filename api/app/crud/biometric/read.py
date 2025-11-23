@@ -5,27 +5,15 @@ from app.models.enums import QueueStatus
 from app.models.queue_item import QueueItem
 
 
-def get_called_pending_by_user(db: Session, user_id: int) -> QueueItem | None:
-    """
-    Retorna o item da fila do usuário que está em status CALLED_PENDING.
-
-    Args:
-        db (Session): Sessão do banco de dados.
-        user_id (int): ID do usuário.
-
-    Returns:
-        QueueItem | None: O primeiro item da fila com status CALLED_PENDING ou None
-        se não houver nenhum.
-
-    Exemplo:
-        item = get_called_pending_by_user(db, 42)
-        if item:
-            print(item.status)
-    """
+def get_called_pending_by_queue_item_id(
+    db: Session, queue_item_id: int
+) -> QueueItem | None:
+    """Busca um QueueItem pelo id do item, somente se estiver CALLED_PENDING."""
     return (
         db.query(QueueItem)
         .filter(
-            QueueItem.user_id == user_id, QueueItem.status == QueueStatus.CALLED_PENDING
+            QueueItem.id == queue_item_id,
+            QueueItem.status == QueueStatus.CALLED_PENDING,
         )
         .first()
     )

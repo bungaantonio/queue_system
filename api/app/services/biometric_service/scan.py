@@ -8,7 +8,8 @@ from app.schemas.biometric_schema.request import BiometricScan
 
 
 from app.crud.user import get_user
-from app.crud.queue import enqueue_user, get_existing_queue_item
+from app.crud.queue.create import enqueue_user
+from app.crud.queue.read import get_existing_queue_item
 
 
 def quick_entry(

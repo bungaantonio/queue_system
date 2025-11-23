@@ -32,10 +32,10 @@ export const queueDataProvider = {
         return { data };
     },
 
-    requeue: async (user_id: number, attendance_type: string, operator_id: number) => {
+    requeue: async (user_id: number, attendance_type: string) => {
         const data = await fetchWithAuth(`${API_URL}/requeue`, {
             method: "POST",
-            body: JSON.stringify({ user_id, attendance_type, operator_id }),
+            body: JSON.stringify({ user_id, attendance_type }),
         });
         return { data };
     },

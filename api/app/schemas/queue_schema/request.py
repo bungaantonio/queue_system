@@ -19,7 +19,6 @@ class QueueRegister(BaseModel):
 
 class QueueRequeue(BaseModel):
     user_id: int
-    operator_id: int
     attendance_type: AttendanceType = AttendanceType.NORMAL
 
 

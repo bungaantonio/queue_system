@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { queueDataProvider } from "../data/queueDataProvider";
-import { authProvider } from "../../operators/authProvider";
 
 export type UserStatus = "WAITING" | "CALLED_PENDING" | "BEING_SERVED" | "DONE" | "CANCELLED";
 
@@ -67,8 +66,7 @@ export const useQueue = () => {
 
     const requeue = async (userId: number, attendanceType: string) => {
         try {
-            const operatorId = authProvider.getIdentity?.()?.id || 0;
-            await queueDataProvider.requeue(userId, attendanceType, operatorId);
+            await queueDataProvider.requeue(userId, attendanceType);
         } catch (err: any) {
             console.error(err.message);
         }

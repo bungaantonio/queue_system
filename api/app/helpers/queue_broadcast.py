@@ -14,9 +14,9 @@ from app.exceptions.exceptions import QueueException
 logger = logging.getLogger(__name__)
 
 
-# ------------------------------------------------------------------------------
-# 🔧 Utilitário de serialização segura
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+# 🔧 Serialização segura de datas
+# --------------------------------------------------------------------------
 def serialize_dates(obj):
     """Converte datetime/date em ISO 8601 recursivamente (para JSON)."""
     if isinstance(obj, dict):
@@ -28,15 +28,14 @@ def serialize_dates(obj):
     return obj
 
 
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # 🧠 Construção do estado da fila
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 def build_queue_state(db: Session) -> dict:
     """Constrói snapshot consistente do estado da fila."""
     try:
         current = consult.get_active_user(db)
-    except QueueException as e:
-        logger.debug(f"Nenhum usuário em atendimento ativo ({e}).")
+    except QueueException:
         current = None
     except Exception as e:
         logger.exception(f"Erro inesperado ao obter item ativo: {e}")
@@ -44,8 +43,7 @@ def build_queue_state(db: Session) -> dict:
 
     try:
         called = consult.get_pending_verification_user(db)
-    except QueueException as e:
-        logger.debug(f"Nenhum usuário chamado pendente ({e}).")
+    except QueueException:
         called = None
     except Exception as e:
         logger.exception(f"Erro inesperado ao obter item pendente: {e}")
@@ -66,46 +64,35 @@ def build_queue_state(db: Session) -> dict:
     )
 
 
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # 🚀 Função principal de broadcast
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 async def broadcast_state():
-    """
-    Executa leitura pós-commit e publica estado da fila.
-    Usa sessão própria e isolada (segura para BackgroundTasks).
-    """
+    """Executa leitura pós-commit e publica estado da fila usando sessão isolada."""
     start = time.perf_counter()
     session = SessionLocal()
     try:
-        logger.debug("Iniciando broadcast_state() com sessão isolada.")
-        serialized_state = build_queue_state(session)
-        await queue_notifier.publish(serialized_state)
+        state = build_queue_state(session)
+        await queue_notifier.publish(state)
         elapsed = (time.perf_counter() - start) * 1000
         logger.debug(f"Broadcast concluído com sucesso ({elapsed:.1f} ms).")
     except Exception as e:
         logger.exception(f"Erro durante broadcast_state(): {e}")
     finally:
         session.close()
-        logger.debug("Sessão SQLAlchemy encerrada após broadcast_state().")
 
 
-# ------------------------------------------------------------------------------
-# 🧱 Interface síncrona segura (para uso em endpoints)
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+# 🧱 Interface síncrona segura (para endpoints FastAPI)
+# --------------------------------------------------------------------------
 def broadcast_state_sync():
     """
-    Executa broadcast_state() de forma segura, mesmo fora de loop assíncrono.
-    Ideal para uso com FastAPI BackgroundTasks.
+    Executa broadcast_state() de forma segura em BackgroundTasks.
+    Compatível com loop assíncrono existente ou cria loop temporário se necessário.
     """
     try:
-        try:
-            # tenta usar loop atual (se existir)
-            loop = asyncio.get_running_loop()
-            loop.create_task(broadcast_state())
-            logger.debug("Broadcast agendado no loop existente.")
-        except RuntimeError:
-            # se não há loop (ex: AnyIO worker), cria e executa um novo
-            logger.debug("Nenhum loop ativo — criando novo event loop para broadcast.")
-            asyncio.run(broadcast_state())
-    except Exception as e:
-        logger.exception(f"Erro no broadcast_state_sync(): {e}")
+        loop = asyncio.get_running_loop()
+        loop.create_task(broadcast_state())
+    except RuntimeError:
+        # raro: cria loop temporário para execução imediata
+        asyncio.run(broadcast_state())

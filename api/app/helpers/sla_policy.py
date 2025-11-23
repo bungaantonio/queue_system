@@ -1,13 +1,15 @@
 # app/helpers/sla_policy.py
 
 from datetime import datetime, timezone
+from typing import Tuple
 from app.models.enums import AttendanceType
 
-def calculate_sla(user, attendance_type: AttendanceType) -> int:
+
+def calculate_sla(user, attendance_type: AttendanceType) -> Tuple[int, str]:
     """
     Calcula SLA (tempo máximo de espera em minutos) do usuário
     baseado em múltiplos fatores, de forma madura.
-    
+
     Regras:
     1. Tipo de atendimento:
        - URGENT → menor SLA

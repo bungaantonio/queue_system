@@ -5,7 +5,7 @@ from app.crud.biometric import (
     mark_as_being_served,
     mark_biometric_attempt,
     mark_biometric_verified,
-    get_called_pending_by_user,
+    get_called_pending_by_queue_item_id,
 )
 from app.models.queue_item import QueueItem
 
@@ -17,7 +17,7 @@ class BiometricAuthService:
     @staticmethod
     def authenticate_user(
         db: Session,
-        user_id: int,
+        queue_item_id: int,
         presented_biometric_hash: str,
         presented_call_token: str,
         operator_id: int | None = None,
@@ -27,9 +27,9 @@ class BiometricAuthService:
         """
 
         # 1️⃣ Recupera o item chamado
-        item = get_called_pending_by_user(db, user_id)
+        item = get_called_pending_by_queue_item_id(db, queue_item_id)
         if not item:
-            raise QueueException("user_not_called_or_not_pending")
+            raise QueueException("queue_item_not_called_or_not_pending")
 
         # 2️⃣ Valida call_token
         if not utils.validate_call_token(

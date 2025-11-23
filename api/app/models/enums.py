@@ -3,7 +3,7 @@ from enum import Enum
 
 class QueueStatus(str, Enum):
     WAITING = "waiting"
-    CALLED_PENDING = "called_pending_verification"
+    CALLED_PENDING = "called_pending"
     BEING_SERVED = "being_served"
     DONE = "done"
     CANCELLED = "cancelled"

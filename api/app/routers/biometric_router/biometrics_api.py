@@ -58,7 +58,7 @@ def authenticate_user(
     with db.begin():  # Transação atômica: commit/rollback automático
         item = BiometricAuthService.authenticate_user(
             db=db,
-            user_id=request.user_id,
+            queue_item_id=request.queue_item_id,
             presented_biometric_hash=request.biometric_hash,
             presented_call_token=request.call_token,
             operator_id=request.operator_id,
@@ -67,22 +67,3 @@ def authenticate_user(
         background_tasks.add_task(broadcast_state_sync)
 
     return QueueDetailItem.from_orm_item(item)
-
-
-@router.post("/verify_called_user", response_model=QuickQueueEntryBiometric)
-def verify_called_user(
-    request: BiometricVerify,
-    db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = None,
-):
-    result = scan.verify_called_user(
-        db,
-        request.queue_id,
-        request.biometric_id,
-    )
-
-    # agenda o broadcast depois da alteração de estado
-    if background_tasks:
-        background_tasks.add_task(broadcast_state_sync)
-
-    return result

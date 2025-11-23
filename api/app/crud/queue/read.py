@@ -77,7 +77,7 @@ def get_active_service_item(db: Session) -> Optional[QueueItem]:
     )
 
 
-def get_called_pending_by_user(db: Session, user_id: int) -> Optional[QueueItem]:
+def get_called_pending_by_user_queue(db: Session, user_id: int) -> Optional[QueueItem]:
     """
     Retorna o item da fila do usuário que está em status CALLED_PENDING.
     """
