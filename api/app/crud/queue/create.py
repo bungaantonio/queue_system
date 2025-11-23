@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional
+import logging
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
@@ -12,12 +12,16 @@ from app.models.queue_item import QueueItem
 from . import read
 
 
+logger = logging.getLogger(__name__)
+
+
 def _insert(
     db: Session,
     user,
     operator_id: int,
     status: QueueStatus = QueueStatus.WAITING,
     attendance_type: AttendanceType = AttendanceType.NORMAL,
+    allow_duplicate: bool = False,
 ) -> QueueItem:
     """
     Insere um novo item na fila, evitando duplicidade.
@@ -25,10 +29,11 @@ def _insert(
     Registra auditoria.
     NÃO faz commit — transação deve ser controlada pelo serviço chamador.
     """
-    # Verifica se o usuário já possui item ativo na fila
-    existing_item = read.get_existing_queue_item(db, user_id=user.id)
-    if existing_item:
-        return existing_item  # Evita duplicação
+
+    if not allow_duplicate:
+        existing_item = read.get_existing_queue_item(db, user_id=user.id)
+        if existing_item:
+            return existing_item
 
     # Calcula posição
     max_position = db.query(func.max(QueueItem.position)).scalar() or 0
@@ -40,11 +45,11 @@ def _insert(
     sla_minutes, sla_reason = calculate_sla(user, attendance_type)
 
     # --- DEBUG ---
-    print(f"[DEBUG] Inserindo usuário {user.name} ({user.id})")
-    print(f"[DEBUG]   Birth date: {user.birth_date}, Attendance: {attendance_type}")
-    print(f"[DEBUG]   Priority score: {priority_score}, Reason: {priority_reason}")
-    print(f"[DEBUG]   SLA: {sla_minutes} minutos, Reason: {sla_reason}")
-    print(f"[DEBUG]   Max position atual: {max_position}")
+    logger.debug(
+        f"Inserindo usuário {user.name} ({user.id}), Attendance: {attendance_type}, "
+        f"Priority: {priority_score} ({priority_reason}), SLA: {sla_minutes}min, "
+        f"Max position: {max_position}"
+    )
     # --------------
 
     # Cria o item de fila
@@ -93,16 +98,13 @@ def enqueue_user(
     """
     Insere o cidadão na fila, caso ainda não esteja.
     """
-    existing = read.get_existing_queue_item(db, user.id)
-    if existing:
-        return existing
-
     return _insert(
         db,
         user,
+        operator_id=operator_id,
         status=QueueStatus.WAITING,
         attendance_type=attendance_type,
-        operator_id=operator_id,
+        allow_duplicate=False,
     )
 
 
@@ -118,7 +120,8 @@ def requeue_user(
     return _insert(
         db,
         user,
+        operator_id=operator_id,
         status=QueueStatus.WAITING,
         attendance_type=attendance_type,
-        operator_id=operator_id,
+        allow_duplicate=True,
     )

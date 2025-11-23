@@ -62,7 +62,6 @@ export const authProvider = {
     }
 
     return Promise.resolve({
-      id: username,
       fullName: username,
       role: role || "attendant",
     });

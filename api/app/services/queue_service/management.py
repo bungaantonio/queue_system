@@ -1,31 +1,38 @@
 from typing import Optional
+from app.crud.operator_crud import get_operator_by_id
+from app.helpers.operators import check_permissions
+from app.models.enums import OperatorRole
 from sqlalchemy.orm import Session
 
 from app.exceptions.exceptions import QueueException
 from app.helpers.audit_helpers import get_biometric_for_finished
-from app.helpers.queue_helpers import map_to_queue_detail
 
+from app.schemas.queue_schema.request import QueueRequeue
 from app.schemas.queue_schema.response import (
     QueueConsult,
     QueueDetailItem,
     QueueCalledItem,
 )
 
-from app.crud import (
-    get_user,
-    get_next_waiting_item,
-    get_active_service_item,
+from app.crud.user.read import get_user
+
+
+from app.crud.queue.create import requeue_user
+from app.crud.queue.update import (
     mark_as_called,
     mark_as_skipped,
     mark_as_done,
     mark_as_cancelled,
     mark_attempted_verification,
-    has_active_service,
+)
+
+from app.crud.queue.read import (
     get_pending_verification_item,
-    get_called_pending_by_user,
+    get_called_pending_by_user_queue,
     get_existing_queue_item,
-    requeue_user,
-    
+    has_active_service,
+    get_next_waiting_item,
+    get_active_service_item,
 )
 
 
@@ -75,7 +82,7 @@ def skip_called_user(db: Session) -> QueueDetailItem:
 
 def mark_user_verification_attempted(db: Session, user_id: int) -> None:
     """Marca que o usuário tentou verificação biométrica."""
-    queue_item = get_called_pending_by_user(db, user_id)
+    queue_item = get_called_pending_by_user_queue(db, user_id)
     if queue_item:
         verificated = mark_attempted_verification(db, queue_item)
     # Criar um scheme para verificação
@@ -91,11 +98,20 @@ def cancel_active_user(db: Session, user_id: int) -> QueueDetailItem:
     return QueueDetailItem.from_orm_item(cancelled_item)
 
 
-def requeue_user_service(db, request):
+def requeue_user_service(db, request: QueueRequeue, operator_id: int):
     """
     Reagenda o atendimento de um usuário, reinserindo-o na fila com base
     nas políticas de prioridade e SLA.
     """
+
+    operator = get_operator_by_id(db, operator_id)
+    if not operator:
+        raise QueueException("operator_not_found")
+
+    check_permissions(
+        operator, allowed_roles=[OperatorRole.ATTENDANT, OperatorRole.ADMIN]
+    )
+
     user = get_user(db, request.user_id)
     if not user:
         raise QueueException("user_not_found")
@@ -103,8 +119,10 @@ def requeue_user_service(db, request):
     queue_item = requeue_user(
         db,
         user=user,
-        operator_id=request.operator_id,
+        operator_id=operator_id,
         attendance_type=request.attendance_type,
     )
+
+    db.commit()
 
     return QueueConsult.from_queue_item(queue_item)

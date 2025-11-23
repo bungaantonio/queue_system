@@ -1,4 +1,5 @@
 from typing import List, Optional
+from app.core.security import get_operator_id
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db
@@ -139,17 +140,20 @@ def cancel_active_user(
 def requeue_user_endpoint(
     request: QueueRequeue,
     db: Session = Depends(get_db),
+    operator_id: int = Depends(get_operator_id),
     background_tasks: BackgroundTasks = None,
 ):
     """
     Reagenda o atendimento de um usuário (novo item WAITING).
     Pode ser usado após cancelamento, ausência ou erro operacional.
     """
-    with db.begin():
-        result = management.requeue_user_service(db, request)
 
-        if background_tasks:
-            background_tasks.add_task(broadcast_state_sync)
+    result = management.requeue_user_service(db, request, operator_id=operator_id)
+    if not result:
+        raise QueueException("requeue_failed")
+
+    if background_tasks:
+        background_tasks.add_task(broadcast_state_sync)
 
     return result
 
@@ -166,6 +170,8 @@ def skip_current_called_user(
     """
     with db.begin():
         updated_item = management.skip_called_user(db)
+        if not updated_item:
+            raise QueueException("no_called_user")
 
     # Atualiza estado global da fila para dashboards/painéis
     if background_tasks:

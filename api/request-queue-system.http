@@ -38,7 +38,9 @@ Content-Type: application/json
   "biometric": {
     "biometric_id": "c13f9c04-6c88-4bb8-9a7d-0e44fcd6b2c0",
     "finger_index": 2
-  }
+  },
+  "attendance_type": "urgent",
+  "operator_id": 26
 }
 
 ### Registrar usuário com biometria #2
@@ -127,9 +129,9 @@ POST http://127.0.0.1:8000/api/v1/biometrics/authenticate
 Content-Type: application/json
 
 {
-  "user_id": 1,
-  "biometric_hash": "9cc7773313b33c8e67af00cedea1f995a9824a5b725e43b339bedf7a0a311c2c",
-  "call_token": "1978af88-24a1-4a2b-8d63-c47199dac0b2",
+  "user_id": 3,
+  "biometric_hash": "a7b0777c8e4b6e3de1f8222450a1b6d590f84fb78161f06e2ae62911b14e1b6e",
+  "call_token": "ec482655-1054-4a32-87b9-76a769dacac4",
   "operator_id": 26
 }
 
@@ -148,17 +150,17 @@ POST http://127.0.0.1:8000/api/v1/queue/cancel
 Content-Type: application/json
 
 {
-  "user_id":2
+  "user_id":1
 }
 
 ### Reagendar
 POST http://127.0.0.1:8000/api/v1/queue/requeue
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzYzOTE4MTYxLCJzdWIiOiJhZG1pbiIsImlhdCI6MTc2MzkxNDU2MX0.u_bZhBuTdBiAsxbaLm5q4ncYwlSOr7KzT9qLyJxfqZc
 
 {
-  "user_id": 3,
-  "attendance_type": "normal",
-  "operator_id": 26
+  "user_id": 1,
+  "attendance_type": "urgent"
 }
 
 ### Pular o próximo da fila
@@ -175,8 +177,7 @@ GET http://127.0.0.1:8000/api/v1/queue/waiting-and-called
 GET http://127.0.0.1:8000/api/v1/queue/current
 
 
-Parte do middleware C#
-###
+### Parte do middleware C# (uso interno)
 GET http://127.0.0.1:8000/api/v1/queue/next-called-for-client
 
 ################################ OLD | LEGACY ################################ 

@@ -9,7 +9,7 @@ QUEUE_ERRORS = {
         400,
         "Usuário já tentou verificação e não pode ser pulado",
     ),
-    "user_not_called_or_not_pending": (
+    "queue_item_not_called_or_not_pending": (
         400,
         "Usuário não foi chamado ou não está pendente de verificação",
     ),
