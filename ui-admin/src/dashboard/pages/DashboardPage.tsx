@@ -1,16 +1,21 @@
+// src/dashboard/DashboardPage.tsx
+import { QueueProvider } from "../queue/QueueProvider";
 import { CurrentAttendance } from "../components/CurrentAttendance";
 import { QueueList } from "../components/QueueList";
+import { Container, Stack, Typography } from "@mui/material";
 
 export const DashboardPage = () => {
     return (
-        <div style={{ padding: "1rem" }}>
-            <h1>Painel de Atendimento</h1>
-
-            {/* Atendimento atual */}
-            <CurrentAttendance />
-
-            {/* Lista da fila com botões globais */}
-            <QueueList />
-        </div>
+        <QueueProvider>
+            <Container sx={{ py: 4 }}>
+                <Stack spacing={4}>
+                    <Typography variant="h4" fontWeight="bold">
+                        Painel de Atendimento
+                    </Typography>
+                    <CurrentAttendance />
+                    <QueueList />
+                </Stack>
+            </Container>
+        </QueueProvider>
     );
 };
