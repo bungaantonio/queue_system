@@ -1,10 +1,10 @@
-// src/dashboard/DashboardPage.tsx
+// src/control/DashboardPage.tsx
 import { QueueProvider } from "../queue/QueueProvider";
 import { CurrentAttendance } from "../components/CurrentAttendance";
 import { QueueList } from "../components/QueueList";
 import { Container, Stack, Typography } from "@mui/material";
 
-export const DashboardPage = () => {
+export const ControlPage = () => {
     return (
         <QueueProvider>
             <Container sx={{ py: 4 }}>

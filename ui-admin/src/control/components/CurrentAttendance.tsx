@@ -1,4 +1,4 @@
-// src/dashboard/components/CurrentAttendance.tsx
+// src/control/components/CurrentAttendance.tsx
 import { useQueue } from "../queue/QueueContext";
 import { QueueActions } from "./QueueActions";
 import { Paper, Typography, Divider, Stack, CircularProgress } from "@mui/material";

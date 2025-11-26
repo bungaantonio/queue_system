@@ -1,4 +1,4 @@
-// src/dashboard/queue/QueueProvider.tsx
+// src/control/queue/QueueProvider.tsx
 import { useEffect, useState } from "react";
 import { QueueContext } from "./QueueContext";
 import type { QueueUser } from "./types";

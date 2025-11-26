@@ -1,4 +1,4 @@
-// src/dashboard/queue/QueueContext.ts
+// src/control/queue/QueueContext.ts
 import { createContext, useContext } from "react";
 import type { QueueUser } from "./types";
 
