@@ -1,4 +1,4 @@
-// src/dashboard/services/api.ts
+// src/control/services/api.ts
 import { authProvider } from "../../operators/authProvider";
 
 const getToken = () => localStorage.getItem("token") || "";

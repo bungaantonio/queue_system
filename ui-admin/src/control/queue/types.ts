@@ -1,4 +1,4 @@
-// src/dashboard/queue/types.ts
+// src/control/queue/types.ts
 export type UserStatus =
     | "waiting"
     | "called_pending"

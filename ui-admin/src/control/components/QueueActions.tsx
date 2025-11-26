@@ -1,4 +1,4 @@
-// src/dashboard/components/QueueActions.tsx
+// src/control/components/QueueActions.tsx
 import { useState } from "react";
 import { useQueue } from "../queue/QueueContext";
 import type { UserStatus } from "../queue/types";

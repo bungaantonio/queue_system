@@ -1,4 +1,4 @@
-// src/dashboard/components/QueueList.tsx
+// src/control/components/QueueList.tsx
 import { useQueue } from "../queue/QueueContext";
 import { QueueActions } from "./QueueActions";
 import { Paper, Typography, Divider, Stack, List, ListItem, Chip, CircularProgress, Button } from "@mui/material";

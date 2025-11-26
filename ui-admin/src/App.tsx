@@ -5,13 +5,13 @@ import { authProvider } from "./operators/authProvider";
 import { OperatorsList } from "./operators/OperatorsList";
 import { OperatorsCreate } from "./operators/OperatorsCreate";
 import { OperatorsEdit } from "./operators/OperatorsEdit";
-import { DashboardPage } from "./dashboard/pages/DashboardPage";
+import { ControlPage } from "./control/pages/ControlPage";
 
 export const App = () => (
     <Admin
-        authProvider={authProvider}
+        authProvider={authProvider as any} // investigar esse 'as any'
         dataProvider={operatorDataProvider}
-        dashboard={DashboardPage}
+        dashboard={ControlPage}
     >
         <Resource
             name="operators"
