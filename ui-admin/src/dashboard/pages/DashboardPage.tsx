@@ -1,8 +1,8 @@
 import { ThemeProvider, createTheme, CssBaseline, Container, Box, Fade } from '@mui/material';
-import { KpiBar } from '../components/KpiBar';
-import { ChartSection } from '../components/ChartSection';
-import { AlertsPanel } from '../components/AlertsPanel';
-import { RecentActivity } from '../components/RecentActivity';
+import { KpiBar } from '../components/kpis/KpiBar';
+import { ChartSection } from '../components/charts/ChartSection';
+import { AlertsPanel } from '../components/alerts/AlertsPanel';
+import { RecentActivity } from '../components/activity/RecentActivity';
 
 const theme = createTheme({
   palette: {
@@ -122,18 +122,18 @@ export const DashboardPage = () => {
           <Fade in={true} timeout={1000}>
             <Box>
               <Box sx={{ mb: 6 }}>
-                <Box component="h1" sx={{ 
-                  typography: 'h3', 
-                  fontWeight: 700, 
-                  color: 'text.primary', 
-                  mb: 2 
+                <Box component="h1" sx={{
+                  typography: 'h3',
+                  fontWeight: 700,
+                  color: 'text.primary',
+                  mb: 2
                 }}>
                   Analytics Dashboard
                 </Box>
-                <Box component="p" sx={{ 
-                  typography: 'h6', 
+                <Box component="p" sx={{
+                  typography: 'h6',
                   color: 'text.secondary',
-                  fontWeight: 400 
+                  fontWeight: 400
                 }}>
                   Performance insights and queue management metrics
                 </Box>
@@ -143,11 +143,11 @@ export const DashboardPage = () => {
 
               <ChartSection />
 
-              <Box sx={{ 
-                display: 'grid', 
-                gap: 4, 
-                mt: 4, 
-                gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' } 
+              <Box sx={{
+                display: 'grid',
+                gap: 4,
+                mt: 4,
+                gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' }
               }}>
                 <AlertsPanel />
                 <RecentActivity />
