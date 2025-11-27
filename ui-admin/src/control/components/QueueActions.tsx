@@ -1,8 +1,11 @@
-// src/control/components/QueueActions.tsx
 import { useState } from "react";
 import { useQueue } from "../queue/QueueContext";
 import type { UserStatus } from "../queue/types";
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Select, Stack, CircularProgress } from "@mui/material";
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Select, Stack, CircularProgress, IconButton, Tooltip } from "@mui/material";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import SkipNextIcon from '@mui/icons-material/SkipNext';
 
 interface Props {
     userId: number;
@@ -31,53 +34,75 @@ export const QueueActions = ({ userId, status }: Props) => {
                             color="success"
                             onClick={finish}
                             disabled={loadingAction || userLoading}
-                            startIcon={userLoading ? <CircularProgress size={20} /> : null}
+                            startIcon={userLoading ? <CircularProgress size={20} color="inherit" /> : <CheckCircleIcon />}
+                            sx={{ px: 3 }}
                         >
                             Finalizar
                         </Button>
-                        <Button
-                            variant="contained"
-                            color="error"
-                            onClick={() => cancel(userId)}
-                            disabled={loadingAction || userLoading}
-                            startIcon={userLoading ? <CircularProgress size={20} /> : null}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button variant="contained" onClick={() => setOpen(true)}>
-                            Reagendar
-                        </Button>
+                        <Tooltip title="Cancelar atendimento">
+                            <IconButton
+                                color="error"
+                                onClick={() => cancel(userId)}
+                                disabled={loadingAction || userLoading}
+                                sx={{ border: '1px solid', borderColor: 'error.main' }}
+                            >
+                                {userLoading ? <CircularProgress size={20} /> : <CancelIcon />}
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Reagendar">
+                            <IconButton 
+                                color="primary" 
+                                onClick={() => setOpen(true)}
+                                sx={{ border: '1px solid', borderColor: 'primary.main' }}
+                            >
+                                <ScheduleIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Stack>
                 );
             case "called_pending":
                 return (
                     <>
                         <Stack direction="row" spacing={1}>
-                            <Button
-                                variant="contained"
-                                color="warning"
-                                onClick={skip}
-                                disabled={loadingAction || userLoading}
-                                startIcon={userLoading ? <CircularProgress size={20} /> : null}
-                            >
-                                Pular
-                            </Button>
-                            <Button
-                                variant="contained"
-                                color="error"
-                                onClick={() => cancel(userId)}
-                                disabled={loadingAction || userLoading}
-                                startIcon={userLoading ? <CircularProgress size={20} /> : null}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button variant="contained" onClick={() => setOpen(true)}>
-                                Reagendar
-                            </Button>
+                            <Tooltip title="Pular usuário">
+                                <IconButton
+                                    color="warning"
+                                    onClick={skip}
+                                    disabled={loadingAction || userLoading}
+                                    size="small"
+                                >
+                                    {userLoading ? <CircularProgress size={16} /> : <SkipNextIcon />}
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Cancelar">
+                                <IconButton
+                                    color="error"
+                                    onClick={() => cancel(userId)}
+                                    disabled={loadingAction || userLoading}
+                                    size="small"
+                                >
+                                    {userLoading ? <CircularProgress size={16} /> : <CancelIcon />}
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Reagendar">
+                                <IconButton 
+                                    color="primary" 
+                                    onClick={() => setOpen(true)}
+                                    size="small"
+                                >
+                                    <ScheduleIcon />
+                                </IconButton>
+                            </Tooltip>
                         </Stack>
 
-                        <Dialog open={open} onClose={() => setOpen(false)}>
-                            <DialogTitle>Reagendar Atendimento</DialogTitle>
+                        <Dialog 
+                            open={open} 
+                            onClose={() => setOpen(false)}
+                            PaperProps={{
+                                sx: { borderRadius: 3, p: 1 }
+                            }}
+                        >
+                            <DialogTitle sx={{ fontWeight: 600 }}>Reagendar Atendimento</DialogTitle>
                             <DialogContent>
                                 <Select
                                     fullWidth
@@ -85,15 +110,72 @@ export const QueueActions = ({ userId, status }: Props) => {
                                     onChange={e =>
                                         setAttendanceType(e.target.value as "normal" | "urgent" | "priority")
                                     }
+                                    sx={{ mt: 1 }}
                                 >
                                     <MenuItem value="normal">Normal</MenuItem>
                                     <MenuItem value="urgent">Urgente</MenuItem>
-                                    <MenuItem value="priority">Priority</MenuItem>
+                                    <MenuItem value="priority">Prioridade</MenuItem>
                                 </Select>
                             </DialogContent>
-                            <DialogActions>
-                                <Button onClick={() => setOpen(false)}>Cancelar</Button>
-                                <Button onClick={handleRequeue} variant="contained">
+                            <DialogActions sx={{ px: 3, pb: 2 }}>
+                                <Button onClick={() => setOpen(false)} color="inherit">Cancelar</Button>
+                                <Button onClick={handleRequeue} variant="contained" disableElevation>
+                                    Confirmar
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+                    </>
+                );
+            case "waiting":
+                return (
+                    <>
+                        <Stack direction="row" spacing={1}>
+                            <Tooltip title="Cancelar">
+                                <IconButton
+                                    color="error"
+                                    onClick={() => cancel(userId)}
+                                    disabled={loadingAction || userLoading}
+                                    size="small"
+                                >
+                                    {userLoading ? <CircularProgress size={16} /> : <CancelIcon />}
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Reagendar">
+                                <IconButton 
+                                    color="primary" 
+                                    onClick={() => setOpen(true)}
+                                    size="small"
+                                >
+                                    <ScheduleIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </Stack>
+
+                        <Dialog 
+                            open={open} 
+                            onClose={() => setOpen(false)}
+                            PaperProps={{
+                                sx: { borderRadius: 3, p: 1 }
+                            }}
+                        >
+                            <DialogTitle sx={{ fontWeight: 600 }}>Reagendar Atendimento</DialogTitle>
+                            <DialogContent>
+                                <Select
+                                    fullWidth
+                                    value={attendanceType}
+                                    onChange={e =>
+                                        setAttendanceType(e.target.value as "normal" | "urgent" | "priority")
+                                    }
+                                    sx={{ mt: 1 }}
+                                >
+                                    <MenuItem value="normal">Normal</MenuItem>
+                                    <MenuItem value="urgent">Urgente</MenuItem>
+                                    <MenuItem value="priority">Prioridade</MenuItem>
+                                </Select>
+                            </DialogContent>
+                            <DialogActions sx={{ px: 3, pb: 2 }}>
+                                <Button onClick={() => setOpen(false)} color="inherit">Cancelar</Button>
+                                <Button onClick={handleRequeue} variant="contained" disableElevation>
                                     Confirmar
                                 </Button>
                             </DialogActions>
