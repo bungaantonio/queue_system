@@ -1,12 +1,11 @@
 import { useQueue } from "../queue/QueueContext";
 import { QueueActions } from "./QueueActions";
-import { Paper, Typography, Divider, Stack, List, ListItem, Chip, CircularProgress, Button, Box, Grid } from "@mui/material";
+import { Paper, Typography, Divider, Stack, List, ListItem, Chip, CircularProgress, Button, Box } from "@mui/material";
 import type { QueueUser } from "../queue/types";
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import PeopleIcon from '@mui/icons-material/People';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
-
 
 export const QueueList = () => {
     const { queue, called, current, loading, callNext, skip, loadingAction } = useQueue();
@@ -15,7 +14,7 @@ export const QueueList = () => {
         return (
             <Stack alignItems="center" justifyContent="center" sx={{ py: 8 }}>
                 <CircularProgress size={32} thickness={4} />
-                <Typography color="textSecondary" mt={2} variant="body2">
+                <Typography color="text.secondary" mt={2} variant="body2">
                     Sincronizando fila...
                 </Typography>
             </Stack>
@@ -64,7 +63,7 @@ export const QueueList = () => {
                         />
                     )}
                 </Stack>
-                <Typography variant="caption" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     Chegada: {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </Typography>
             </Stack>
@@ -74,23 +73,15 @@ export const QueueList = () => {
     );
 
     return (
-        <Grid
-            container
+        <Box
             sx={{
                 display: 'grid',
                 gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-                gap: 24,
+                gap: 3, // 3*8px = 24px
             }}
         >
             {/* Called / Pending Section */}
-            <Paper
-                sx={{
-                    p: 3,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    bgcolor: 'background.paper',
-                }}
-            >
+            <Paper sx={{ p: 3, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
                 <Stack direction="row" alignItems="center" spacing={1} mb={3}>
                     <NotificationsActiveIcon color="warning" />
                     <Typography variant="h6">Chamados</Typography>
@@ -123,14 +114,7 @@ export const QueueList = () => {
             </Paper>
 
             {/* Waiting Queue Section */}
-            <Paper
-                sx={{
-                    p: 3,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    bgcolor: 'background.paper',
-                }}
-            >
+            <Paper sx={{ p: 3, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
                 <Stack direction="row" alignItems="center" spacing={1} mb={3}>
                     <PeopleIcon color="primary" />
                     <Typography variant="h6">Fila de Espera</Typography>
@@ -162,6 +146,6 @@ export const QueueList = () => {
                     Chamar Próximo
                 </Button>
             </Paper>
-        </Grid>
+        </Box>
     );
 };

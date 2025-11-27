@@ -1,4 +1,18 @@
+// src/operators/authProvider.ts
 const API_URL = "http://127.0.0.1:8000/auth/login";
+
+interface LoginResponse {
+  access_token: string;
+  role?: "admin" | "attendant" | "auditor";
+}
+
+const parseJSON = async (res: Response) => {
+  try {
+    return await res.json();
+  } catch {
+    return {};
+  }
+};
 
 export const authProvider = {
   login: async ({ username, password }: { username: string; password: string }) => {
@@ -8,15 +22,14 @@ export const authProvider = {
       body: JSON.stringify({ username, password }),
     });
 
+    const data: LoginResponse = await parseJSON(res);
+
     if (!res.ok) {
-      const errorBody = await res.json().catch(() => ({}));
-      throw new Error(errorBody.detail || "Credenciais inválidas");
+      throw new Error((data as any)?.detail || "Credenciais inválidas");
     }
 
-    const data = await res.json();
-
     localStorage.setItem("token", data.access_token);
-    localStorage.setItem("role", data.role || "attendant");
+    localStorage.setItem("role", data.role ?? "attendant");
     localStorage.setItem("username", username);
 
     return Promise.resolve();
@@ -30,7 +43,9 @@ export const authProvider = {
   },
 
   checkAuth: () =>
-    localStorage.getItem("token") ? Promise.resolve() : Promise.reject(new Error("Não autenticado")),
+    localStorage.getItem("token")
+      ? Promise.resolve()
+      : Promise.reject(new Error("Não autenticado")),
 
   checkError: async (error: any) => {
     if (error.status === 401) {
@@ -47,7 +62,6 @@ export const authProvider = {
     return Promise.resolve();
   },
 
-
   getPermissions: () => {
     const role = localStorage.getItem("role");
     return Promise.resolve(role);
@@ -62,8 +76,9 @@ export const authProvider = {
     }
 
     return Promise.resolve({
+      id: username, // verificar no backend se há um ID único
       fullName: username,
-      role: role || "attendant",
+      role: role ?? "attendant",
     });
   },
 };
