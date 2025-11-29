@@ -88,9 +88,9 @@ def mark_user_verification_attempted(db: Session, user_id: int) -> None:
     # Criar um scheme para verificação
 
 
-def cancel_active_user(db: Session, user_id: int) -> QueueDetailItem:
+def cancel_active_user(db: Session, item_id: int) -> QueueDetailItem:
     """Cancela o atendimento do usuário ativo."""
-    queue_item = get_existing_queue_item(db, user_id)
+    queue_item = get_existing_queue_item(db, item_id)
     if not queue_item:
         raise QueueException("no_active_user")
 

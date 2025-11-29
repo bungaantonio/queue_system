@@ -44,7 +44,7 @@ def get_by_user(db: Session, user_id: int) -> Optional[QueueItem]:
     )
 
 
-def get_existing_queue_item(db: Session, user_id: int) -> Optional[QueueItem]:
+def get_existing_queue_item(db: Session, item_id: int) -> Optional[QueueItem]:
     """
     Verifica se o usuário já possui um item ativo na fila.
     Considera os status de espera e atendimento em curso.
@@ -52,7 +52,7 @@ def get_existing_queue_item(db: Session, user_id: int) -> Optional[QueueItem]:
     return (
         db.query(QueueItem)
         .filter(
-            QueueItem.user_id == user_id,
+            QueueItem.id == item_id,
             QueueItem.status.in_(
                 [
                     QueueStatus.WAITING,

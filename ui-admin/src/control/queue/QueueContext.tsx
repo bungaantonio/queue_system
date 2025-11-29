@@ -17,7 +17,7 @@ export interface QueueContextType {
     // ações
     callNext: () => Promise<void>;
     finish: () => Promise<void>;
-    cancel: (userId: number) => Promise<void>;
+    cancel: (itemId: number) => Promise<void>;
     requeue: (userId: number, attendance: string) => Promise<void>;
     skip: () => Promise<void>;
 }

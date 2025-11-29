@@ -45,7 +45,7 @@ def register_users_in_batch():
                 "biometric_id": biometric_uuid,
                 "finger_index": (idx % 5) + 1  # Exemplo: distribui dedo de 1 a 5
             },
-            "attendance_type": "normal" if idx % 3 else "urgent",
+            "attendance_type": "urgent" if idx % 3 == 0 else "priority" if idx % 3 == 1 else "normal",
             "operator_id": 26
         }
 

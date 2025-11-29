@@ -9,7 +9,7 @@ from app.helpers.sla_policy import calculate_sla
 from app.models.enums import QueueStatus, AttendanceType, AuditAction
 from app.models.queue_item import QueueItem
 
-from . import read
+from app.services.user_service import consult
 
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ def _insert(
     """
 
     if not allow_duplicate:
-        existing_item = read.get_existing_queue_item(db, user_id=user.id)
+        existing_item = consult.get_existing_user_item(db, user_id=user.id)
         if existing_item:
             return existing_item
 
