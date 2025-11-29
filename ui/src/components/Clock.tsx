@@ -14,7 +14,7 @@ export default function Clock({ reduced = false }) {
         reduced ? "text-xl" : "text-3xl"
       }`}
     >
-      {time.toLocaleTimeString("pt-BR", {
+      {time.toLocaleTimeString("pt-PT", {
         hour: "2-digit",
         minute: "2-digit",
       })}
