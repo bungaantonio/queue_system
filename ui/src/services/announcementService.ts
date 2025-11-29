@@ -1,8 +1,9 @@
+// src/services/announcementService.ts
 import { beepManager } from "./beepManager";
-import { speechService } from "./speechService";
+import { playAudioFile } from "./audioPlayer";
 
 interface QueueItem {
-    text: string;
+    audioUrl: string;
     delayAfterBeep: number;
 }
 
@@ -10,31 +11,33 @@ class AnnouncementService {
     private queue: QueueItem[] = [];
     private busy = false;
 
-    async announce(text: string, delayAfterBeep = 800): Promise<void> {
-        console.log("[AnnouncementService] Adicionando à fila:", text);
-        this.queue.push({ text, delayAfterBeep });
+    enqueue(item: QueueItem) {
+        console.log("[AnnouncementService] Adicionando à fila:", item.audioUrl);
+        this.queue.push(item);
         if (!this.busy) this.processQueue();
     }
 
     private async processQueue() {
         this.busy = true;
+
         while (this.queue.length) {
             const item = this.queue.shift()!;
-            console.log("[AnnouncementService] Tocando beep para:", item.text);
+            console.log("[AnnouncementService] Processando:", item.audioUrl);
+
             await beepManager.playBeep();
-            console.log("[AnnouncementService] Beep tocado, aguardando delay:", item.delayAfterBeep);
+            console.log("[AnnouncementService] Delay após beep:", item.delayAfterBeep, "ms");
             await new Promise(res => setTimeout(res, item.delayAfterBeep));
-            console.log("[AnnouncementService] Iniciando TTS:", item.text);
-            await speechService.speak(item.text);
-            console.log("[AnnouncementService] TTS finalizado para:", item.text);
+
+            await playAudioFile(item.audioUrl);
         }
+
         this.busy = false;
-        console.log("[AnnouncementService] Fila processada completamente");
     }
 }
 
 export const announcementService = new AnnouncementService();
 
-export function announceSequence(text: string, delayAfterBeep?: number) {
-    return announcementService.announce(text, delayAfterBeep);
+/** Função utilitária para hooks */
+export function announceSequence(audioUrl: string, delayAfterBeep = 800) {
+    announcementService.enqueue({ audioUrl, delayAfterBeep });
 }

@@ -7,7 +7,7 @@ interface SpeechOptions {
 class SpeechService {
     speak(
         text: string,
-        { lang = "pt-PT", rate = 0.95, pitch = 1 }: SpeechOptions = {}
+        { lang = "pt-BR", rate = 0.95, pitch = 1 }: SpeechOptions = {}
     ): Promise<void> {
         return new Promise(resolve => {
             if (!("speechSynthesis" in window)) return resolve();
@@ -19,7 +19,7 @@ class SpeechService {
 
             // escolher voz PT nativa se disponível
             const voices = speechSynthesis.getVoices();
-            const ptVoice = voices.find(v => v.lang.startsWith("pt-PT"));
+            const ptVoice = voices.find(v => v.lang.startsWith("pt-BR"));
             if (ptVoice) utter.voice = ptVoice;
 
             utter.onend = () => resolve();

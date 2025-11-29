@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.exceptions.handlers import register_exception_handlers
 from app.routers import (
     auth_router,
+    dedicated_router,
     operators_router,
     audit_router,
     queue_stream_router,
@@ -63,6 +64,8 @@ app.include_router(
     tags=["Audit"],
     responses={404: {"description": "Registro não encontrado"}},
 )
+
+app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Dedicated"])
 
 
 @app.get("/")

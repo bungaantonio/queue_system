@@ -21,11 +21,9 @@ export default function Display() {
   const handleEnableAudio = () => {
     requestAudioPermission();
     beepManager.initBeep("/sounds/notification.mp3");
-    // Toca beep imediato para feedback do clique
     beepManager.playBeep().finally(() => setAudioReady(true));
   };
 
-  // Hook só dispara se audioReady = true
   useAnnounce(audioReady ? calledUser : null, { repetitions: 3, interval: 10000 });
 
 
