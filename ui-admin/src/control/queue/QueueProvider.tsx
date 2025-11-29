@@ -25,7 +25,7 @@ export const QueueProvider = ({ children }: { children: React.ReactNode }) => {
         let evt: EventSource;
 
         const connect = () => {
-            evt = new EventSource("http://127.0.0.1:8000/api/v1/sse/stream");
+            evt = new EventSource("/api/v1/sse/stream");
 
             evt.onmessage = (ev) => {
                 const data = JSON.parse(ev.data);

@@ -1,7 +1,7 @@
 import { DataProvider } from "react-admin";
 import { authProvider } from "./authProvider";
 
-const API_URL = "http://127.0.0.1:8000/operators";
+const API_URL = "/operators/";
 
 const getToken = () => localStorage.getItem("token") || "";
 
