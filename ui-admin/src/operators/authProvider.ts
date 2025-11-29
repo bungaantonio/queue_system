@@ -1,5 +1,5 @@
 // src/operators/authProvider.ts
-const API_URL = "http://127.0.0.1:8000/auth/login";
+const API_URL = "/auth/login";
 
 interface LoginResponse {
   access_token: string;

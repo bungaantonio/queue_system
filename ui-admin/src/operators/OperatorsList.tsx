@@ -8,14 +8,9 @@ const roleColors: Record<string, "error" | "primary" | "info"> = {
     auditor: "info",
 };
 
-const OperatorsFilter = () => (
-    <Filter>
-        <TextInput label="Buscar" source="q" alwaysOn />
-    </Filter>
-);
 
 export const OperatorsList = ({ permissions, ...props }: any) => (
-    <List {...props} filters={<OperatorsFilter />} perPage={10} sort={{ field: "username", order: "ASC" }}>
+    <List {...props} perPage={10} sort={{ field: "username", order: "ASC" }}>
         <Datagrid
             rowClick={permissions === "admin" ? "edit" : undefined}
             sx={{

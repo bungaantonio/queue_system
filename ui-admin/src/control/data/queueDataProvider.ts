@@ -1,7 +1,7 @@
 // src/control/data/queueDataProvider.ts
 import { fetchWithAuth } from "../services/api";
 
-const API_URL = "http://127.0.0.1:8000/api/v1/queue";
+const API_URL = "/api/v1/queue";
 
 export const queueDataProvider = {
     listWaitingAndCalled: async () => {
