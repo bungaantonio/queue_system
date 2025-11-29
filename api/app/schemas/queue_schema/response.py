@@ -13,6 +13,7 @@ class QueueListItem(BaseModel):
     timestamp: datetime
     name: str
     id_hint: Optional[str]
+    attendance_type: Optional[str] = None
 
     @classmethod
     def from_orm_item(cls, item):
@@ -30,6 +31,7 @@ class QueueListItem(BaseModel):
             timestamp=item.timestamp,
             name=short_name,
             id_hint=id_hint,
+            attendance_type=item.attendance_type,
         )
 
 
@@ -40,6 +42,7 @@ class QueueConsult(BaseModel):
     status: Optional[str] = None
     timestamp: Optional[datetime] = None
     name: Optional[str] = None
+    attendance_type: Optional[str] = None
 
     @classmethod
     def from_queue_item(cls, queue_item, msg="Usuário registrado na fila com sucesso"):
@@ -60,6 +63,7 @@ class QueueConsult(BaseModel):
             status=queue_item.status,
             timestamp=queue_item.timestamp,
             name=short_name,
+            attendance_type=queue_item.attendance_type,
         )
 
 
@@ -76,6 +80,7 @@ class QueueDetailItem(BaseModel):
     id_hint: Optional[str] = None
     phone: Optional[str] = None
     birth_date: date
+    attendance_type: Optional[str] = None
 
     @classmethod
     def from_orm_item(cls, item):
@@ -98,6 +103,7 @@ class QueueDetailItem(BaseModel):
             id_hint=document_id,
             phone=phone_safe,
             birth_date=item.user.birth_date,
+            attendance_type=item.attendance_type,
         )
 
 

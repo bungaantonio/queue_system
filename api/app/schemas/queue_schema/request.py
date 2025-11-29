@@ -23,4 +23,4 @@ class QueueRequeue(BaseModel):
 
 
 class QueueCancel(BaseModel):
-    user_id: int
+    item_id: int

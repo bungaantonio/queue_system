@@ -125,7 +125,7 @@ def cancel_active_user(
     liberando a fila para o próximo chamado.
     """
     with db.begin():
-        cancelled_item = management.cancel_active_user(db, request.user_id)
+        cancelled_item = management.cancel_active_user(db, request.item_id)
         if not cancelled_item:
             raise QueueException("no_active_user")
 

@@ -24,10 +24,10 @@ export const queueDataProvider = {
         return { data };
     },
 
-    cancel: async (user_id: number) => {
+    cancel: async (item_id: number) => {
         const data = await fetchWithAuth(`${API_URL}/cancel`, {
             method: "POST",
-            body: JSON.stringify({ user_id }),
+            body: JSON.stringify({ item_id }),
         });
         return { data };
     },
