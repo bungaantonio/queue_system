@@ -1,58 +1,63 @@
 import { useEffect, useRef } from "react";
-import { announceTTS } from "../utils/announceTTS";
+import { announceSequence } from "../services/announcementService";
 import { formatSenhaForSpeech } from "../utils/formatSenha";
+import { isAudioAllowed } from "../utils/audioPermission";
 
 interface User {
   id: string | number;
-  id_number?: string;
-  name?: string;
+  id_hint?: string;
 }
 
-interface AnnounceOptions {
-  lang?: string;
-  rate?: number;
-  pitch?: number;
+interface Options {
   repetitions?: number;
-  interval?: number; // ms
-  beep?: HTMLAudioElement | null;
+  interval?: number;
 }
 
 export function useAnnounce(
-  currentUser: User | null,
-  {
-    lang = "pt-BR",
-    rate = 1,
-    pitch = 1,
-    repetitions = 3,
-    interval = 10000,
-    beep = null,
-  }: AnnounceOptions = {}
+  calledUser: User | null,
+  { repetitions = 3, interval = 10000 }: Options = {}
 ) {
   const lastAnnouncedId = useRef<string | number | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
-    // Limpa repetições antigas
-    timeoutRef.current.forEach(clearTimeout);
-    timeoutRef.current = [];
+    console.log("[useAnnounce] chamada detectada:", calledUser, "audioAllowed:", isAudioAllowed());
 
-    if (currentUser?.id_number && currentUser.id !== lastAnnouncedId.current) {
-      const senhaFormatada = formatSenhaForSpeech(currentUser.id_number);
-      const texto = `Senha ${senhaFormatada}, por favor dirigir-se ao atendimento.`;
+    // cancela timers antigos
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
 
-      for (let i = 0; i < repetitions; i++) {
-        const t = setTimeout(() => {
-          announceTTS(texto, { lang, rate, pitch, beep });
-        }, i * interval);
-        timeoutRef.current.push(t);
-      }
-
-      lastAnnouncedId.current = currentUser.id;
+    if (!isAudioAllowed()) {
+      console.log("[useAnnounce] Áudio não permitido ainda.");
+      return;
     }
 
-    // cleanup
-    return () => {
-      timeoutRef.current.forEach(clearTimeout);
-    };
-  }, [currentUser, lang, rate, pitch, repetitions, interval, beep]);
+    if (!calledUser?.id_hint) {
+      console.log("[useAnnounce] Nenhum usuário chamado.");
+      return;
+    }
+
+    if (lastAnnouncedId.current === calledUser.id) {
+      console.log("[useAnnounce] Usuário já anunciado:", calledUser.id);
+      return;
+    }
+
+    const senha = formatSenhaForSpeech(calledUser.id_hint);
+    const text = `Senha ${senha}, por favor dirigir-se ao atendimento.`;
+
+    console.log("[useAnnounce] Preparando anúncios:", text);
+
+    for (let i = 0; i < repetitions; i++) {
+      const t = setTimeout(() => {
+        console.log(`[useAnnounce] Disparando anúncio ${i + 1}/${repetitions}`);
+        announceSequence(text);
+      }, i * interval);
+      timers.current.push(t);
+    }
+
+    lastAnnouncedId.current = calledUser.id;
+
+    return () => timers.current.forEach(clearTimeout);
+  }, [calledUser, repetitions, interval]);
+
 }
