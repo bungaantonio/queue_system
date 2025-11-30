@@ -24,12 +24,14 @@ class QueueItem(Base):
 
     status = Column(String(32), nullable=False, default=QueueStatus.WAITING)
     position = Column(Integer, nullable=False)
-    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+    timestamp = Column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True
+    )
 
     # --- Campos adicionais ---
     priority_score = Column(Integer, default=0, nullable=False)
     priority_reason = Column(String(256), nullable=True)
-    sla_deadline = Column(DateTime, nullable=True)
+    sla_deadline = Column(DateTime(timezone=True), nullable=True)
     attendance_type = Column(String(32), default=AttendanceType.NORMAL)
 
     biometric_hash = Column(String(64), nullable=True)

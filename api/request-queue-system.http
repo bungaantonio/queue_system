@@ -68,9 +68,6 @@ Content-Type: application/json
   "operator_id": 26
 }
 
-
-
-
 ### Registrar usuário com biometria #3
 POST http://127.0.0.1:8000/api/v1/queue/register 
 Content-Type: application/json
@@ -127,7 +124,7 @@ POST http://127.0.0.1:8000/api/v1/biometrics/quick-entry
 Content-Type: application/json
 
 {
-  "biometric_id": "BIO005",
+  "biometric_id": "f9e8d7c6-1234-4a9b-8cde-9f0a1b2c3d4e",
   "attendance_type": "priority"
 }
 

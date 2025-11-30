@@ -64,7 +64,7 @@ def root():
 # Middleware global
 setup_monitoring_middleware(app)
 
-app.include_router(monitoring_router, prefix="/api/v1")
+app.include_router(monitoring_router, prefix="/api/v1/monitoring")
 
 app.include_router(queue_api.router, prefix="/api/v1/queue", tags=["Queue"])
 app.include_router(
