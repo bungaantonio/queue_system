@@ -81,6 +81,7 @@ class QueueDetailItem(BaseModel):
     phone: Optional[str] = None
     birth_date: date
     attendance_type: Optional[str] = None
+    sla_deadline: Optional[datetime] = None
 
     @classmethod
     def from_orm_item(cls, item):
@@ -104,6 +105,7 @@ class QueueDetailItem(BaseModel):
             phone=phone_safe,
             birth_date=item.user.birth_date,
             attendance_type=item.attendance_type,
+            sla_deadline=item.sla_deadline,
         )
 
 

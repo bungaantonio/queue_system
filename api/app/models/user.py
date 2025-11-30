@@ -13,9 +13,9 @@ class User(Base):
     birth_date = Column(Date, nullable=True)
 
     is_pregnant = Column(Boolean, default=False, nullable=False)
-    pregnant_until = Column(DateTime, nullable=True)
+    pregnant_until = Column(DateTime(timezone=True), nullable=True)
     is_disabled_temp = Column(Boolean, default=False, nullable=False)
-    disabled_until = Column(DateTime, nullable=True)
+    disabled_until = Column(DateTime(timezone=True), nullable=True)
 
     queue_items = relationship("QueueItem", back_populates="user")
     biometric = relationship("Biometric", uselist=False, back_populates="user")
