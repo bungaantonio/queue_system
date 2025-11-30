@@ -88,19 +88,22 @@ Perfeito! Vamos organizar tudo de forma clara e estruturada, recaptulando **deci
 ## 6️⃣ Estrutura conceitual do Middleware (Windows Service)
 
 ```
-Middleware Bridge (.NET Worker Service)
+BiometricsBridge/
  ├── Services/
  │   ├── DeviceService.cs      ← SDK ZKTeco / comunicação USB
  │   ├── CaptureService.cs     ← captura, hash, tratamento
- │   └── StatusMonitor.cs      ← monitora hardware, erros
+ │   └── StatusMonitor.cs      ← monitora hardware, logs e erros
  ├── Api/
- │   ├── CaptureController.cs  ← endpoints REST
- │   ├── StatusController.cs   ← healthcheck, status
- │   └── WebSocketHub.cs       ← eventos streaming
+ │   ├── CaptureController.cs  ← endpoints REST (/capture, /cancel)
+ │   ├── StatusController.cs   ← healthcheck, status do leitor
+ │   └── WebSocketHub.cs       ← streaming de eventos para Frontend/FastAPI
  ├── Config/
  │   └── appsettings.json      ← porta, timeout, logs, SDK
  ├── Logs/
+ │   ├── capture.log
+ │   └── status.log
  └── Program.cs (Worker Service)
+
 ```
 
 **Endpoints exemplo:**
