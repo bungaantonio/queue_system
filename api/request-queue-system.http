@@ -127,8 +127,8 @@ POST http://127.0.0.1:8000/api/v1/biometrics/quick-entry
 Content-Type: application/json
 
 {
-  "biometric_id": "BIO005",
-  "attendance_type": "priority"
+  "biometric_id": "9876563LA055",
+  "attendance_type": "normal"
 }
 
 
@@ -137,9 +137,9 @@ POST http://127.0.0.1:8000/api/v1/biometrics/authenticate
 Content-Type: application/json
 
 {
-  "user_id": 3,
-  "biometric_hash": "a7b0777c8e4b6e3de1f8222450a1b6d590f84fb78161f06e2ae62911b14e1b6e",
-  "call_token": "ec482655-1054-4a32-87b9-76a769dacac4",
+  "queue_item_id": 2,
+  "biometric_hash": "e8aeec08109cfdec6f2f47bff9f16f011d07a6d60cbbe654e41299366e921f03",
+  "call_token": "3115b0c2-ff9e-404e-98a6-7dbf58fd7ecf",
   "operator_id": 26
 }
 
