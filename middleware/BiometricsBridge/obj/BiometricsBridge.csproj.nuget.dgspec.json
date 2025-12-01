@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\bunga\\stuffs\\queue_system\\middleware\\BiometricsBridge\\BiometricsBridge.csproj": {}
+    "C:\\Users\\bunga\\source\\repos\\BiometricsBridge\\BiometricsBridge.csproj": {}
   },
   "projects": {
-    "C:\\Users\\bunga\\stuffs\\queue_system\\middleware\\BiometricsBridge\\BiometricsBridge.csproj": {
+    "C:\\Users\\bunga\\source\\repos\\BiometricsBridge\\BiometricsBridge.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\bunga\\stuffs\\queue_system\\middleware\\BiometricsBridge\\BiometricsBridge.csproj",
+        "projectUniqueName": "C:\\Users\\bunga\\source\\repos\\BiometricsBridge\\BiometricsBridge.csproj",
         "projectName": "BiometricsBridge",
-        "projectPath": "C:\\Users\\bunga\\stuffs\\queue_system\\middleware\\BiometricsBridge\\BiometricsBridge.csproj",
+        "projectPath": "C:\\Users\\bunga\\source\\repos\\BiometricsBridge\\BiometricsBridge.csproj",
         "packagesPath": "C:\\Users\\bunga\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\bunga\\stuffs\\queue_system\\middleware\\BiometricsBridge\\obj\\",
+        "outputPath": "C:\\Users\\bunga\\source\\repos\\BiometricsBridge\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -22,15 +22,15 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net9.0"
+          "net8.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net9.0": {
-            "targetAlias": "net9.0",
+          "net8.0": {
+            "targetAlias": "net8.0",
             "projectReferences": {}
           }
         },
@@ -47,12 +47,12 @@
         "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
-        "net9.0": {
-          "targetAlias": "net9.0",
+        "net8.0": {
+          "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.Extensions.Hosting": {
               "target": "Package",
-              "version": "[9.0.11, )"
+              "version": "[8.0.1, )"
             }
           },
           "imports": [
@@ -67,6 +67,9 @@
           "assetTargetFallback": true,
           "warn": true,
           "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
