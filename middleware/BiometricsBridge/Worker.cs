@@ -1,23 +1,58 @@
-namespace BiometricsBridge;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using BiometricsBridge.Services;
 
-public class Worker : BackgroundService
+namespace BiometricsBridge
 {
-    private readonly ILogger<Worker> _logger;
-
-    public Worker(ILogger<Worker> logger)
+    public class Worker : BackgroundService
     {
-        _logger = logger;
-    }
+        private readonly DeviceService _deviceService;
+        private readonly ILogger<Worker> _logger;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
+        public Worker(DeviceService deviceService, ILogger<Worker> logger)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
+            _deviceService = deviceService;
+            _logger = logger;
+        }
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            _deviceService.OnStatusChanged += (s, msg) => _logger.LogInformation($"Status: {msg}");
+            _deviceService.OnTemplateCaptured += (s, e) =>
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                int len = Math.Min(16, e.TemplateBase64.Length);
+                _logger.LogInformation($"Template capturado: {e.TemplateBase64.Substring(0, len)}...");
+            };
+
+            _logger.LogInformation("Worker iniciado. Loop de captura iniciando...");
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    await _deviceService.StartCaptureAsync(stoppingToken);
+                }
+                catch (TaskCanceledException)
+                {
+                    _logger.LogInformation("ExecuteAsync cancelado via token.");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Erro no loop de captura do Worker");
+                    await Task.Delay(2000, stoppingToken);
+                }
             }
-            await Task.Delay(1000, stoppingToken);
+
+            _logger.LogInformation("Worker finalizando...");
+        }
+
+        public override void Dispose()
+        {
+            _deviceService.Dispose();
+            base.Dispose();
         }
     }
 }
