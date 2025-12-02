@@ -14,6 +14,7 @@ from app.db.database import engine
 
 from app.routers.queue_router import queue_api
 from app.routers.biometric_router import biometrics_api
+from app.routers.monitoring_router import monitoring_router, setup_monitoring_middleware
 import logging
 
 logging.basicConfig(
@@ -48,6 +49,23 @@ app.add_middleware(
 )
 
 
+@app.get("/", tags=["Root"])
+def root():
+    return {
+        "message": "Sistema de Gestão de Filas ativo",
+        "endpoints": {
+            "health": "/api/v1/health",
+            "metrics": "/api/v1/metrics",
+            "docs": "/docs",
+            "openapi": "/openapi.json",
+        },
+    }
+
+# Middleware global
+setup_monitoring_middleware(app)
+
+app.include_router(monitoring_router, prefix="/api/v1/monitoring")
+
 app.include_router(queue_api.router, prefix="/api/v1/queue", tags=["Queue"])
 app.include_router(
     queue_stream_router.router, prefix="/api/v1/sse", tags=["Queue Stream"]
@@ -66,11 +84,6 @@ app.include_router(
 )
 
 app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Dedicated"])
-
-
-@app.get("/")
-def root():
-    return {"message": "Sistema de Gestão de Filas ativo"}
 
 
 register_exception_handlers(app)
