@@ -1,28 +1,30 @@
 from enum import Enum
 
-
 class QueueStatus(str, Enum):
-    WAITING = "à espera"
-    CALLED_PENDING = "chamado pendente"
-    BEING_SERVED = "a ser atendido"
-    DONE = "concluído"
-    CANCELLED = "cancelado"
-    SKIPPED = "ignorado"
-
+    WAITING = "À espera"
+    CALLED_PENDING = "Chamado pendente"
+    BEING_SERVED = "A ser atendido"
+    DONE = "Concluído"
+    CANCELLED = "Cancelado"
+    SKIPPED = "Ignorado"
 
 class AttendanceType(str, Enum):
-    NORMAL = "normal"
-    PRIORITY = "prioritário"
-    URGENT = "urgente"
+    NORMAL = "Normal"
+    PRIORITY = "Prioritário"
+    URGENT = "Urgente"
 
 
 class OperatorRole(str, Enum):
-    ADMIN = "administrador"
-    ATTENDANT = "atendente"
-    AUDITOR = "auditor"
+    ADMIN = "Administrador"
+    ATTENDANT = "Atendente"
+    AUDITOR = "Auditor"
 
 
 class AuditAction(str, Enum):
+    QUEUE_CREATED = "Fila criada"
+    QUEUE_UPDATED = "Fila atualizada"
+    QUEUE_VERIFIED = "Fila verificada"
+    QUEUE_PROCESSED = "Fila processada"
     QUEUE_CREATED = "Fila criada"
     QUEUE_UPDATED = "Fila atualizada"
     QUEUE_VERIFIED = "Fila verificada"

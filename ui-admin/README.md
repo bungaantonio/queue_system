@@ -1,4 +1,4 @@
-# ui-admin
+# ui-admin | Queue Admin
 
 ## Installation
 
