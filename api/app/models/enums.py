@@ -25,3 +25,7 @@ class AuditAction(str, Enum):
     QUEUE_UPDATED = "Fila atualizada"
     QUEUE_VERIFIED = "Fila verificada"
     QUEUE_PROCESSED = "Fila processada"
+    QUEUE_CREATED = "Fila criada"
+    QUEUE_UPDATED = "Fila atualizada"
+    QUEUE_VERIFIED = "Fila verificada"
+    QUEUE_PROCESSED = "Fila processada"
