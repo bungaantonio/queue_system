@@ -6,7 +6,7 @@ Content-Type: application/json
 {
   "username": "admin",
   "password": "123",
-  "role": "admin"
+  "role": "administrador"
 }
 
 ###
@@ -39,7 +39,7 @@ Content-Type: application/json
     "biometric_id": "c13f9c04-6c88-4bb8-9a7d-0e44fcd6b2c0",
     "finger_index": 2
   },
-  "attendance_type": "urgent",
+  "attendance_type": "prioritário",
   "operator_id": 26
 }
 
@@ -62,7 +62,7 @@ Content-Type: application/json
     "biometric_id": "BIO004",
     "finger_index": 4
   },
-  "attendance_type": "urgent",
+  "attendance_type": "urgente",
   "operator_id": 26
 }
 
@@ -110,7 +110,7 @@ Content-Type: application/json
     "biometric_id": "BIO005",
     "finger_index": 1
   },
-  "attendance_type": "priority",
+  "attendance_type": "prioritário",
   "operator_id": 26
 }
 
@@ -160,7 +160,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 
 {
   "user_id": 1,
-  "attendance_type": "urgent"
+  "attendance_type": "urgente"
 }
 
 ### Pular o próximo da fila
