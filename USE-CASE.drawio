@@ -1,0 +1,67 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0 Unique/97.7.7020.67" version="29.2.7">
+  <diagram name="Página-1" id="Kw7J-WTzVpLqSCu4M1Kj">
+    <mxGraphModel dx="2026" dy="1146" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-19" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="440" width="310" x="259" y="365" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-11" edge="1" parent="1" source="pumvY6RaQdZr4Xil8dFa-1" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="pumvY6RaQdZr4Xil8dFa-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-12" edge="1" parent="1" source="pumvY6RaQdZr4Xil8dFa-1" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;endArrow=none;endFill=0;" target="pumvY6RaQdZr4Xil8dFa-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Operador" vertex="1">
+          <mxGeometry height="60" width="30" x="164" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-17" edge="1" parent="1" source="pumvY6RaQdZr4Xil8dFa-2" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="pumvY6RaQdZr4Xil8dFa-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-2" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Utente" vertex="1">
+          <mxGeometry height="60" width="30" x="634" y="685" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-13" edge="1" parent="1" source="pumvY6RaQdZr4Xil8dFa-3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="pumvY6RaQdZr4Xil8dFa-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-3" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Administrador" vertex="1">
+          <mxGeometry height="60" width="30" x="634" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-14" edge="1" parent="1" source="pumvY6RaQdZr4Xil8dFa-4" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="pumvY6RaQdZr4Xil8dFa-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-4" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Auditor" vertex="1">
+          <mxGeometry height="60" width="30" x="164" y="685" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-15" edge="1" parent="1" source="pumvY6RaQdZr4Xil8dFa-5" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" target="pumvY6RaQdZr4Xil8dFa-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-5" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Sistema" vertex="1">
+          <mxGeometry height="60" width="30" x="634" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-6" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Inserir Utente na Fila" vertex="1">
+          <mxGeometry height="80" width="120" x="414" y="605" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Registar Utente" vertex="1">
+          <mxGeometry height="80" width="120" x="294" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-8" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Chamar Utente para Atendimento" vertex="1">
+          <mxGeometry height="80" width="120" x="294" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Monitorizar Fila em Tempo Real" vertex="1">
+          <mxGeometry height="80" width="120" x="414" y="495" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-10" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar Histórico e Auditoria" vertex="1">
+          <mxGeometry height="80" width="120" x="294" y="645" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-16" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar Posição na Fila" vertex="1">
+          <mxGeometry height="80" width="120" x="414" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="pumvY6RaQdZr4Xil8dFa-20" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="SISTEMA DE GESTÃO DE FILAS" vertex="1">
+          <mxGeometry height="30" width="210" x="309" y="375" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
