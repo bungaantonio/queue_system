@@ -22,12 +22,8 @@ class AnnouncementService {
 
         while (this.queue.length) {
             const item = this.queue.shift()!;
-            console.log("[AnnouncementService] Processando:", item.audioUrl);
-
             await beepManager.playBeep();
-            console.log("[AnnouncementService] Delay após beep:", item.delayAfterBeep, "ms");
             await new Promise(res => setTimeout(res, item.delayAfterBeep));
-
             await playAudioFile(item.audioUrl);
         }
 
@@ -37,7 +33,7 @@ class AnnouncementService {
 
 export const announcementService = new AnnouncementService();
 
-/** Função utilitária para hooks */
+// utilitário para hooks
 export function announceSequence(audioUrl: string, delayAfterBeep = 800) {
     announcementService.enqueue({ audioUrl, delayAfterBeep });
 }

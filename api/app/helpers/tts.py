@@ -2,13 +2,14 @@
 from gtts import gTTS
 from io import BytesIO
 
-def generate_senha_audio_bytes(senha: str):
+
+def generate_senha_audio_bytes(texto: str) -> BytesIO:
     """
-    Gera MP3 soletrando a senha e retorna como BytesIO.
+    Recebe texto pronto para fala (ex: 'Senha L, A, zero, um, oito')
+    e retorna BytesIO com MP3.
     """
-    texto = " ".join(senha)  # soletra cada caractere
     buf = BytesIO()
-    tts = gTTS(text=texto, lang="pt-PT")
+    tts = gTTS(text=texto, lang="pt")
     tts.write_to_fp(buf)
     buf.seek(0)
     return buf
