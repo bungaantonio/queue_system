@@ -1,3 +1,4 @@
+// src/utils/senhaSpeech.ts
 export function formatSenhaForSpeech(senha: string): string {
   if (!senha) return "";
 
@@ -14,13 +15,10 @@ export function formatSenhaForSpeech(senha: string): string {
     "9": "nove",
   };
 
-  // Soletra cada caractere, separando com vírgula para pequenas pausas
-  return senha
+  const soletrado = senha
     .split("")
-    .map(char => {
-      if (/[0-9]/.test(char)) return numeros[char];
-      if (/[a-zA-Z]/.test(char)) return char.toLowerCase(); // minuscula para TTS
-      return char;
-    })
-    .join(", "); // vírgula adiciona pausa entre caracteres
+    .map(c => (/[0-9]/.test(c) ? numeros[c] : c.toUpperCase()))
+    .join(", ");
+
+  return `Senha ${soletrado}`;
 }
