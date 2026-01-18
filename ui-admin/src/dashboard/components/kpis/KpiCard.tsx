@@ -11,18 +11,20 @@ export const KpiCard = ({ title, value, subtitle, icon, color = 'primary', trend
                 height: '100%',
                 transition: 'all 0.3s ease-in-out',
                 '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
                 },
             }}
         >
             <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                    <Box sx={{ flex: 1 }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+
+                    {/* Bloco de Texto */}
+                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                             {title}
                         </Typography>
-                        <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
                             {value}
                         </Typography>
                         {subtitle && (
@@ -31,19 +33,19 @@ export const KpiCard = ({ title, value, subtitle, icon, color = 'primary', trend
                             </Typography>
                         )}
                         {trend && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, color: getTrendColor(trend.isPositive) }}>
-                                    {formatTrend(trend.value, trend.isPositive)}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-                                    vs. yesterday
-                                </Typography>
-                            </Box>
+                            <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 600, color: getTrendColor(trend.isPositive), mt: 0.5 }}
+                            >
+                                {formatTrend(trend.value, trend.isPositive)} vs. ontem
+                            </Typography>
                         )}
                     </Box>
+
+                    {/* Ícone */}
                     <Box
                         sx={{
-                            p: 1.5,
+                            p: 2,
                             borderRadius: 2,
                             backgroundColor: colors.bg,
                             color: colors.text,
@@ -52,6 +54,7 @@ export const KpiCard = ({ title, value, subtitle, icon, color = 'primary', trend
                             justifyContent: 'center',
                             minWidth: 56,
                             minHeight: 56,
+                            ml: 2,
                         }}
                     >
                         {icon}

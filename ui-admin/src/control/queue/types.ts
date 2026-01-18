@@ -10,5 +10,5 @@ export interface QueueUser {
     name: string;
     status: UserStatus;
     timestamp: string;
-    attendance_type?: "normal" | "urgent" | "priority";
+    attendance_type: "normal" | "urgent" | "priority";
 }

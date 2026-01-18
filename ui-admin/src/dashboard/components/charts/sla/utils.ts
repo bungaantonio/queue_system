@@ -1,7 +1,6 @@
-// components/charts/sla/utils.ts
-
 import { SLAMetric, SLAStatus } from './types';
 
+// Retorna string MUI compatível para cor do texto
 export const getStatusColor = (status: SLAStatus): string => {
     switch (status) {
         case 'success': return 'success.main';
@@ -11,6 +10,7 @@ export const getStatusColor = (status: SLAStatus): string => {
     }
 };
 
+// Retorna string MUI compatível para cor de fundo
 export const getStatusBg = (status: SLAStatus): string => {
     switch (status) {
         case 'success': return 'success.50';
@@ -20,8 +20,15 @@ export const getStatusBg = (status: SLAStatus): string => {
     }
 };
 
+// Calcula média global do SLA
 export const calculateOverallSLA = (metrics: SLAMetric[]): number => {
-    const values = metrics.map(m => m.current);
-    const total = values.reduce((acc, v) => acc + v, 0);
-    return parseFloat((total / values.length).toFixed(1));
+    const total = metrics.reduce((acc, m) => acc + m.current, 0);
+    return parseFloat((total / metrics.length).toFixed(1));
+};
+
+// Determina status global baseado no valor e target
+export const getOverallSLAStatus = (overall: number, target: number): SLAStatus => {
+    if (overall >= target) return 'success';
+    if (overall >= target - 5) return 'warning';
+    return 'error';
 };

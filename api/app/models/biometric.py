@@ -12,7 +12,6 @@ class Biometric(Base):
 
     # Identificador determinístico ou hash/HMAC do template biométrico
     biometric_id = Column(String, nullable=False, unique=True, index=True)
-    finger_index = Column(Integer, nullable=False)
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

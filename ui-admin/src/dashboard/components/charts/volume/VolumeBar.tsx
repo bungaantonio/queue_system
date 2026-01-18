@@ -1,14 +1,13 @@
-// src/dashboard/components/volume/VolumeBar.tsx
-
 import { Box, Typography } from "@mui/material";
 import { DayVolume } from "./types";
+import { VOLUME_CHART_LABELS as L } from "./labels";
 
 interface Props {
     item: DayVolume;
 }
 
 export const VolumeBar = ({ item }: Props) => {
-    const barHeight = Math.min(100, item.current); // garante escala simples
+    const barHeight = Math.min(100, item.current);     // escala simples
     const previousHeight = Math.min(100, item.previous);
 
     const isPositive = item.trend >= 0;
@@ -24,7 +23,7 @@ export const VolumeBar = ({ item }: Props) => {
                     color: isPositive ? "success.main" : "error.main",
                 }}
             >
-                {isPositive ? "▲" : "▼"} {Math.abs(item.trend)}%
+                {isPositive ? L.trendUp : L.trendDown} {Math.abs(item.trend)}%
             </Typography>
 
             {/* Gráfico vertical */}
@@ -43,7 +42,7 @@ export const VolumeBar = ({ item }: Props) => {
                     }}
                 />
 
-                {/* Barra actual */}
+                {/* Barra atual */}
                 <Box
                     sx={{
                         position: "absolute",

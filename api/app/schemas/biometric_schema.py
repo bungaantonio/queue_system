@@ -4,7 +4,6 @@ from typing import Optional, Dict
 
 class BiometricCreate(BaseModel):
     biometric_id: str
-    finger_index: int
 
 
 class BiometricVerifyRequest(BaseModel):

@@ -180,6 +180,14 @@ Não vou “inventar” nada — apenas **elevar o registo**.
 
 ---
 
+
+
+
+
+
+
+
+
 ## 3.2.1 Levantamento de Requisitos
 
 Esta fase teve como finalidade identificar e estruturar os requisitos funcionais e não funcionais do Sistema de Gestão de Filas de Forma Segura, assegurando coerência entre as funcionalidades propostas, os requisitos de segurança e desempenho, e as necessidades associadas ao controlo e auditoria do sistema.
