@@ -6,6 +6,7 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import PeopleIcon from '@mui/icons-material/People';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
+import { ATTENDANCE_TYPE_LABELS, ATTENDANCE_TYPE_COLOR } from "../queue/labels";
 
 export const QueueList = () => {
     const { queue, called, current, loading, callNext, skip, loadingAction } = useQueue();
@@ -54,14 +55,15 @@ export const QueueList = () => {
                     <Typography variant="subtitle1" fontWeight={600}>
                         {item.name}
                     </Typography>
-                    {item.attendance_type && item.attendance_type !== 'normal' && (
+                    {item.attendance_type !== 'normal' && (
                         <Chip
-                            label={item.attendance_type}
+                            label={ATTENDANCE_TYPE_LABELS[item.attendance_type]}
                             size="small"
-                            color={item.attendance_type === 'urgent' ? 'error' : 'warning'}
+                            color={ATTENDANCE_TYPE_COLOR[item.attendance_type]}
                             sx={{ height: 20, fontSize: '0.7rem' }}
                         />
                     )}
+
                 </Stack>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     Chegada: {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

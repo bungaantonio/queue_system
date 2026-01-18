@@ -2,6 +2,7 @@
 import { TableCell, TableRow, Box, Avatar, Typography, Chip } from '@mui/material';
 import { Activity, ActivityAction, ActivityStatus } from './types';
 import { getStatusColor, getActionIcon } from './activityIcons';
+import { ACTIVITY_ACTION_LABELS } from './labels';
 
 interface ActivityRowProps {
     activity: Activity;
@@ -45,9 +46,9 @@ export const ActivityRow = ({ activity }: ActivityRowProps) => {
 
             <TableCell>
                 <Chip
-                    label={activity.action}
+                    label={ACTIVITY_ACTION_LABELS[activity.action]}
                     size="small"
-                    icon={getActionIcon(activity.action as ActivityAction)}
+                    icon={getActionIcon(activity.action)}
                     sx={(theme) => ({
                         fontWeight: 500,
                         fontSize: '0.7rem',

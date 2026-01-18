@@ -1,9 +1,8 @@
-// src/dashboard/components/volume/VolumeChart.tsx
-
 import { Box, Typography, Card, CardContent } from "@mui/material";
 import { VolumeSummary } from "./VolumeSummary";
 import { VolumeBar } from "./VolumeBar";
 import { VolumeData } from "./types";
+import { VOLUME_CHART_LABELS as L } from "./labels";
 
 interface Props {
     data: VolumeData;
@@ -15,7 +14,7 @@ export const VolumeChart = ({ data }: Props) => {
             <CardContent>
 
                 <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                    Volume Semanal
+                    {L.title}
                 </Typography>
 
                 <VolumeSummary data={data} />

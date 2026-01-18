@@ -1,5 +1,6 @@
 import { ListItem, ListItemIcon, ListItemText, Chip, Box } from '@mui/material';
 import { AlertData } from './alertTypes';
+import { ALERT_PRIORITY_LABELS } from './labels';
 
 const priorityColors = {
     high: 'error',
@@ -31,7 +32,7 @@ export const AlertItem = ({ alert }: Props) => {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         {alert.title}
                         <Chip
-                            label={alert.priority}
+                            label={ALERT_PRIORITY_LABELS[alert.priority]}
                             color={priorityColors[alert.priority]}
                             size="small"
                             sx={{ fontSize: '0.7rem', height: 20 }}

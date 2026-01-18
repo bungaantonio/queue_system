@@ -1,8 +1,7 @@
-// components/charts/sla/SLAMetricRow.tsx
-
 import { Box, Typography } from '@mui/material';
 import { SLAMetric } from './types';
 import { getStatusColor, getStatusBg } from './utils';
+import { SLA_STATUS_LABELS } from './labels';
 
 interface Props {
     metric: SLAMetric;
@@ -15,7 +14,7 @@ export const SLAMetricRow = ({ metric }: Props) => (
                 {metric.label}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-                Target: {metric.target}
+                Meta: {metric.target}%
             </Typography>
         </Box>
 
@@ -24,7 +23,7 @@ export const SLAMetricRow = ({ metric }: Props) => (
                 variant="h6"
                 sx={{ fontWeight: 600, color: getStatusColor(metric.status) }}
             >
-                {metric.current}
+                {metric.current}%
             </Typography>
 
             <Box
@@ -35,10 +34,10 @@ export const SLAMetricRow = ({ metric }: Props) => (
                     backgroundColor: getStatusBg(metric.status),
                     color: getStatusColor(metric.status),
                     fontSize: '0.7rem',
-                    fontWeight: 600
+                    fontWeight: 600,
                 }}
             >
-                {metric.status}
+                {SLA_STATUS_LABELS[metric.status]}
             </Box>
         </Box>
     </Box>

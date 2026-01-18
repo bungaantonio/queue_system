@@ -51,7 +51,6 @@ def _create_or_get_biometric(db: Session, user_id: int, biometric_model) -> obje
             db,
             user_id=user_id,
             biometric_id=biometric_model.biometric_id,
-            finger_index=biometric_model.finger_index,
         )
     except IntegrityError:
         # Nenhum rollback aqui; commit será controlado pelo chamador

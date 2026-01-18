@@ -7,7 +7,6 @@ from app.schemas.user_schema import UserCreate
 
 class BiometricCreate(BaseModel):
     biometric_id: str
-    finger_index: int
 
 
 class QueueRegister(BaseModel):

@@ -11,7 +11,7 @@ Content-Type: application/json
 
 ###
 GET http://127.0.0.1:8000/operators/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzYxMTg0Njg1LCJzdWIiOiJhZG1pbiIsImlhdCI6MTc2MTE4MTA4NX0.aGlzyy7ryejOhrH4zyB8kNUzDn8s2HRERDZuO0hswwc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzY4NjgzNzMxLCJzdWIiOiJhZG1pbiIsImlhdCI6MTc2ODY4MDEzMX0.7mDpPp1fQ-O7G9DolcACt_sFog5zY2Mb2HovWNPBSHM
 
 ### Login
 POST http://127.0.0.1:8000/auth/login
@@ -124,7 +124,7 @@ POST http://127.0.0.1:8000/api/v1/biometrics/quick-entry
 Content-Type: application/json
 
 {
-  "biometric_id": "9876563LA055",
+  "biometric_id": "7aa7035a-8a49-4641-b30a-6cf976526e55",
   "attendance_type": "normal"
 }
 

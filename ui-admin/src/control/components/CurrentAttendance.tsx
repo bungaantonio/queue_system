@@ -3,6 +3,7 @@ import { QueueActions } from "./QueueActions";
 import { Paper, Typography, Box, Stack, CircularProgress, Chip, Avatar } from "@mui/material";
 import PersonIcon from '@mui/icons-material/Person';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import { ATTENDANCE_TYPE_LABELS, USER_STATUS_LABELS, ATTENDANCE_TYPE_COLOR } from "../queue/labels";
 
 export const CurrentAttendance = () => {
     const { current, loading } = useQueue();
@@ -12,7 +13,7 @@ export const CurrentAttendance = () => {
             <CircularProgress size={24} />
         </Box>
     );
-    
+
     if (!current)
         return (
             <Paper elevation={0} sx={{ p: 4, textAlign: 'center', bgcolor: 'background.default', border: '2px dashed rgba(0,0,0,0.1)' }}>
@@ -24,10 +25,10 @@ export const CurrentAttendance = () => {
         );
 
     return (
-        <Paper 
-            elevation={3} 
-            sx={{ 
-                p: 0, 
+        <Paper
+            elevation={3}
+            sx={{
+                p: 0,
                 overflow: 'hidden',
                 position: 'relative',
                 transition: 'transform 0.2s',
@@ -36,37 +37,38 @@ export const CurrentAttendance = () => {
                 }
             }}
         >
-            <Box sx={{ 
-                bgcolor: 'primary.main', 
-                color: 'white', 
-                p: 2, 
+            <Box sx={{
+                bgcolor: 'primary.main',
+                color: 'white',
+                p: 2,
                 px: 3,
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center' 
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
             }}>
                 <Typography variant="subtitle2" sx={{ opacity: 0.9, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                     Em Atendimento
                 </Typography>
-                <Chip 
-                    label={current.status.replace("_", " ")} 
-                    size="small" 
-                    sx={{ 
-                        bgcolor: 'rgba(255,255,255,0.2)', 
+                <Chip
+                    label={USER_STATUS_LABELS[current.status]}
+                    size="small"
+                    sx={{
+                        bgcolor: 'rgba(255,255,255,0.2)',
                         color: 'white',
                         backdropFilter: 'blur(4px)',
                         border: 'none'
-                    }} 
+                    }}
                 />
+
             </Box>
-            
+
             <Box sx={{ p: 4 }}>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="center" justifyContent="space-between">
                     <Stack direction="row" spacing={3} alignItems="center">
-                        <Avatar 
-                            sx={{ 
-                                width: 80, 
-                                height: 80, 
+                        <Avatar
+                            sx={{
+                                width: 80,
+                                height: 80,
                                 bgcolor: 'primary.light',
                                 fontSize: '2rem'
                             }}
@@ -78,13 +80,15 @@ export const CurrentAttendance = () => {
                                 {current.name}
                             </Typography>
                             <Stack direction="row" spacing={2} alignItems="center">
-                                <Chip 
+                                <Chip
                                     icon={<PersonIcon sx={{ fontSize: 16 }} />}
-                                    label={current.attendance_type || "Normal"} 
-                                    color={current.attendance_type === 'urgent' ? 'error' : current.attendance_type === 'priority' ? 'warning' : 'default'}
-                                    variant={current.attendance_type === 'normal' ? 'outlined' : 'filled'}
+                                    label={ATTENDANCE_TYPE_LABELS[current.attendance_type]}
+                                    color={ATTENDANCE_TYPE_COLOR[current.attendance_type]}
+                                    variant={current.attendance_type === "normal" ? "outlined" : "filled"}
                                     size="small"
                                 />
+
+
                                 <Stack direction="row" spacing={0.5} alignItems="center">
                                     <AccessTimeIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                                     <Typography variant="body2" color="textSecondary">
@@ -94,7 +98,7 @@ export const CurrentAttendance = () => {
                             </Stack>
                         </Box>
                     </Stack>
-                    
+
                     <Box sx={{ width: { xs: '100%', sm: 'auto' }, pt: { xs: 2, sm: 0 } }}>
                         <QueueActions userId={current.id} status={current.status} />
                     </Box>

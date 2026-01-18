@@ -1,66 +1,51 @@
 // components/charts/waitTime/WaitTimeBar.tsx
-
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Tooltip } from '@mui/material';
+import { WAITTIME_CHART_LABELS } from './labels';
 
 interface Props {
     hour: string;
     time: number;
-    heightPercent: number;
+    min: number;
+    max: number;
 }
 
-export const WaitTimeBar = ({ hour, time, heightPercent }: Props) => {
+export const WaitTimeBar = ({ hour, time, min, max }: Props) => {
+    const heightPercent = ((time - min) / (max - min)) * 100 || 10; // escala real
+    const color =
+        time <= min + (max - min) / 3
+            ? 'success.main'
+            : time <= min + (2 * (max - min)) / 3
+                ? 'warning.main'
+                : 'error.main';
+
     return (
-        <Box
-            sx={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                mx: 0.5,
-                height: '100%',
-            }}
-        >
-            {/* Bar */}
+        <Tooltip title={`${hour}: ${time} min`}>
             <Box
-                aria-label={`${hour}: ${time} minutes`}
                 sx={{
-                    width: '100%',
-                    height: `${heightPercent}%`,
-                    minHeight: 24,
-                    background: theme =>
-                        `linear-gradient(to top, ${theme.palette.primary.dark}, ${theme.palette.primary.light})`,
-                    borderRadius: '4px 4px 0 0',
-                    transition: 'all 0.25s ease-in-out',
-                    cursor: 'pointer',
-                    '&:hover': {
-                        background: theme =>
-                            `linear-gradient(to top, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-                    },
-                }}
-            />
-
-            {/* Hour */}
-            <Typography
-                variant="caption"
-                sx={{
-                    mt: 0.5,
-                    fontSize: '0.7rem',
-                    textAlign: 'center',
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    mx: 0.5,
+                    height: '100%',
                 }}
             >
-                {hour}
-            </Typography>
-
-            {/* Value */}
-            <Typography
-                variant="caption"
-                sx={{
-                    fontSize: '0.65rem',
-                    color: 'text.secondary',
-                }}
-            >
-                {time}min
-            </Typography>
-        </Box>
+                <Box
+                    sx={{
+                        width: '100%',
+                        height: `${heightPercent}%`,
+                        bgcolor: color,
+                        borderRadius: 1,
+                        transition: 'all 0.25s ease-in-out',
+                    }}
+                />
+                <Typography variant="caption" sx={{ mt: 0.5 }}>
+                    {hour}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+                    {time}min
+                </Typography>
+            </Box>
+        </Tooltip>
     );
 };

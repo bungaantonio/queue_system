@@ -1,30 +1,55 @@
 from enum import Enum
 
+
 class QueueStatus(str, Enum):
-    WAITING = "À espera"
-    CALLED_PENDING = "Chamado pendente"
-    BEING_SERVED = "A ser atendido"
-    DONE = "Concluído"
-    CANCELLED = "Cancelado"
-    SKIPPED = "Ignorado"
+    WAITING = "waiting"
+    CALLED_PENDING = "called_pending"
+    BEING_SERVED = "being_served"
+    DONE = "done"
+    CANCELLED = "cancelled"
+    SKIPPED = "skipped"
+
+    @property
+    def label(self):
+        return {
+            "waiting": "À espera",
+            "called_pending": "Chamado pendente",
+            "being_served": "A ser atendido",
+            "done": "Concluído",
+            "cancelled": "Cancelado",
+            "skipped": "Ignorado",
+        }[self.value]
+
 
 class AttendanceType(str, Enum):
-    NORMAL = "Normal"
-    PRIORITY = "Prioritário"
-    URGENT = "Urgente"
+    NORMAL = "normal"
+    PRIORITY = "priority"
+    URGENT = "urgent"
+
+    @property
+    def label(self):
+        return {
+            "normal": "Normal",
+            "priority": "Prioritário",
+            "urgent": "Urgente",
+        }[self.value]
 
 
 class OperatorRole(str, Enum):
-    ADMIN = "Administrador"
-    ATTENDANT = "Atendente"
-    AUDITOR = "Auditor"
+    ADMIN = "admin"
+    ATTENDANT = "attendant"
+    AUDITOR = "auditor"
+
+    @property
+    def label(self):
+        return {
+            "admin": "Administrador",
+            "attendant": "Atendente",
+            "auditor": "Auditor",
+        }[self.value]
 
 
 class AuditAction(str, Enum):
-    QUEUE_CREATED = "Fila criada"
-    QUEUE_UPDATED = "Fila atualizada"
-    QUEUE_VERIFIED = "Fila verificada"
-    QUEUE_PROCESSED = "Fila processada"
     QUEUE_CREATED = "Fila criada"
     QUEUE_UPDATED = "Fila atualizada"
     QUEUE_VERIFIED = "Fila verificada"

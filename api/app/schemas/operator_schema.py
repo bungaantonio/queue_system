@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional
 
+from app.models.enums import OperatorRole
+
 
 class OperatorBase(BaseModel):
     username: str
-    role: str
+    role: OperatorRole
 
 
 class OperatorCreate(OperatorBase):
