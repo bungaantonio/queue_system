@@ -32,3 +32,16 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```sh
 uvicorn app.main:app --reload
 ```
+
+### Rodar PostgreSQL
+```sh
+docker-compose up -d
+```
+* Testar conexão:
+```sh
+psql postgresql://devuser:devpass@localhost:5432/devdb
+```
+* Rode migrations Alembic normalmente:
+```sh
+alembic upgrade head
+```

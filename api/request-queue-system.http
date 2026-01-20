@@ -84,10 +84,10 @@ Content-Type: application/json
     "phone": "912345678"
   },
   "biometric": {
-    "biometric_id": "a1f2c3d4-5678-4b9a-b123-45d6f7890abc",
+    "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e",
     "finger_index": 1
   },
-  "attendance_type": "Normal",
+  "attendance_type": "normal",
   "operator_id": 26
 }
 
@@ -110,7 +110,7 @@ Content-Type: application/json
     "phone": "956789012"
   },
   "biometric": {
-    "biometric_id": "f9e8d7c6-1234-4a9b-8cde-9f0a1b2c3d4e",
+    "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e",
     "finger_index": 1
   },
   "attendance_type": "priority",
@@ -124,7 +124,7 @@ POST http://127.0.0.1:8000/api/v1/biometrics/quick-entry
 Content-Type: application/json
 
 {
-  "biometric_id": "7aa7035a-8a49-4641-b30a-6cf976526e55",
+  "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e",
   "attendance_type": "normal"
 }
 

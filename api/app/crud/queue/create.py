@@ -3,6 +3,7 @@ import logging
 from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
+from app.crud.queue.read import get_existing_queue_item, get_next_position
 from app.helpers.priority_policy import calculate_priority
 from app.helpers.audit_helpers import audit_queue_action
 from app.helpers.sla_policy import calculate_sla
@@ -31,12 +32,12 @@ def _insert(
     """
 
     if not allow_duplicate:
-        existing_item = consult.get_existing_user_item(db, user_id=user.id)
+        existing_item = get_existing_queue_item(db, user.id)
         if existing_item:
             return existing_item
 
     # Calcula posição
-    max_position = db.query(func.max(QueueItem.position)).scalar() or 0
+    max_position = get_next_position(db)
 
     # Calcula prioridade
     priority_score, priority_reason = calculate_priority(user, attendance_type)

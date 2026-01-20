@@ -2,7 +2,7 @@ import hashlib
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Index
 from sqlalchemy.orm import relationship, validates
 from datetime import datetime, timezone
-from app.db.database import Base
+from app.db.base import Base
 
 
 class Audit(Base):
