@@ -39,6 +39,19 @@ def mark_biometric_attempt(
 
 
 def mark_as_being_served(db: Session, item: QueueItem, operator_id: int) -> QueueItem:
+    """
+    Marca o item como BEING_SERVED, garantindo que não haja outro ativo.
+    """
+    # Verifica se já existe algum atendimento ativo
+    existing_active = (
+        db.query(QueueItem).filter(QueueItem.status == QueueStatus.BEING_SERVED).first()
+    )
+    if existing_active:
+        raise ValueError(
+            f"Não é possível marcar {item.user_id} como BEING_SERVED: "
+            f"usuário {existing_active.user_id} já está sendo atendido."
+        )
+
     old_status = item.status
     item.status = QueueStatus.BEING_SERVED
     item.timestamp = datetime.now(timezone.utc)

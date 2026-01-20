@@ -1,11 +1,13 @@
 from datetime import datetime, timezone
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+from app.crud.queue.read import get_next_position
 from app.helpers.audit_helpers import audit_queue_action
 from app.models.enums import QueueStatus, AuditAction
 from app.models.queue_item import QueueItem
 from app.crud.biometric import get_first_biometric_by_user
 from app.services.biometric_service import utils
+
 
 def mark_as_called(
     db: Session, item: QueueItem, operator_id: int | None = None
@@ -106,7 +108,7 @@ def mark_as_skipped(
     old_status = item.status
     old_position = item.position
 
-    max_position = db.query(func.max(QueueItem.position)).scalar() or old_position
+    max_position = get_next_position(db) - 1
     new_position = min(old_position + offset, max_position)
 
     # Atualiza posições dos outros itens

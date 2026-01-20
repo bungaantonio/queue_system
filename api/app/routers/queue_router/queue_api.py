@@ -1,9 +1,12 @@
 from typing import List, Optional
 from app.core.security import get_operator_id
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.crud.queue.create import enqueue_user
+from app.crud.queue.read import get_existing_queue_item
+from app.crud.user.create import create_user
 from app.db.database import get_db
-from app.exceptions.exceptions import QueueException
+from app.exceptions.exceptions import BiometricException, QueueException
 from app.helpers.queue_broadcast import broadcast_state_sync
 from app.schemas.queue_schema.response import (
     QueueCalledItem,
@@ -14,7 +17,10 @@ from app.schemas.queue_schema.response import (
 from app.schemas.queue_schema.request import QueueRegister, QueueCancel, QueueRequeue
 from app.services.queue_service import consult, management
 
-from app.services.queue_service.registration import create_user_with_biometric_and_queue
+from app.services.queue_service.registration import (
+    _create_or_get_biometric,
+    create_user_with_biometric_and_queue,
+)
 
 router = APIRouter()
 
@@ -25,20 +31,28 @@ def register_user(
     db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = None,
 ):
-    # Transação atômica + conversão para Pydantic dentro do mesmo bloco
-    with db.begin():
-        db_user, db_bio, queue_item = create_user_with_biometric_and_queue(
-            db,
-            request,
-            operator_id=request.operator_id,
-        )
-        user_queue_status = QueueConsult.from_queue_item(queue_item)
+    try:
+        # Transação atômica
+        with db.begin():
+            db_user, db_bio, queue_item = create_user_with_biometric_and_queue(
+                db,
+                request,
+                operator_id=request.operator_id,
+            )
+            user_queue_status = QueueConsult.from_queue_item(queue_item)
 
-    # Broadcast assíncrono do estado da fila (fora do bloco)
-    if background_tasks:
-        background_tasks.add_task(broadcast_state_sync)
+        # Broadcast assíncrono
+        if background_tasks:
+            background_tasks.add_task(broadcast_state_sync)
 
-    return user_queue_status
+        return user_queue_status
+
+    except BiometricException as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Falha ao registrar usuário")
 
 
 @router.get("/waiting-and-called", response_model=List[QueueListItem])

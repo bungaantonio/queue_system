@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 from datetime import datetime, timezone
 from sqlalchemy.orm import validates
-from app.db.database import Base
+from app.db.base import Base
 from app.models.enums import OperatorRole
 from passlib.context import CryptContext
 

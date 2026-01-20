@@ -49,7 +49,7 @@ class QueueItem(Base):
         CheckConstraint("position >= 0", name="ck_queue_position_non_negative"),
         CheckConstraint("priority_score >= 0", name="ck_queue_priority_non_negative"),
         CheckConstraint(
-            "(status != 'being_served') OR (biometric_verified = 1)",
+            "(status != 'being_served') OR (biometric_verified = TRUE)",
             name="ck_served_requires_biometric_verification",
         ),
     )

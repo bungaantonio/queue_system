@@ -7,6 +7,8 @@ from app.crud.user.read import get_user
 from app.crud.queue.create import enqueue_user
 from app.crud.queue.read import get_existing_queue_item
 from app.crud.biometric.create import create_biometric
+from app.exceptions.exceptions import BiometricException
+from app.models.biometric import Biometric
 from app.models.queue_item import QueueItem
 from app.schemas.queue_schema.request import QueueRegister
 
@@ -42,18 +44,30 @@ def create_user_with_biometric_and_queue(
     return db_user, db_bio, queue_item
 
 
-def _create_or_get_biometric(db: Session, user_id: int, biometric_model) -> object:
+def _create_or_get_biometric(db: Session, user_id: int, biometric_model) -> Biometric:
     """
-    Tenta criar biometria; se já existir, retorna a existente.
+    Retorna a biometria existente do usuário ou cria uma nova.
+    Garante unicidade global da biometria e evita IntegrityError.
     """
-    try:
-        return create_biometric(
-            db,
-            user_id=user_id,
-            biometric_id=biometric_model.biometric_id,
-        )
-    except IntegrityError:
-        # Nenhum rollback aqui; commit será controlado pelo chamador
-        # Verificar depois se deve retornar que tipo de _user
-        # Tem um get_by_user em queue_crud
-        return get_user(db, user_id)
+    # Verifica se o usuário já tem biometria
+    existing_user_bio = db.query(Biometric).filter(Biometric.user_id == user_id).first()
+    if existing_user_bio:
+        return existing_user_bio
+
+    # Verifica se a biometria já foi registrada por outro usuário
+    existing_bio_global = (
+        db.query(Biometric)
+        .filter(Biometric.biometric_id == biometric_model.biometric_id)
+        .first()
+    )
+    if existing_bio_global:
+        raise BiometricException("biometric_already_registered")
+
+    # Cria nova biometria
+    biometric = Biometric(
+        user_id=user_id,
+        biometric_id=biometric_model.biometric_id,
+    )
+    db.add(biometric)
+    db.flush()
+    return biometric

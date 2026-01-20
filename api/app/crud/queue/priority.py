@@ -1,6 +1,7 @@
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.crud.queue.read import get_next_position
 from app.helpers.audit_helpers import audit_queue_action
 from app.models.enums import QueueStatus, AuditAction
 from app.models.queue_item import QueueItem
@@ -57,7 +58,7 @@ def reinsert_at_position(
     Move um item para uma nova posição na fila, ajustando os demais conforme necessário.
     """
     old_position = item.position
-    max_position = db.query(func.max(QueueItem.position)).scalar() or 0
+    max_position = get_next_position(db) - 1
     position = max(1, min(position, max_position))
 
     if position == old_position:

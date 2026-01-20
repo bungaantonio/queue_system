@@ -1,5 +1,5 @@
 from typing import Sequence, Optional
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, func
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.enums import QueueStatus
@@ -44,15 +44,15 @@ def get_by_user(db: Session, user_id: int) -> Optional[QueueItem]:
     )
 
 
-def get_existing_queue_item(db: Session, item_id: int) -> Optional[QueueItem]:
+def get_existing_queue_item(db: Session, user_id: int) -> Optional[QueueItem]:
     """
-    Verifica se o usuário já possui um item ativo na fila.
-    Considera os status de espera e atendimento em curso.
+    Retorna o item ativo de um usuário na fila.
+    Status ativos: WAITING, CALLED_PENDING, BEING_SERVED
     """
     return (
         db.query(QueueItem)
         .filter(
-            QueueItem.id == item_id,
+            QueueItem.user_id == user_id,
             QueueItem.status.in_(
                 [
                     QueueStatus.WAITING,
@@ -143,3 +143,13 @@ def get_pending_verification_item(db: Session) -> Optional[QueueItem]:
         .order_by(asc(QueueItem.position))
         .first()
     )
+
+
+def get_next_position(db: Session) -> int:
+    """
+    Retorna a próxima posição disponível na fila.
+    Deve ser chamado dentro de uma transação atômica (`with db.begin()`).
+    """
+    # SQLite não tem lock de linha, mas dentro de `db.begin()` já reduz conflitos
+    max_position = db.query(func.max(QueueItem.position)).scalar()
+    return (max_position or 0) + 1
