@@ -1,9 +1,8 @@
-// src/utentes/UtentesList.tsx
 import React from "react";
 import { List, ListProps, useListContext } from "react-admin";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Box } from "@mui/material";
-import { JSX } from "react/jsx-runtime";
+// Adicionado Chip na importação abaixo
+import { Box, Chip } from "@mui/material";
 
 const UtentesGrid = () => {
   const {
@@ -18,6 +17,7 @@ const UtentesGrid = () => {
     setSort,
   } = useListContext();
 
+  // Converte o objeto de dados em array para o DataGrid
   const rows = data ? Object.values(data) : [];
 
   const columns: GridColDef[] = [
@@ -26,35 +26,56 @@ const UtentesGrid = () => {
     { field: "birth_date", headerName: "Data Nascimento", width: 150 },
     { field: "phone", headerName: "Telefone", width: 150 },
     {
-      field: "is_pregnant",
-      headerName: "Grávida?",
-      width: 120,
-      type: "boolean",
+      field: "attendance_type",
+      headerName: "Tipo",
+      width: 140,
+      renderCell: (params) => {
+        // Lógica de cores para os Chips
+        const colors: Record<
+          string,
+          "success" | "warning" | "error" | "default"
+        > = {
+          normal: "success",
+          priority: "warning",
+          urgent: "error",
+        };
+        const status = params.value as string;
+        return (
+          <Chip
+            label={status || "N/A"}
+            color={colors[status] || "default"}
+            size="small"
+          />
+        );
+      },
     },
     {
-      field: "is_disabled_temp",
-      headerName: "Deficiência?",
-      width: 140,
+      field: "is_pregnant",
+      headerName: "Grávida",
+      width: 100,
       type: "boolean",
     },
-    { field: "attendance_type", headerName: "Tipo Atendimento", width: 140 },
     { field: "operator_id", headerName: "Operador", width: 100 },
   ];
 
   return (
-    <Box sx={{ height: 500, width: "100%" }}>
+    <Box sx={{ height: 500, width: "100%", mt: 2 }}>
       <DataGrid
         rows={rows}
         columns={columns}
         loading={isLoading}
-        rowCount={total}
+        rowCount={total || 0}
         pagination
         paginationMode="server"
+        // Define o modelo de paginação atual
         paginationModel={{ page: page - 1, pageSize: perPage }}
-        onPaginationModelChange={({ page: newPage, pageSize: newPageSize }) => {
-          setPage(newPage + 1);
-          setPerPage(newPageSize);
+        // Atualiza a página ou o tamanho da página
+        onPaginationModelChange={(model) => {
+          setPage(model.page + 1);
+          setPerPage(model.pageSize);
         }}
+        // CORREÇÃO: Adicionado o 10 aqui para parar o erro de pageSizeOptions
+        pageSizeOptions={[10, 25, 50, 100]}
         sortingMode="server"
         sortModel={
           sort
@@ -67,10 +88,10 @@ const UtentesGrid = () => {
             : []
         }
         onSortModelChange={(model) => {
-          if (model.length > 0 && model[0].sort) {
+          if (model.length > 0) {
             setSort({
               field: model[0].field,
-              order: model[0].sort.toUpperCase() as "ASC" | "DESC",
+              order: model[0].sort?.toUpperCase() as "ASC" | "DESC",
             });
           }
         }}
@@ -81,9 +102,7 @@ const UtentesGrid = () => {
   );
 };
 
-export const UtentesList = (
-  props: JSX.IntrinsicAttributes & ListProps<any>,
-) => (
+export const UtentesList = (props: ListProps) => (
   <List {...props} perPage={10} sort={{ field: "id", order: "ASC" }}>
     <UtentesGrid />
   </List>
