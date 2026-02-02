@@ -1,4 +1,4 @@
-# app/crud/biometric_crud.py
+# app/crud/biometric/read.py
 from sqlalchemy.orm import Session
 from app.models.biometric import Biometric
 from app.models.enums import QueueStatus
