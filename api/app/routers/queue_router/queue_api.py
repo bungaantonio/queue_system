@@ -1,3 +1,4 @@
+# app/routers/queue_router/queue_api.py
 from typing import List, Optional
 from app.core.security import get_operator_id
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -18,7 +19,6 @@ from app.schemas.queue_schema.request import QueueRegister, QueueCancel, QueueRe
 from app.services.queue_service import consult, management
 
 from app.services.queue_service.registration import (
-    _create_or_get_biometric,
     create_user_with_biometric_and_queue,
 )
 

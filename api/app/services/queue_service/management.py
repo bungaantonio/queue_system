@@ -37,7 +37,10 @@ from app.crud.queue.read import (
 
 
 def call_next_user(db: Session, operator_id: Optional[int] = None) -> QueueCalledItem:
-    """Chama o próximo usuário da fila, considerando prioridade."""
+    """
+    Chama o próximo da fila. A biometria NÃO é tratada aqui.
+    Apenas geramos o token de presença (call_token).
+    """
     if has_active_service(db):
         raise QueueException("blocked_pending_verification")
 
@@ -45,10 +48,10 @@ def call_next_user(db: Session, operator_id: Optional[int] = None) -> QueueCalle
     if not next_item:
         raise QueueException("empty")
 
+    # O mark_as_called agora gera apenas o CallToken e o status CALLED_PENDING
     updated_item = mark_as_called(db, next_item, operator_id=operator_id)
 
     db.flush()
-
     return QueueCalledItem.from_orm_item(updated_item)
 
 

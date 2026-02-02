@@ -1,3 +1,4 @@
+# app/crud/queue/update.py
 from datetime import datetime, timezone
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -6,6 +7,7 @@ from app.helpers.audit_helpers import audit_queue_action
 from app.models.enums import QueueStatus, AuditAction
 from app.models.queue_item import QueueItem
 from app.crud.biometric import get_first_biometric_by_user
+from app.models.user_credential import UserCredential
 from app.services.biometric_service import utils
 
 
@@ -13,32 +15,43 @@ def mark_as_called(
     db: Session, item: QueueItem, operator_id: int | None = None
 ) -> QueueItem:
     """
-    Marca o usuário como chamado, preparando call_token e biometric_hash.
+    Marca o usuário como chamado e gera os tokens de sessão.
     """
     old_status = item.status
     item.status = QueueStatus.CALLED_PENDING
     item.attempted_verification = False
     item.timestamp = datetime.now(timezone.utc)
 
-    # Biometric hash
-    biometric = get_first_biometric_by_user(db, item.user_id)
-    if not biometric:
-        raise ValueError(f"Usuário {item.user_id} não possui biometria registrada.")
-    item.biometric_hash = utils.make_biometric_hash(biometric.biometric_id)
-
-    # Call token
+    # 1. Gerar Call Token (Obrigatório para a sessão de atendimento)
+    # Usando o nome correto da função em utils.py
     item.call_token, item.call_token_expires_at = utils.generate_call_token()
 
+    # 2. Buscar a credencial do usuário (Opcional aqui, obrigatório na autenticação)
+    # Não travamos o processo se não encontrar, apenas logamos.
+    credential = (
+        db.query(UserCredential)
+        .filter(
+            UserCredential.user_id == item.user_id, UserCredential.cred_type == "zkteco"
+        )
+        .first()
+    )
+
+    if credential:
+        # Se ele tem biometria física, guardamos o hash no item da fila para conferência rápida
+        item.biometric_hash = credential.identifier
+    else:
+        # Se não tem ZKTeco, ele pode estar usando WebAuthn (não precisa de hash prévio na fila)
+        item.biometric_hash = None
+
     db.flush()
-    db.refresh(item)  # garante consistência da sessão
-    new_status = item.status
+    db.refresh(item)
 
     audit_queue_action(
         db,
         AuditAction.QUEUE_UPDATED,
         item,
         operator_id,
-        f"mark_as_called: {old_status} -> {new_status}, call_token set, biometric_hash set",
+        f"mark_as_called: {old_status} -> {item.status}, token generated",
     )
     return item
 

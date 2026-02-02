@@ -90,7 +90,7 @@ Content-Type: application/json
     "phone": "956789012"
   },
   "biometric": {
-    "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e",
+    "biometric_id": "HASH_TESTE_DEDO_1",
     "finger_index": 1
   },
   "attendance_type": "priority",
@@ -104,7 +104,7 @@ POST http://127.0.0.1:8000/api/v1/biometrics/quick-entry
 Content-Type: application/json
 
 {
-  "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e",
+  "biometric_id": "HASH_TESTE_DEDO_1",
   "attendance_type": "normal"
 }
 
@@ -135,7 +135,7 @@ POST http://127.0.0.1:8000/api/v1/queue/cancel
 Content-Type: application/json
 
 {
-  "item_id":18
+  "item_id":1
 }
 
 ### Reagendar
@@ -144,7 +144,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzYzOTE4MTYxLCJzdWIiOiJhZG1pbiIsImlhdCI6MTc2MzkxNDU2MX0.u_bZhBuTdBiAsxbaLm5q4ncYwlSOr7KzT9qLyJxfqZc
 
 {
-  "user_id": 1,
+  "user_id": 3,
   "attendance_type": "urgent"
 }
 
