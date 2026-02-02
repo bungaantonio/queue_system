@@ -1,5 +1,5 @@
 import { Edit, SimpleForm, TextInput, SelectInput } from "react-admin";
-import { Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 
 export const OperatorsEdit = () => (
     <Edit>

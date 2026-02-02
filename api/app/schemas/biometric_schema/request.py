@@ -23,7 +23,7 @@ class BiometricScan(BaseModel):
     )
 
 
-class BiometricAuth(BaseModel):
+class BiometricAuthRequest(BaseModel):
     queue_item_id: int
     biometric_hash: str
     call_token: str

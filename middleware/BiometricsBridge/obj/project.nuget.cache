@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+ABymHSCT98=",
+  "dgSpecHash": "6nYK9nh4N9Y=",
   "success": true,
-  "projectFilePath": "C:\\Users\\bunga\\source\\repos\\BiometricsBridge\\BiometricsBridge.csproj",
+  "projectFilePath": "C:\\Users\\bunga\\stuffs\\queue_system\\middleware\\BiometricsBridge\\BiometricsBridge.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\bunga\\.nuget\\packages\\microsoft.extensions.configuration\\8.0.0\\microsoft.extensions.configuration.8.0.0.nupkg.sha512",
     "C:\\Users\\bunga\\.nuget\\packages\\microsoft.extensions.configuration.abstractions\\8.0.0\\microsoft.extensions.configuration.abstractions.8.0.0.nupkg.sha512",

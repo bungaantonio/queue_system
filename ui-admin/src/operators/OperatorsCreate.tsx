@@ -1,4 +1,3 @@
-import React from "react";
 import { Create, SimpleForm, TextInput, SelectInput } from "react-admin";
 import { Typography, Paper, Grid } from "@mui/material";
 

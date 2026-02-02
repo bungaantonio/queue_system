@@ -1,47 +1,33 @@
-from diagrams import Cluster, Diagram, Edge
-from diagrams.programming.language import Csharp, Python, Javascript
-from diagrams.programming.framework import Fastapi, React
-from diagrams.programming.flowchart import ManualInput, Decision, Database, Document, StartEnd
-from diagrams.onprem.inmemory import Redis
+from diagrams import Diagram, Cluster, Node, Edge
 
-with Diagram("Sistema de Gestão de Filas com Biometria", show=False, direction="LR"):
+with Diagram("Arquitetura do Sistema - Três Camadas", show=True, direction="LR"):
 
-    inicio = StartEnd("Início")
+    # Frontend
+    with Cluster("Frontend (Interfaces)"):
+        react_admin = Node("Admin Interface")
+        react_queue = Node("Queue Display")
+        frontend_nodes = [react_admin, react_queue]
 
-    # --- Camada Middleware ---
-    with Cluster("Middleware Local (C# + SDK ZKTeco)"):
-        mw = Csharp("Middleware")
-        captura = ManualInput("Captura Digital")
+    # Middleware
+    with Cluster("Middleware (Processamento de Dados)"):
+        biometrics = Node("Validação Biométrica")
+        json_conv = Node("Conversão JSON")
+        middleware_nodes = [biometrics, json_conv]
 
-        mw >> Edge(color="darkgreen", style="bold", label="captura") >> captura
+    # Backend
+    with Cluster("Backend (Regras de Negócio e Serviços)"):
+        api = Node("API Gateway / Regras de Negócio")
+        queue_mgmt = Node("Gerenciamento de Fila")
+        audit = Node("Auditoria / Logs")
+        db = Node("Banco de Dados")
+        backend_nodes = [api, queue_mgmt, audit, db]
 
-    # --- Camada Servidor Backend ---
-    with Cluster("Servidor Backend (FastAPI)"):
-        api = Fastapi("API FastAPI")
-        regras = Decision("Regras de Negócio")
-        db = Database("PostgreSQL - Usuários/Fila/Auditoria")
-        cache = Redis("Fila em Memória")
+    # Fluxo de dados
+    for fe in frontend_nodes:
+        fe >> api  # Frontend envia requisições para Backend
 
-        api >> Edge(color="brown", style="dashed") >> regras
-        regras >> Edge(color="black") >> db
-        regras >> cache
+    biometrics >> json_conv >> api  # Middleware processa dados antes do Backend
 
-    # --- Camada Frontend ---
-    with Cluster("Frontend Operador (Web)"):
-        front = React("Interface React")
-        chamada = Document("Tela de Chamada")
-
-        front >> chamada
-
-    # --- Camada Auditoria ---
-    with Cluster("Auditoria e Integridade"):
-        auditor = Python("Auditoria HashChain")
-
-    # Fluxos principais
-    inicio >> Edge(label="cadastro (dados + digital)") >> mw
-    mw >> Edge(color="darkblue", label="POST /queue/register, /queue/scan") >> api
-
-    front >> Edge(color="darkorange", label="GET /queue/*, PUT /queue/next,/done") >> api
-    mw >> Edge(color="firebrick", style="dotted", label="POST /biometrics/verify_called_user") >> api
-
-    api >> Edge(label="eventos de auditoria") >> auditor
+    api >> queue_mgmt  # API envia para fila
+    api >> audit       # API envia para auditoria
+    queue_mgmt >> db   # Fila atualiza banco de dados

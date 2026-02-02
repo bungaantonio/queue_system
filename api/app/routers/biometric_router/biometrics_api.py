@@ -10,7 +10,7 @@ from app.schemas.biometric_schema.response import QuickQueueEntryBiometric
 from app.schemas.biometric_schema.request import (
     BiometricVerify,
     BiometricScan,
-    BiometricAuth,
+    BiometricAuthRequest,
 )
 from app.exceptions.exceptions import QueueException
 from app.services.biometric_service.authentication import BiometricAuthService
@@ -42,7 +42,7 @@ def entry(
 
 @router.post("/authenticate", response_model=QueueDetailItem)
 def authenticate_user(
-    request: BiometricAuth,
+    request: BiometricAuthRequest,
     db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = None,
 ):

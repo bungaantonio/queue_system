@@ -1549,11 +1549,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\bunga\\source\\repos\\BiometricsBridge\\BiometricsBridge.csproj",
+      "projectUniqueName": "C:\\Users\\bunga\\stuffs\\queue_system\\middleware\\BiometricsBridge\\BiometricsBridge.csproj",
       "projectName": "BiometricsBridge",
-      "projectPath": "C:\\Users\\bunga\\source\\repos\\BiometricsBridge\\BiometricsBridge.csproj",
+      "projectPath": "C:\\Users\\bunga\\stuffs\\queue_system\\middleware\\BiometricsBridge\\BiometricsBridge.csproj",
       "packagesPath": "C:\\Users\\bunga\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\bunga\\source\\repos\\BiometricsBridge\\obj\\",
+      "outputPath": "C:\\Users\\bunga\\stuffs\\queue_system\\middleware\\BiometricsBridge\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
