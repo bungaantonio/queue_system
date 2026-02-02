@@ -1,6 +1,6 @@
 # app/services/auth_provider.py
 from sqlalchemy.orm import Session
-from app.models.biometric import UserCredential
+from app.models.user_credential import UserCredential
 from app.services.biometric_service.utils import compute_server_hash, secure_compare
 
 
