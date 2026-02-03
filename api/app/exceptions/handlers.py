@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 def register_exception_handlers(app):
     @app.exception_handler(QueueException)
     async def queue_exception_handler(request: Request, exc: QueueException):
-        logger.debug(f"QueueException: {exc}")
+        logger.info(f"QueueException: {exc}")
         # Mantém 200/400/404/409 conforme novo mapeamento
         return JSONResponse(
             status_code=exc.status_code,
@@ -21,7 +21,7 @@ def register_exception_handlers(app):
 
     @app.exception_handler(BiometricException)
     async def biometric_exception_handler(request: Request, exc: BiometricException):
-        logger.debug(f"BiometricException: {exc}")
+        logger.info(f"BiometricException: {exc}")
         return JSONResponse(
             status_code=exc.status_code,
             content={

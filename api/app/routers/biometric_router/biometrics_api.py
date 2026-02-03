@@ -24,13 +24,9 @@ def entry(
     db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = None,
 ):
-    """
-    Processa leitura biométrica rápida:
-    - Identifica o usuário com base no template biométrico.
-    - Marca verificação (biometric_verified=True, se aplicável).
-    - Retorna o estado atualizado da fila.
-    """
-    result = scan.quick_entry(db, request, request.biometric_id)
+    op_id = getattr(request, "operator_id", None)
+
+    result = scan.quick_entry(db, request, request.biometric_id, operator_id=op_id)
 
     db.commit()
 

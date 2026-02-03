@@ -75,7 +75,7 @@ async def broadcast_state():
         state = build_queue_state(session)
         await queue_notifier.publish(state)
         elapsed = (time.perf_counter() - start) * 1000
-        logger.debug(f"Broadcast concluído com sucesso ({elapsed:.1f} ms).")
+        logger.info(f"Broadcast concluído com sucesso ({elapsed:.1f} ms).")
     except Exception as e:
         logger.exception(f"Erro durante broadcast_state(): {e}")
     finally:

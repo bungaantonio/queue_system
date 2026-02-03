@@ -31,28 +31,19 @@ def register_user(
     db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = None,
 ):
-    try:
-        # Transação atômica
-        with db.begin():
-            db_user, db_bio, queue_item = create_user_with_biometric_and_queue(
-                db,
-                request,
-                operator_id=request.operator_id,
-            )
-            user_queue_status = QueueConsult.from_queue_item(queue_item)
+    # Transação atômica
+    with db.begin():
+        db_user, db_bio, queue_item = create_user_with_biometric_and_queue(
+            db,
+            request,
+            operator_id=request.operator_id,
+        )
+        user_queue_status = QueueConsult.from_queue_item(queue_item)
 
-        # Broadcast assíncrono
-        if background_tasks:
-            background_tasks.add_task(broadcast_state_sync)
+    if background_tasks:
+        background_tasks.add_task(broadcast_state_sync)
 
-        return user_queue_status
-
-    except BiometricException as e:
-        raise HTTPException(status_code=e.status_code, detail=str(e))
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Falha ao registrar usuário")
+    return user_queue_status
 
 
 @router.get("/waiting-and-called", response_model=List[QueueListItem])

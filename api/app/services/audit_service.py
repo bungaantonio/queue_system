@@ -28,7 +28,7 @@ class AuditService:
         previous_matches = audit.previous_hash == previous_hash
         valid = (recalculated == audit.record_hash) and previous_matches
 
-        logger.debug(
+        logger.info(
             "Audit %s verification: recalculated=%s, stored=%s, prev_match=%s, valid=%s",
             audit.id, recalculated, audit.record_hash, previous_matches, valid
         )
