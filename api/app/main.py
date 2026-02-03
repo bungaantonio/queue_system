@@ -18,10 +18,12 @@ from app.routers.monitoring_router import monitoring_router, setup_monitoring_mi
 import logging
 
 logging.basicConfig(
-    level=logging.DEBUG,  # ou INFO em produção
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 origins = [
     "http://localhost:3001",
@@ -60,6 +62,7 @@ def root():
             "openapi": "/openapi.json",
         },
     }
+
 
 # Middleware global
 setup_monitoring_middleware(app)

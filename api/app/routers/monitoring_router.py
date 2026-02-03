@@ -96,14 +96,14 @@ def timer(db: Session = Depends(get_db)):
         }
 
     now = datetime.now(timezone.utc)
-    logger.debug("Now (UTC-aware): %s, type: %s", now, type(now))
+    logger.info("Now (UTC-aware): %s, type: %s", now, type(now))
 
     # Garante que timestamp do usuário é UTC-aware
     user_ts = user_item.timestamp
     if user_ts.tzinfo is None:
         user_ts = user_ts.replace(tzinfo=timezone.utc)
 
-    logger.debug(
+    logger.info(
         "User item timestamp: %s, type: %s, tzinfo: %s",
         user_ts,
         type(user_ts),
@@ -111,7 +111,7 @@ def timer(db: Session = Depends(get_db)):
     )
 
     elapsed = int((now - user_ts).total_seconds())
-    logger.debug("Elapsed seconds: %s", elapsed)
+    logger.info("Elapsed seconds: %s", elapsed)
 
     sla_minutes = (
         int((user_item.sla_deadline - user_item.timestamp).total_seconds() // 60)

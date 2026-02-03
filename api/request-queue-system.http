@@ -90,8 +90,7 @@ Content-Type: application/json
     "phone": "956789012"
   },
   "biometric": {
-    "biometric_id": "HASH_TESTE_DEDO_1",
-    "finger_index": 1
+    "biometric_id": "HASH_TESTE_DEDO_1"
   },
   "attendance_type": "priority",
   "operator_id": 26
@@ -104,7 +103,7 @@ POST http://127.0.0.1:8000/api/v1/biometrics/quick-entry
 Content-Type: application/json
 
 {
-  "biometric_id": "HASH_TESTE_DEDO_1",
+  "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc13e",
   "attendance_type": "normal"
 }
 

@@ -1,5 +1,7 @@
 QUEUE_ERRORS = {
     # Situações normais, sem ação possível
+    "user_already_registered": (409, "Usuário já cadastrado no sistema."),
+    "user_already_in_queue": (409, "Usuário já possui atendimento ativo na fila."),
     "no_active_service": (200, "Nenhum usuário está em atendimento"),
     "no_active_user": (200, "Nenhum usuário ativo para cancelar"),
     "no_called_user": (200, "Nenhum usuário foi chamado"),

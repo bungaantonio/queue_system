@@ -45,8 +45,8 @@ def _insert(
     # Calcula SLA usando política madura
     sla_minutes, sla_reason = calculate_sla(user, attendance_type)
 
-    # --- DEBUG ---
-    logger.debug(
+    # --- INFO ---
+    logger.info(
         f"Inserindo usuário {user.name} ({user.id}), Attendance: {attendance_type}, "
         f"Priority: {priority_score} ({priority_reason}), SLA: {sla_minutes}min, "
         f"Max position: {max_position}"

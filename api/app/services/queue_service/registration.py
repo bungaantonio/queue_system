@@ -1,10 +1,12 @@
 # app/services/queue_service/registration.py
 from typing import Tuple
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.crud.user.create import create_user
 from app.crud.queue.create import enqueue_user
 from app.crud.queue.read import get_existing_queue_item
-from app.exceptions.exceptions import BiometricException
+from app.exceptions.exceptions import BiometricException, QueueException
+from app.models.user import User
 from app.models.user_credential import UserCredential  # Nova Model
 from app.models.queue_item import QueueItem
 from app.schemas.queue_schema.request import QueueRegister
@@ -13,29 +15,28 @@ from app.services.biometric_service.utils import (
 )
 
 
-def create_user_with_biometric_and_queue(
-    db: Session, request: QueueRegister, operator_id: int
-) -> Tuple[object, object, QueueItem]:
-    """
-    Fluxo de Cadastro: Cria usuário, gera credencial segura e entra na fila.
-    """
-    user_model, biometric_model = request.user, request.biometric
+def create_user_with_biometric_and_queue(db, request, operator_id):
+    # Verifica se usuário já existe
+    user_exists = (
+        db.query(User).filter(User.id_number == request.user.document_id).first()
+    )
+    if user_exists:
+        raise QueueException("user_already_registered")
 
-    # 1. Cria usuário (ou recupera se duplicado pelo document_id)
-    db_user = create_user(db, user_model)
+    # Criação do usuário
+    db_user = create_user(db, request.user)
 
-    # 2. Cria ou recupera a credencial híbrida (ZKTeco ou futuramente WebAuthn)
-    db_cred = _create_or_get_credential(db, db_user.id, biometric_model)
+    # Verifica biometria
+    db_cred = _create_or_get_credential(db, db_user.id, request.biometric)
 
-    # 3. Garante item de fila ativo (Não passamos biometria para a fila!)
+    # Verifica fila
     queue_item = get_existing_queue_item(db, db_user.id)
+    if queue_item:
+        raise QueueException("user_already_in_queue")
+
+    # Cria item de fila se não existir
     if not queue_item:
-        queue_item = enqueue_user(
-            db,
-            user=db_user,
-            operator_id=operator_id,
-            attendance_type=request.attendance_type,
-        )
+        queue_item = enqueue_user(db, db_user, operator_id, request.attendance_type)
 
     return db_user, db_cred, queue_item
 
