@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     # --- Base de dados (exemplo) ---
     DATABASE_URL: str = Field(..., description="URL de conexão à base de dados.")
 
+    SYSTEM_OPERATOR_ID: int = Field(
+        default=1,
+        description="ID do operador sistema (usado em operações automáticas).",
+    )
+
     # --- Configuração do modelo ---
     model_config = SettingsConfigDict(
         env_file=".env",
