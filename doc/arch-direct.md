@@ -51,59 +51,71 @@ src/
 ## React Admin
 ```bash
 src/
-├── app/
-│   ├── App.tsx                   # Componente raiz <Admin>, registra recursos 
-│   ├── dataProvider.ts           # Comunicação com API REST/GraphQL
-│   ├── authProvider.ts           # Autenticação e permissões
-│   └── routes.tsx                # Rotas customizadas (opcional)
 │
-├── config/
-│   ├── theme.ts                  # Tema do Material UI
-│   ├── i18n.ts                   # Traduções
-│   └── constants.ts              # Constantes globais
+├── main.tsx                         # Bootstrap da aplicação (ReactDOM)
 │
-├── services/
-│   ├── usersService.ts           # Funções específicas de API para usuários
-│   ├── postsService.ts
-│   └── index.ts                  # Exporta todos os serviços centralizados
+├── application/                     # Integração com React Admin (framework layer)
+│   ├── adminApp.tsx                 # Componente <Admin>
+│   ├── adminAuthProvider.ts         # Adapter do React Admin para sessão
+│   ├── adminDataProvider.ts         # Adapter do React Admin para API
+│   └── adminRoutes.tsx              # Rotas customizadas (se necessário)
 │
-├── types/
-│   ├── users.ts                  # Interfaces e tipos do recurso users
-│   ├── posts.ts                  # Interfaces e tipos do recurso posts
-│   └── global.d.ts               # Tipos globais ou declarações externas
+├── core/                            # Infraestrutura transversal (não depende de RA)
+│   │
+│   ├── http/
+│   │   ├── apiClient.ts             # Cliente HTTP base (fetch + headers + error mapping)
+│   │   ├── ApiError.ts              # Tipagem estruturada de erro
+│   │   └── httpTypes.ts
+│   │
+│   ├── session/
+│   │   ├── sessionStorage.ts        # get/set/clear token
+│   │   └── sessionManager.ts        # Regras de sessão (expiração, etc.)
+│   │
+│   └── config/
+│       ├── env.ts                   # Variáveis de ambiente
+│       └── appConstants.ts          # Constantes estruturais
 │
-├── components/
+├── ui/                              # Componentes reutilizáveis (UI pura)
 │   ├── inputs/
-│   │   ├── CustomTextInput.tsx
-│   │   └── RichTextInput.tsx
 │   ├── buttons/
-│   │   └── ExportButton.tsx
 │   ├── filters/
-│   │   └── UserFilter.tsx
 │   └── layout/
-│       ├── CustomMenu.tsx
-│       ├── CustomDashboard.tsx
-│       └── Sidebar.tsx
 │
-├── features/
-│   ├── users/
-│   │   ├── UserList.tsx
-│   │   ├── UserEdit.tsx
-│   │   ├── UserCreate.tsx
-│   │   ├── UserShow.tsx
-│   │   └── __tests__/            # Testes do recurso
-│   ├── posts/
-│   │   ├── PostList.tsx
-│   │   ├── PostEdit.tsx
-│   │   ├── PostCreate.tsx
-│   │   └── PostShow.tsx
-│   └── ...                       # Outros recursos
+├── modules/                         # Domínio real do sistema
+│   │
+│   ├── operators/
+│   │   ├── operatorsGateway.ts      # Comunicação API do domínio
+│   │   ├── operators.types.ts
+│   │   ├── OperatorsList.tsx
+│   │   ├── OperatorsCreate.tsx
+│   │   ├── OperatorsEdit.tsx
+│   │   └── __tests__/
+│   │
+│   ├── utentes/
+│   │   ├── utentesGateway.ts
+│   │   ├── utentes.types.ts
+│   │   ├── components/
+│   │   │   └── BiometricInput.tsx
+│   │   ├── UtentesList.tsx
+│   │   ├── UtentesCreate.tsx
+│   │   └── UtentesEdit.tsx
+│   │
+│   ├── biometria/
+│   │   ├── biometriaGateway.ts
+│   │   └── biometria.types.ts
+│   │
+│   ├── atendimento/
+│   │   ├── atendimentoGateway.ts
+│   │   ├── ControlPanel.tsx
+│   │   └── atendimento.types.ts
+│   │
+│   └── dashboard/
+│       └── DashboardPage.tsx
 │
-├── utils/
-│   ├── helpers.ts                # Funções utilitárias
-│   └── formatters.ts             # Formatação de datas, moedas, etc.
-│
-└── index.tsx                      # Entrada principal da aplicação
+└── shared/                          # Utilitários realmente genéricos
+    ├── dateFormatter.ts
+    ├── currencyFormatter.ts
+    └── helpers.ts
 ```
 
 ## FastAPI
