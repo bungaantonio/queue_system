@@ -6,6 +6,8 @@ interface LoginResponse {
   role?: "admin" | "attendant" | "auditor";
 }
 
+let sessionInvalidated = false; // garante que só ocorre uma vez  
+
 export const adminAuthProvider = {
   login: async ({
     username,
@@ -24,11 +26,13 @@ export const adminAuthProvider = {
 
     sessionStorage.setToken(data.access_token);
     sessionStorage.setUser(username, data.role ?? "attendant");
+    sessionInvalidated = false; // reset após login
     return Promise.resolve();
   },
 
   logout: () => {
     sessionStorage.clear();
+    sessionInvalidated = true;
     return Promise.resolve();
   },
 
@@ -40,11 +44,16 @@ export const adminAuthProvider = {
 
   checkError: async (error: { status: number }) => {
     if (error.status === 401) {
-      sessionStorage.clear();
+      if (!sessionInvalidated) {
+        sessionInvalidated = true;
+        sessionStorage.clear();
+      }
       return Promise.reject(new Error("Sessão expirada"));
     }
+
     if (error.status === 403)
       return Promise.reject(new Error("Não autorizado"));
+
     return Promise.resolve();
   },
 

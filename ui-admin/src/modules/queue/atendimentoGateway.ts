@@ -1,21 +1,29 @@
+// src/modules/atendimento/atendimentoGateway.ts
+
 import { httpClient } from "../../core/http/apiClient";
 import type { QueueUser } from "./atendimento.types";
 
-const BASE = "/api/v1/queue";
+const BASE = "/queue";
 
 export const atendimentoGateway = {
-  getList: async (): Promise<QueueUser[]> =>
-    httpClient.get<QueueUser[]>(`${BASE}/waiting-and-called`),
+  listWaitingAndCalled: async (): Promise<{
+    queue: QueueUser[];
+    called: QueueUser[];
+    current: QueueUser | null;
+  }> => httpClient.get(`${BASE}/waiting-and-called`),
 
-  getOne: async (id: number): Promise<QueueUser> =>
-    httpClient.get<QueueUser>(`${BASE}/${id}`),
+  callNext: async (): Promise<void> => httpClient.post(`${BASE}/call-next`),
 
-  create: async (data: any): Promise<QueueUser> =>
-    httpClient.post<QueueUser>(`${BASE}/requeue`, data),
+  finish: async (): Promise<void> => httpClient.post(`${BASE}/finish`),
 
-  update: async (id: number, data: any): Promise<QueueUser> =>
-    httpClient.post<QueueUser>(`${BASE}/finish`, data),
+  skip: async (): Promise<void> => httpClient.post(`${BASE}/skip`),
 
-  delete: async (id: number): Promise<void> =>
-    httpClient.post(`${BASE}/cancel`, { item_id: id }),
+  cancel: async (item_id: number): Promise<void> =>
+    httpClient.post(`${BASE}/cancel`, { item_id }),
+
+  requeue: async (user_id: number, attendance_type: string): Promise<void> =>
+    httpClient.post(`${BASE}/requeue`, {
+      user_id,
+      attendance_type,
+    }),
 };

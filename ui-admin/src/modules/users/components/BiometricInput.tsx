@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, CircularProgress, Typography } from "@mui/material";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { biometricService } from "../../../services/biometricService";
 import { useInput } from "react-admin";
-import { biometricGateway } from "../../../services/biometricGateway";
 
-interface BiometricInputProps {
+export const BiometricInput = ({
+  source,
+  operatorId,
+}: {
   source: string;
   operatorId: number;
-}
-
-export const BiometricInput = ({ source, operatorId }: BiometricInputProps) => {
+}) => {
   const {
     field: { onChange, value },
   } = useInput({ source });
@@ -22,15 +22,14 @@ export const BiometricInput = ({ source, operatorId }: BiometricInputProps) => {
   const handleCapture = async () => {
     setLoading(true);
     setStatus("waiting");
-
     try {
-      const { session_id } = await biometricGateway.requestCapture(operatorId);
+      const { session_id } = await biometricService.requestCapture(operatorId);
 
-      // Polling a cada 2 segundos
+      // Polling
       const interval = setInterval(async () => {
-        const hash = await biometricGateway.fetchHash(session_id);
+        const hash = await biometricService.fetchHash(session_id);
         if (hash) {
-          onChange(hash); // atualiza o valor no formulário do React Admin
+          onChange(hash); // Atualiza o valor no formulário do React-Admin
           setStatus("success");
           setLoading(false);
           clearInterval(interval);
@@ -42,7 +41,7 @@ export const BiometricInput = ({ source, operatorId }: BiometricInputProps) => {
         clearInterval(interval);
         if (status === "waiting") setStatus("error");
       }, 60000);
-    } catch (err) {
+    } catch (e) {
       setStatus("error");
       setLoading(false);
     }
@@ -61,7 +60,6 @@ export const BiometricInput = ({ source, operatorId }: BiometricInputProps) => {
       >
         {status === "success" ? "Digital Vinculada" : "Capturar Biometria"}
       </Button>
-
       {value && (
         <Typography variant="caption" display="block">
           Hash: {value.substring(0, 10)}...
