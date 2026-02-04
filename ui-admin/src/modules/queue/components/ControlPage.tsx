@@ -44,7 +44,26 @@ export const ControlPage = () => {
   const { queue, called, current, callNext, finish, skip, cancel, requeue } =
     context;
 
-  // Handler genérico para ações para mostrar feedback visual de carregamento
+  // --- LÓGICA DE UNIFICAÇÃO SEM DUPLICATAS ---
+  const buildUniqueList = () => {
+    // 1. Criamos um array bruto com a hierarquia: atual > chamado > fila
+    const rawList = [
+      ...(current ? [current] : []),
+      ...(Array.isArray(called) ? called : called ? [called] : []),
+      ...(queue || []),
+    ];
+
+    // 2. Filtramos para garantir que cada ID apareça apenas uma vez
+    // (Prioriza a primeira aparição, que pela ordem acima é o status mais avançado)
+    const uniqueList = rawList.filter(
+      (item, index, self) => index === self.findIndex((t) => t.id === item.id),
+    );
+
+    return uniqueList;
+  };
+
+  const allUsers = buildUniqueList();
+
   const handleAction = async (actionFn: () => Promise<any>) => {
     setActionLoading(true);
     try {
@@ -56,17 +75,11 @@ export const ControlPage = () => {
     }
   };
 
-  const calledArray = Array.isArray(called) ? called : called ? [called] : [];
-  let allUsers = [...calledArray, ...queue];
-  if (current) {
-    allUsers = [current, ...allUsers.filter((u) => u.id !== current.id)];
-  }
-
   return (
     <Box>
       <Title title="Painel de Atendimento" />
 
-      {/* --- BARRA DE AÇÕES TOTAIS --- */}
+      {/* Barra de Ações */}
       <Card
         sx={{
           p: 2,
@@ -80,10 +93,8 @@ export const ControlPage = () => {
         <Stack direction="row" spacing={2}>
           <Button
             variant="contained"
-            color="primary"
-            startIcon={<PlayArrowIcon />}
             onClick={() => handleAction(callNext)}
-            disabled={actionLoading || queue.length === 0 || !!called} // Só chama se houver gente e ninguém chamado
+            disabled={actionLoading || queue.length === 0 || !!called}
           >
             Chamar Próximo
           </Button>
@@ -91,33 +102,26 @@ export const ControlPage = () => {
           <Button
             variant="contained"
             color="success"
-            startIcon={<DoneIcon />}
             onClick={() => handleAction(finish)}
-            disabled={actionLoading || !current} // Só finaliza se houver alguém sendo atendido
+            disabled={actionLoading || !current}
           >
-            Finalizar Atendimento
+            Finalizar
           </Button>
 
           <Button
             variant="outlined"
             color="warning"
-            startIcon={<SkipNextIcon />}
             onClick={() => handleAction(skip)}
-            disabled={actionLoading || !called} // Só pula se houver alguém chamado mas não apareceu
+            disabled={actionLoading || !called}
           >
-            Pular / Ausente
+            Ausente
           </Button>
         </Stack>
-
         {actionLoading && <CircularProgress size={24} />}
       </Card>
 
-      {/* --- TABELA DA FILA --- */}
+      {/* Tabela */}
       <Card sx={{ p: 2 }}>
-        <Box mb={2}>
-          <Typography variant="h6">Fila de Atendimento</Typography>
-        </Box>
-
         <Datagrid data={allUsers} bulkActionButtons={false} rowClick={false}>
           <TextField source="position" label="Pos" />
           <TextField source="name" label="Utente" />
@@ -138,31 +142,16 @@ export const ControlPage = () => {
             }}
           />
 
-          {/* --- AÇÕES POR LINHA --- */}
           <FunctionField
             label="Ações"
             render={(record: any) => (
               <Stack direction="row" spacing={1}>
-                {/* Botão de Cancelar para qualquer um na fila */}
                 <Button
                   size="small"
                   color="error"
-                  startIcon={<CancelIcon />}
                   onClick={() => handleAction(() => cancel(record.id))}
                 >
                   Remover
-                </Button>
-
-                {/* Botão de Re-enfileirar (ex: mudar prioridade) */}
-                <Button
-                  size="small"
-                  color="inherit"
-                  startIcon={<ReplayIcon />}
-                  onClick={() =>
-                    handleAction(() => requeue(record.user_id, "priority"))
-                  }
-                >
-                  Prioridade
                 </Button>
               </Stack>
             )}
@@ -171,9 +160,7 @@ export const ControlPage = () => {
 
         {allUsers.length === 0 && (
           <Box p={4} textAlign="center">
-            <Typography color="textSecondary">
-              Nenhum utente aguardando.
-            </Typography>
+            Sem utentes na fila.
           </Box>
         )}
       </Card>
