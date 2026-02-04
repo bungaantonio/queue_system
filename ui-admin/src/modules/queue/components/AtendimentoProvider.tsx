@@ -1,8 +1,8 @@
-// src/queue/QueueProvider.tsx
+// src/modules/queue/QueueProvider.tsx
 import { useEffect, useState } from "react";
-import { QueueContext } from "./QueueContext";
-import { queueDataProvider } from "./queueDataProvider";
-import type { QueueUser } from "../modules/queue/atendimento.types";
+import { AtendimentoContext } from "../QueueContext";
+import { atendimentoGateway } from "../atendimentoGateway";
+import type { QueueUser } from "../atendimento.types";
 
 export const QueueProvider = ({ children }: { children: React.ReactNode }) => {
   const [queue, setQueue] = useState<QueueUser[]>([]);
@@ -18,6 +18,7 @@ export const QueueProvider = ({ children }: { children: React.ReactNode }) => {
     setLoadingActions((prev) => ({ ...prev, [id]: value }));
   };
 
+  // SSE para atualização em tempo real
   useEffect(() => {
     let evt: EventSource;
 
@@ -45,14 +46,20 @@ export const QueueProvider = ({ children }: { children: React.ReactNode }) => {
     return () => evt?.close();
   }, []);
 
+  // Ações do gateway
   const callNext = async () => {
-    if (queue.length === 0 && called.length === 0) {
-      console.warn("Fila vazia, nada a chamar.");
-      return;
-    }
     setLoadingGlobalAction(true);
     try {
-      await queueDataProvider.callNext();
+      await atendimentoGateway.callNext();
+    } finally {
+      setLoadingGlobalAction(false);
+    }
+  };
+
+  const finish = async () => {
+    setLoadingGlobalAction(true);
+    try {
+      await atendimentoGateway.finish();
     } finally {
       setLoadingGlobalAction(false);
     }
@@ -60,20 +67,17 @@ export const QueueProvider = ({ children }: { children: React.ReactNode }) => {
 
   const skip = async () => {
     setLoadingGlobalAction(true);
-    await queueDataProvider.skip();
-    setLoadingGlobalAction(false);
-  };
-
-  const finish = async () => {
-    setLoadingGlobalAction(true);
-    await queueDataProvider.finish();
-    setLoadingGlobalAction(false);
+    try {
+      await atendimentoGateway.skip();
+    } finally {
+      setLoadingGlobalAction(false);
+    }
   };
 
   const cancel = async (id: number) => {
     setUserLoading(id, true);
     try {
-      await queueDataProvider.cancel(id);
+      await atendimentoGateway.cancel(id);
     } finally {
       setUserLoading(id, false);
     }
@@ -82,14 +86,14 @@ export const QueueProvider = ({ children }: { children: React.ReactNode }) => {
   const requeue = async (id: number, type: string) => {
     setUserLoading(id, true);
     try {
-      await queueDataProvider.requeue(id, type);
+      await atendimentoGateway.requeue(id, type);
     } finally {
       setUserLoading(id, false);
     }
   };
 
   return (
-    <QueueContext.Provider
+    <AtendimentoContext.Provider
       value={{
         queue,
         called,
@@ -105,6 +109,6 @@ export const QueueProvider = ({ children }: { children: React.ReactNode }) => {
       }}
     >
       {children}
-    </QueueContext.Provider>
+    </AtendimentoContext.Provider>
   );
 };

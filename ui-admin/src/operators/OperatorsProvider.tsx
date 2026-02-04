@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { OperatorsContext } from "./OperatorsContext";
 import { operatorsDataProvider } from "./operatorsDataProvider";
-import type { Operator } from "./types";
+import type { Operator } from "../modules/operators/types";
 
 export const OperatorsProvider = ({
   children,

@@ -1,13 +1,7 @@
-// src/application/adminAuthProvider.ts
-import { httpClient } from "../core/http/apiClient";
-import {
-  setSession,
-  clearSession,
-  getRole,
-  getUsername,
-} from "../core/session/sessionStorage";
+import { sessionStorage } from "../core/session/sessionStorage";
 
 interface LoginResponse {
+  detail: string;
   access_token: string;
   role?: "admin" | "attendant" | "auditor";
 }
@@ -20,36 +14,45 @@ export const adminAuthProvider = {
     username: string;
     password: string;
   }) => {
-    const data: LoginResponse = await httpClient.post<LoginResponse>(
-      "/auth/login",
-      { username, password },
-    );
-    setSession(data.access_token, data.role ?? "attendant", username);
-  },
+    const res = await fetch("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    const data: LoginResponse = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.detail || "Credenciais inválidas");
 
-  logout: async () => {
-    clearSession();
+    sessionStorage.setToken(data.access_token);
+    sessionStorage.setUser(username, data.role ?? "attendant");
     return Promise.resolve();
   },
 
-  checkAuth: async () => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Não autenticado");
+  logout: () => {
+    sessionStorage.clear();
     return Promise.resolve();
   },
 
-  getPermissions: async () => getRole(),
-
-  getIdentity: async () => {
-    const username = getUsername();
-    const role = getRole();
-    if (!username) throw new Error("Identidade não encontrada");
-    return { id: username, fullName: username, role };
+  checkAuth: () => {
+    const token = sessionStorage.getToken();
+    if (!token) return Promise.reject(new Error("Não autenticado"));
+    return Promise.resolve();
   },
 
   checkError: async (error: { status: number }) => {
-    if (error.status === 401) clearSession();
-    if (error.status === 401) throw new Error("Sessão expirada");
-    if (error.status === 403) throw new Error("Não autorizado");
+    if (error.status === 401) {
+      sessionStorage.clear();
+      return Promise.reject(new Error("Sessão expirada"));
+    }
+    if (error.status === 403)
+      return Promise.reject(new Error("Não autorizado"));
+    return Promise.resolve();
+  },
+
+  getPermissions: () => Promise.resolve(sessionStorage.getUser().role),
+  getIdentity: () => {
+    const { username, role } = sessionStorage.getUser();
+    if (!username)
+      return Promise.reject(new Error("Identidade não encontrada"));
+    return Promise.resolve({ id: username, fullName: username, role });
   },
 };

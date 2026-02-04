@@ -1,4 +1,4 @@
-import { QueueUser, UserStatus } from "./types";
+import { QueueUser, UserStatus } from "../modules/queue/types";
 
 export const ATTENDANCE_TYPE_COLOR: Record<QueueUser["attendance_type"], "default" | "warning" | "error"> = {
     normal: "default",

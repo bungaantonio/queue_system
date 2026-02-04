@@ -1,14 +1,20 @@
-// src/modules/operators/operatorsGateway.ts
 import { httpClient } from "../../core/http/apiClient";
 import type { Operator } from "./types";
 
-const BASE_URL = "/operators";
+const BASE = "/operators";
 
 export const operatorsGateway = {
-  getList: () => httpClient.get<Operator[]>(BASE_URL),
-  getOne: (id: number) => httpClient.get<Operator>(`${BASE_URL}/${id}`),
-  create: (op: Omit<Operator, "id">) => httpClient.post<Operator>(BASE_URL, op),
-  update: (id: number, op: Partial<Operator>) =>
-    httpClient.put<Operator>(`${BASE_URL}/${id}`, op),
-  delete: (id: number) => httpClient.delete(`${BASE_URL}/${id}`),
+  getList: async (): Promise<Operator[]> => httpClient.get<Operator[]>(BASE),
+
+  getOne: async (id: number): Promise<Operator> =>
+    httpClient.get<Operator>(`${BASE}/${id}`),
+
+  create: async (data: Omit<Operator, "id">): Promise<Operator> =>
+    httpClient.post<Operator>(BASE, data),
+
+  update: async (id: number, data: Partial<Operator>): Promise<Operator> =>
+    httpClient.put<Operator>(`${BASE}/${id}`, data),
+
+  delete: async (id: number): Promise<void> =>
+    httpClient.delete(`${BASE}/${id}`),
 };

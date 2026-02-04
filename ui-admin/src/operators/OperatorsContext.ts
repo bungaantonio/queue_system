@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { Operator } from "./types";
+import type { Operator } from "../modules/operators/types";
 
 export interface OperatorsContextType {
   operators: Operator[];
