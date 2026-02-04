@@ -73,7 +73,8 @@ async def broadcast_state():
     session = SessionLocal()
     try:
         state = build_queue_state(session)
-        await queue_notifier.publish(state)
+        # Especificamos o nome do evento que o C# espera para a fila
+        await queue_notifier.publish(state, event_name="queue_sync")
         elapsed = (time.perf_counter() - start) * 1000
         logger.info(f"Broadcast concluído com sucesso ({elapsed:.1f} ms).")
     except Exception as e:
