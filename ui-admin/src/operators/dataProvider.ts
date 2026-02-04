@@ -1,3 +1,4 @@
+// src/operators/dataProvider.ts
 import { DataProvider } from "react-admin";
 import { authProvider } from "../auth/authProvider";
 
