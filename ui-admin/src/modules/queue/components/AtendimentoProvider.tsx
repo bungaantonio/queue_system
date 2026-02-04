@@ -1,96 +1,87 @@
-// src/modules/queue/QueueProvider.tsx
-import { useEffect, useState } from "react";
-import { AtendimentoContext } from "../QueueContext";
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  useCallback,
+  useContext,
+} from "react";
 import { atendimentoGateway } from "../atendimentoGateway";
-import type { QueueUser } from "../atendimento.types";
 
-export const QueueProvider = ({ children }: { children: React.ReactNode }) => {
-  const [queue, setQueue] = useState<QueueUser[]>([]);
-  const [called, setCalled] = useState<QueueUser[]>([]);
-  const [current, setCurrent] = useState<QueueUser | null>(null);
+// 1. Definição da Interface para o TypeScript não reclamar
+interface AtendimentoContextType {
+  queue: any[];
+  called: any | null;
+  current: any | null;
+  loading: boolean;
+  callNext: () => Promise<void>;
+  finish: () => Promise<void>;
+  cancel: (id: number) => Promise<void>;
+  requeue: (id: number, type: string) => Promise<void>;
+  skip: () => Promise<void>;
+}
+
+// 2. Criação do contexto ÚNICO
+export const AtendimentoContext = createContext<AtendimentoContextType | null>(
+  null,
+);
+
+export const AtendimentoProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const [queue, setQueue] = useState<any[]>([]);
+  const [called, setCalled] = useState<any>(null);
+  const [current, setCurrent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [loadingGlobalAction, setLoadingGlobalAction] = useState(false);
-  const [loadingActions, setLoadingActions] = useState<Record<number, boolean>>(
-    {},
-  );
 
-  const setUserLoading = (id: number, value: boolean) => {
-    setLoadingActions((prev) => ({ ...prev, [id]: value }));
-  };
-
-  // SSE para atualização em tempo real
-  useEffect(() => {
-    let evt: EventSource;
-
-    const connect = () => {
-      evt = new EventSource("/api/v1/sse/stream");
-      evt.onmessage = (ev) => {
-        const data = JSON.parse(ev.data);
-        const calledArray = Array.isArray(data.called)
-          ? data.called
-          : data.called
-            ? [data.called]
-            : [];
-        setQueue(data.queue || []);
-        setCalled(calledArray);
-        setCurrent(data.current || null);
-        setLoading(false);
-      };
-      evt.onerror = () => {
-        evt.close();
-        setTimeout(connect, 2000);
-      };
-    };
-
-    connect();
-    return () => evt?.close();
+  // Função para atualizar o estado vindo do servidor
+  const updateState = useCallback((data: any) => {
+    console.log("AtendimentoProvider: Atualizando estado", data);
+    if (data && typeof data === "object" && !Array.isArray(data)) {
+      setQueue(data.queue || []);
+      setCalled(data.called || null);
+      setCurrent(data.current || null);
+    } else if (Array.isArray(data)) {
+      setQueue(data);
+    }
+    setLoading(false);
   }, []);
 
-  // Ações do gateway
+  // Funções de Ação
   const callNext = async () => {
-    setLoadingGlobalAction(true);
-    try {
-      await atendimentoGateway.callNext();
-    } finally {
-      setLoadingGlobalAction(false);
-    }
+    await atendimentoGateway.callNext();
   };
-
   const finish = async () => {
-    setLoadingGlobalAction(true);
-    try {
-      await atendimentoGateway.finish();
-    } finally {
-      setLoadingGlobalAction(false);
-    }
+    await atendimentoGateway.finish();
   };
-
   const skip = async () => {
-    setLoadingGlobalAction(true);
-    try {
-      await atendimentoGateway.skip();
-    } finally {
-      setLoadingGlobalAction(false);
-    }
+    await atendimentoGateway.skip();
   };
-
   const cancel = async (id: number) => {
-    setUserLoading(id, true);
-    try {
-      await atendimentoGateway.cancel(id);
-    } finally {
-      setUserLoading(id, false);
-    }
+    await atendimentoGateway.cancel(id);
+  };
+  const requeue = async (id: number, type: string) => {
+    await atendimentoGateway.requeue(id, type);
   };
 
-  const requeue = async (id: number, type: string) => {
-    setUserLoading(id, true);
-    try {
-      await atendimentoGateway.requeue(id, type);
-    } finally {
-      setUserLoading(id, false);
-    }
-  };
+  useEffect(() => {
+    // Carga inicial HTTP
+    atendimentoGateway
+      .listWaitingAndCalled()
+      .then(updateState)
+      .catch(() => setLoading(false));
+
+    // Tempo real SSE
+    const baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    const eventSource = new EventSource(`${baseUrl}/api/v1/sse/stream`);
+
+    eventSource.addEventListener("queue_sync", (e: any) => {
+      updateState(JSON.parse(e.data));
+    });
+
+    return () => eventSource.close();
+  }, [updateState]);
 
   return (
     <AtendimentoContext.Provider
@@ -99,8 +90,6 @@ export const QueueProvider = ({ children }: { children: React.ReactNode }) => {
         called,
         current,
         loading,
-        loadingAction: loadingGlobalAction,
-        loadingActions,
         callNext,
         finish,
         cancel,

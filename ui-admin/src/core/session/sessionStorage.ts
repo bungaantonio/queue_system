@@ -11,5 +11,10 @@ export const sessionStorage = {
     username: localStorage.getItem("username"),
     role: localStorage.getItem("role") ?? "attendant",
   }),
-  clear: () => localStorage.clear(),
+  clear: () => {
+    // Limpa somente a sessão, sem apagar dados de outras chaves
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
+  },
 };

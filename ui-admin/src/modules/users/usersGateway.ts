@@ -1,16 +1,8 @@
 import { httpClient } from "../../core/http/apiClient";
-import type { Users } from "./types";
 
-const API_URL = "/api/v1/users";
-
+const BASE = "/users";
 export const usersGateway = {
-  getList: async (): Promise<Users[]> => httpClient.get<Users[]>(API_URL),
-  getOne: async (id: number): Promise<Users> =>
-    httpClient.get<Users>(`${API_URL}/${id}`),
-  create: async (user: Omit<Users, "id">): Promise<Users> =>
-    httpClient.post<Users>(API_URL, user),
-  update: async (id: number, user: Partial<Users>): Promise<Users> =>
-    httpClient.put<Users>(`${API_URL}/${id}`, user),
-  delete: async (id: number): Promise<void> =>
-    httpClient.delete(`${API_URL}/${id}`),
+  getList: () => httpClient.get(BASE),
+  getOne: (id: any) => httpClient.get(`${BASE}/${id}`),
+  create: (data: any) => httpClient.post("/queue/register", data), // Cadastro vai para a fila
 };

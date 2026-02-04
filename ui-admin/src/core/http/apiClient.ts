@@ -1,11 +1,13 @@
 import { sessionStorage } from "../session/sessionStorage";
-import { ApiError } from "./ApiError";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API_PREFIX = "/api/v1";
 
 const request = async (method: string, path: string, body?: unknown) => {
   const token = sessionStorage.getToken();
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const url = `${BASE_URL}${API_PREFIX}${path}`; // Garante /api/v1 em tudo
+
+  const res = await fetch(url, {
     method,
     headers: {
       "Content-Type": "application/json",
@@ -15,18 +17,18 @@ const request = async (method: string, path: string, body?: unknown) => {
   });
 
   if (!res.ok) {
-    const responseBody = await res.json().catch(() => ({}));
-    throw new ApiError(res.status, responseBody);
+    const errorBody = await res.json().catch(() => ({}));
+    throw { status: res.status, message: errorBody.detail || "Erro na API" };
   }
 
   return res.json().catch(() => null);
 };
 
 export const httpClient = {
-  get: <T = any>(path: string) => request("GET", path) as Promise<T>,
-  post: <T = any>(path: string, body?: unknown) =>
+  get: <T>(path: string) => request("GET", path) as Promise<T>,
+  post: <T>(path: string, body?: unknown) =>
     request("POST", path, body) as Promise<T>,
-  put: <T = any>(path: string, body?: unknown) =>
+  put: <T>(path: string, body?: unknown) =>
     request("PUT", path, body) as Promise<T>,
-  delete: <T = any>(path: string) => request("DELETE", path) as Promise<T>,
+  delete: (path: string) => request("DELETE", path),
 };

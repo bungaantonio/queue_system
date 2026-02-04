@@ -46,12 +46,16 @@ def register_user(
     return user_queue_status
 
 
-@router.get("/waiting-and-called", response_model=List[QueueListItem])
+@router.get(
+    "/waiting-and-called", response_model=dict
+)  # Mude para dict ou um Schema de Estado
 def list_queue(db: Session = Depends(get_db)):
     """
-    Retorna todos os usuários atualmente na fila (WAITING ou CALLED_PENDING).
+    Retorna o estado COMPLETO da fila para carga inicial do React.
     """
-    return consult.list_waiting_and_called_items(db)
+    from app.helpers.queue_broadcast import build_queue_state
+
+    return build_queue_state(db)
 
 
 @router.post("/call-next", response_model=QueueCalledItem)

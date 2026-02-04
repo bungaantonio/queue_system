@@ -15,43 +15,47 @@ import { UtentesCreate } from "./modules/users/components/UtentesCreate";
 import { UtentesList } from "./modules/users/components/UtentesList";
 import { UtentesEdit } from "./modules/users/components/UtentesEdit";
 
+import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvider";
+
 // Ícones realistas
 import QueueIcon from "@mui/icons-material/Queue";
 import BadgeIcon from "@mui/icons-material/Badge";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 
 export const App = () => (
-  <Admin
-    authProvider={adminAuthProvider}
-    dataProvider={adminDataProvider}
-    dashboard={DashboardPage}
-  >
-    {/* Painel de Atendimento */}
-    <Resource
-      name="atendimento"
-      list={ControlPage}
-      icon={QueueIcon}
-      options={{ label: "Painel de Atendimento" }}
-    />
+  <AtendimentoProvider>
+    <Admin
+      authProvider={adminAuthProvider}
+      dataProvider={adminDataProvider}
+      dashboard={DashboardPage}
+    >
+      {/* Painel de Atendimento */}
+      <Resource
+        name="atendimento"
+        list={ControlPage}
+        icon={QueueIcon}
+        options={{ label: "Painel de Atendimento" }}
+      />
 
-    {/* Operadores */}
-    <Resource
-      name="operators"
-      list={(props) => <OperatorsList {...props} permissions="admin" />}
-      edit={OperatorsEdit}
-      create={OperatorsCreate}
-      icon={BadgeIcon}
-      options={{ label: "Operadores" }}
-    />
+      {/* Operadores */}
+      <Resource
+        name="operators"
+        list={(props) => <OperatorsList {...props} permissions="admin" />}
+        edit={OperatorsEdit}
+        create={OperatorsCreate}
+        icon={BadgeIcon}
+        options={{ label: "Operadores" }}
+      />
 
-    {/* Utentes */}
-    <Resource
-      name="utentes"
-      list={UtentesList}
-      edit={UtentesEdit}
-      create={UtentesCreate}
-      icon={PersonSearchIcon}
-      options={{ label: "Utentes" }}
-    />
-  </Admin>
+      {/* Utentes */}
+      <Resource
+        name="utentes"
+        list={UtentesList}
+        edit={UtentesEdit}
+        create={UtentesCreate}
+        icon={PersonSearchIcon}
+        options={{ label: "Utentes" }}
+      />
+    </Admin>
+  </AtendimentoProvider>
 );
