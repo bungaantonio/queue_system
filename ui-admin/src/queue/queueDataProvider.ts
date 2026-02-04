@@ -1,6 +1,6 @@
 // src/queue/queueDataProvider.ts
 import { httpClient } from "../shared/http/fetchHttpClient";
-import type { QueueUser } from "./types";
+import type { QueueUser } from "../modules/queue/types";
 
 const API_URL = "/api/v1/queue";
 

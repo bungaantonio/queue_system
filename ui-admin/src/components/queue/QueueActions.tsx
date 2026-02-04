@@ -17,7 +17,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
-import type { UserStatus } from "../../queue/types";
+import type { UserStatus } from "../../modules/queue/types";
 
 interface Props {
   userId: number;

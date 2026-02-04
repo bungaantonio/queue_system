@@ -20,7 +20,7 @@ import {
   ATTENDANCE_TYPE_LABELS,
   ATTENDANCE_TYPE_COLOR,
 } from "../../queue/labels";
-import type { QueueUser } from "../../queue/types";
+import type { QueueUser } from "../../modules/queue/types";
 
 export const QueueList = () => {
   const { queue, called, current, loading, callNext, skip, loadingAction } =

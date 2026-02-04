@@ -1,6 +1,6 @@
 // src/control/queue/QueueContext.ts
 import { createContext, useContext } from "react";
-import type { QueueUser } from "./types";
+import type { QueueUser } from "../modules/queue/types";
 
 export interface QueueContextType {
     queue: QueueUser[];

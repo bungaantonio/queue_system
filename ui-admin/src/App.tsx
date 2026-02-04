@@ -1,33 +1,40 @@
-// src/App.tsx
+// src/app/App.tsx
 import { Admin, Resource } from "react-admin";
-import operatorDataProvider from "./operators/dataProvider";
-import { authProvider } from "./auth/authProvider";
-import { OperatorsList } from "./operators/OperatorsList";
-import { OperatorsCreate } from "./operators/OperatorsCreate";
-import { OperatorsEdit } from "./operators/OperatorsEdit";
-import { ControlPage } from "./components/queue/ControlPage";
-import { DashboardPage } from "./dashboard/pages/DashboardPage";
-import { UtentesCreate } from "./utentes/UtentesCreate";
-import { UtentesList } from "./utentes/UtentesList";
-import { UtentesEdit } from "./utentes/UtentesEdit";
+import { adminDataProvider } from "./application/adminDataProvider";
+import { adminAuthProvider } from "./application/adminAuthProvider";
 
-// ícones mais realistas
-import Queue from "@mui/icons-material/Queue";
+import { OperatorsList } from "./modules/operators/components/OperatorsList";
+import { OperatorsCreate } from "./modules/operators/components/OperatorsCreate";
+import { OperatorsEdit } from "./modules/operators/components/OperatorsEdit";
+
+import { ControlPage } from "./modules/queue/components/ControlPage";
+
+import { DashboardPage } from "./modules/dashboard/pages/DashboardPage";
+
+import { UtentesCreate } from "./modules/users/components/UtentesCreate";
+import { UtentesList } from "./modules/users/components/UtentesList";
+import { UtentesEdit } from "./modules/users/components/UtentesEdit";
+
+// Ícones realistas
+import QueueIcon from "@mui/icons-material/Queue";
 import BadgeIcon from "@mui/icons-material/Badge";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 
 export const App = () => (
   <Admin
-    authProvider={authProvider}
-    dataProvider={operatorDataProvider}
+    authProvider={adminAuthProvider}
+    dataProvider={adminDataProvider}
     dashboard={DashboardPage}
   >
+    {/* Painel de Atendimento */}
     <Resource
-      name="control"
+      name="atendimento"
       list={ControlPage}
-      icon={Queue}
+      icon={QueueIcon}
       options={{ label: "Painel de Atendimento" }}
     />
+
+    {/* Operadores */}
     <Resource
       name="operators"
       list={(props) => <OperatorsList {...props} permissions="admin" />}
@@ -36,6 +43,8 @@ export const App = () => (
       icon={BadgeIcon}
       options={{ label: "Operadores" }}
     />
+
+    {/* Utentes */}
     <Resource
       name="utentes"
       list={UtentesList}

@@ -1,6 +1,6 @@
 // src/operators/operatorsDataProvider.ts
 import { httpClient } from "../shared/http/fetchHttpClient";
-import type { Operator } from "./types";
+import type { Operator } from "../modules/operators/types";
 
 const API_URL = "/operators";
 
