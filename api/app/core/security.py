@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-
+from uuid import uuid4
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
+from jose.exceptions import ExpiredSignatureError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -27,12 +28,16 @@ def _get_secret_key_value() -> str:
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (
+    now = datetime.now(timezone.utc)
+
+    expire = now + (
         expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
+
     to_encode.update(
-        {"exp": expire, "sub": data.get("username"), "iat": datetime.now(timezone.utc)}
+        {"sub": data.get("username"), "iat": now, "exp": expire, "jti": uuid4().hex}
     )
+
     secret_key = _get_secret_key_value()
     return jwt.encode(to_encode, secret_key, algorithm=settings.ALGORITHM)
 
@@ -41,8 +46,18 @@ def decode_access_token(token: str) -> dict:
     try:
         secret_key = _get_secret_key_value()
         return jwt.decode(token, secret_key, algorithms=[settings.ALGORITHM])
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=401,
+            detail="Token expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     except JWTError:
-        return {}
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 def get_current_user(

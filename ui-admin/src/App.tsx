@@ -21,6 +21,7 @@ import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvi
 import QueueIcon from "@mui/icons-material/Queue";
 import BadgeIcon from "@mui/icons-material/Badge";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+import { sessionStore } from "./core/session/sessionStorage";
 
 export const App = () => (
   <AtendimentoProvider>
@@ -40,7 +41,11 @@ export const App = () => (
       {/* Operadores */}
       <Resource
         name="operators"
-        list={(props) => <OperatorsList {...props} permissions="admin" />}
+        list={(props) => {
+          const user = sessionStore.getUser();
+          if (user?.role !== "admin") return null;
+          return <OperatorsList {...props} />;
+        }}
         edit={OperatorsEdit}
         create={OperatorsCreate}
         icon={BadgeIcon}

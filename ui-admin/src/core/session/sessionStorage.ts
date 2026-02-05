@@ -1,25 +1,44 @@
 export const sessionStore = {
-  setToken: (token: string) => sessionStorage.setItem("token", token),
-  getToken: () => sessionStorage.getItem("token"),
-  removeToken: () => sessionStorage.removeItem("token"),
+  // Access token: agora só em memória
+  accessToken: null as string | null,
 
-  setUser: (username: string, role: string) => {
-    sessionStorage.setItem("username", username);
-    sessionStorage.setItem("role", role);
+  setAccessToken(token: string) {
+    this.accessToken = token;
+  },
+  getAccessToken() {
+    return this.accessToken;
+  },
+  clearAccessToken() {
+    this.accessToken = null;
   },
 
-  getUser: () => {
-    const username = sessionStorage.getItem("username");
-    const role = sessionStorage.getItem("role");
+  // Refresh token: persistente
+  setRefreshToken(token: string) {
+    localStorage.setItem("refresh_token", token);
+  },
+  getRefreshToken() {
+    return localStorage.getItem("refresh_token");
+  },
+  clearRefreshToken() {
+    localStorage.removeItem("refresh_token");
+  },
 
+  // Usuário
+  setUser(username: string, role: string) {
+    localStorage.setItem("username", username);
+    localStorage.setItem("role", role);
+  },
+  getUser() {
+    const username = localStorage.getItem("username");
+    const role = localStorage.getItem("role");
     if (!username || !role) return null;
-
     return { username, role };
   },
 
-  clear: () => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("username");
-    sessionStorage.removeItem("role");
+  clear() {
+    this.clearAccessToken();
+    this.clearRefreshToken();
+    localStorage.removeItem("username");
+    localStorage.removeItem("role");
   },
 };
