@@ -15,7 +15,7 @@ from app.db.database import engine
 from app.routers.queue_router import queue_api
 from app.routers.biometric_router import biometrics_api
 from app.routers.monitoring_router import monitoring_router, setup_monitoring_middleware
-from app.api.routers import user
+from app.api.routers import utentes
 import logging
 
 logging.basicConfig(
@@ -86,7 +86,7 @@ app.include_router(
     tags=["Audit"],
     responses={404: {"description": "Registro não encontrado"}},
 )
-app.include_router(user.router, prefix="/api/v1", tags=["Users"])
+app.include_router(utentes.router, prefix="/api/v1", tags=["Utentes"])
 
 app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Dedicated"])
 

@@ -3,7 +3,7 @@ import { Create, SimpleForm, TextInput, SelectInput } from "react-admin";
 export const OperatorsCreate = () => (
   <Create>
     <SimpleForm>
-      <TextInput source="name" label="Nome" />
+      <TextInput source="username" label="Username" />
       <TextInput source="email" label="Email" />
       <TextInput source="password" label="Senha" type="password" />
       <SelectInput
