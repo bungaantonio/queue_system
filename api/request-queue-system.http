@@ -1,6 +1,6 @@
 ### Backend - Operadores
 ### Criar primeiro operador (bootstrap)
-POST http://127.0.0.1:8000/operators/bootstrap
+POST http://127.0.0.1:8000/api/v1/operators/bootstrap
 Content-Type: application/json
 
 {
@@ -10,8 +10,8 @@ Content-Type: application/json
 }
 
 ###
-GET http://127.0.0.1:8000/operators/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzcwMTY0NTM2LCJzdWIiOiJhZG1pbiIsImlhdCI6MTc3MDE2MDkzNn0.MafUYUNg9xk3_YpFXLiHbB-dqjCvZIEeP72fX545t5E
+GET http://127.0.0.1:8000/api/v1/operators/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzAzMTczMjEsImV4cCI6MTc3MDMxNzkyMSwianRpIjoiMzg4YWVlNjE2ZjNjNDJlN2I0MGQxYjYyZTg1MmRhOGEifQ.aV0Gs27RM2yLC1fm7Hgu5Z9sfbc1lp9hqNeA5s6y-So
 
 ### Login
 POST http://127.0.0.1:8000/auth/login

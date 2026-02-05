@@ -2,63 +2,76 @@ import { sessionStore } from "../core/session/sessionStorage";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
-interface LoginResponse {
-  detail: string;
-  access_token: string;
-  role?: "admin" | "attendant" | "auditor";
-}
-
-let sessionInvalidated = false;
-
 export const adminAuthProvider = {
-  login: async ({ username, password }: { username: string; password: string }) => {
+  login: async ({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }) => {
     const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
 
-    const data: LoginResponse = await res.json().catch(() => ({}));
-
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data?.detail || "Credenciais inválidas");
 
-    sessionStore.setToken(data.access_token);
+    // Salva tokens
+    sessionStore.setAccessToken(data.access_token);
+    sessionStore.setRefreshToken(data.refresh_token);
     sessionStore.setUser(username, data.role!);
 
-    sessionInvalidated = false;
     return Promise.resolve();
   },
 
-  logout: () => {
-    sessionStore.clear();
-    sessionInvalidated = true;
-    return Promise.resolve();
-  },
-
-  checkAuth: () => {
-    const token = sessionStore.getToken();
-
-    // Permitir página de login sem rejeitar
-    if (window.location.pathname === "/login") {
-      return Promise.resolve();
+  logout: async () => {
+    const refreshToken = sessionStore.getRefreshToken();
+    if (refreshToken) {
+      // Chama endpoint de logout real
+      await fetch(`${BASE_URL}/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      }).catch(() => {});
     }
+    sessionStore.clear();
+    return Promise.resolve();
+  },
 
-    return token
-      ? Promise.resolve()
-      : Promise.reject(new Error("Não autenticado"));
+  checkAuth: async () => {
+    const token = sessionStore.getAccessToken();
+    if (!token) throw new Error("Não autenticado");
+    return Promise.resolve();
   },
 
   checkError: async (error: { status: number }) => {
-    // 401 → token inválido, expirado ou inexistente
     if (error.status === 401) {
-      if (!sessionInvalidated) {
-        sessionInvalidated = true;
-        sessionStore.clear();
+      // Tentar refresh token
+      const refreshToken = sessionStore.getRefreshToken();
+      if (refreshToken) {
+        try {
+          const res = await fetch(`${BASE_URL}/auth/refresh`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error("Refresh token inválido");
+
+          sessionStore.setAccessToken(data.access_token);
+          return Promise.resolve(); // tenta refazer request
+        } catch {
+          sessionStore.clear();
+          return Promise.reject(new Error("Sessão expirada"));
+        }
       }
+      sessionStore.clear();
       return Promise.reject(new Error("Sessão expirada"));
     }
 
-    // 403 → usuário está logado, mas sem permissão; NÃO limpa a sessão
     if (error.status === 403) {
       return Promise.reject(new Error("Não autorizado"));
     }
@@ -66,14 +79,14 @@ export const adminAuthProvider = {
     return Promise.resolve();
   },
 
-  getPermissions: () => {
+  getPermissions: async () => {
     const user = sessionStore.getUser();
-    return Promise.resolve(user ? user.role : null);
+    return user?.role || null;
   },
 
-  getIdentity: () => {
+  getIdentity: async () => {
     const user = sessionStore.getUser();
-    if (!user) return Promise.reject(new Error("Identidade não encontrada"));
-    return Promise.resolve({ id: user.username, fullName: user.username, role: user.role });
+    if (!user) throw new Error("Identidade não encontrada");
+    return { id: user.username, fullName: user.username, role: user.role };
   },
 };

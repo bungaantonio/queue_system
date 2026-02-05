@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useEffect,
-  useState,
-  useCallback,
-  useContext,
-} from "react";
+import React, { createContext, useEffect, useState, useCallback } from "react";
 import { atendimentoGateway } from "../atendimentoGateway";
 import { sessionStore } from "../../../core/session/sessionStorage";
 
@@ -75,7 +69,7 @@ export const AtendimentoProvider = ({
 
     // Tempo real SSE (inclui token como query param para autenticação)
     const baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    const token = sessionStore.getToken();
+    const token = sessionStore.getAccessToken();
     const sseUrl = `${baseUrl}/api/v1/sse/stream${token ? `?token=${token}` : ""}`;
     const eventSource = new EventSource(sseUrl);
 

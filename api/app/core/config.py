@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(
         default=60, description="Tempo de expiração do token de acesso (min)."
     )
+    REFRESH_TOKEN_EXPIRE_DAYS: int = Field(
+        default=7, description="Tempo de expiração do token de atualização (dias)."
+    )
     TOKEN_EXPIRATION_MINUTES: int = Field(
         default=2, description="Tempo de expiração do token curto (min)."
     )
