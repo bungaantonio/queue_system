@@ -22,7 +22,6 @@ export const adminAuthProvider = {
     // Salva tokens
     sessionStore.setAccessToken(data.access_token);
     sessionStore.setRefreshToken(data.refresh_token);
-    sessionStore.setUser(username, data.role!);
 
     return Promise.resolve();
   },
@@ -30,7 +29,6 @@ export const adminAuthProvider = {
   logout: async () => {
     const refreshToken = sessionStore.getRefreshToken();
     if (refreshToken) {
-      // Chama endpoint de logout real
       await fetch(`${BASE_URL}/auth/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,7 +47,6 @@ export const adminAuthProvider = {
 
   checkError: async (error: { status: number }) => {
     if (error.status === 401) {
-      // Tentar refresh token
       const refreshToken = sessionStore.getRefreshToken();
       if (refreshToken) {
         try {
@@ -60,9 +57,8 @@ export const adminAuthProvider = {
           });
           const data = await res.json();
           if (!res.ok) throw new Error("Refresh token inválido");
-
           sessionStore.setAccessToken(data.access_token);
-          return Promise.resolve(); // tenta refazer request
+          return Promise.resolve();
         } catch {
           sessionStore.clear();
           return Promise.reject(new Error("Sessão expirada"));
@@ -72,9 +68,8 @@ export const adminAuthProvider = {
       return Promise.reject(new Error("Sessão expirada"));
     }
 
-    if (error.status === 403) {
+    if (error.status === 403)
       return Promise.reject(new Error("Não autorizado"));
-    }
 
     return Promise.resolve();
   },

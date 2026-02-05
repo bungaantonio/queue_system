@@ -15,6 +15,7 @@
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.3.7",
     "@mui/x-data-grid": "^7.29.12",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.555.0",
     "react": "^19.0.0",
     "react-admin": "^5.13.0",

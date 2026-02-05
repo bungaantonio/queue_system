@@ -1,3 +1,5 @@
+import { jwtDecode } from "jwt-decode";
+
 export const sessionStore = {
   // Access token: agora só em memória
   accessToken: null as string | null,
@@ -29,10 +31,15 @@ export const sessionStore = {
     localStorage.setItem("role", role);
   },
   getUser() {
-    const username = localStorage.getItem("username");
-    const role = localStorage.getItem("role");
-    if (!username || !role) return null;
-    return { username, role };
+    if (!this.accessToken) return null;
+    try {
+      const decoded: { username: string; role: string } = jwtDecode(
+        this.accessToken,
+      );
+      return { username: decoded.username, role: decoded.role };
+    } catch {
+      return null;
+    }
   },
 
   clear() {
