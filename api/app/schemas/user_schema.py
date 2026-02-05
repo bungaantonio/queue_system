@@ -8,12 +8,12 @@ class UserCreate(BaseModel):
     phone: str | None = None
     birth_date: date | None = None
 
+    class Config:
+        from_attributes = True
+
 
 class UserBase(UserCreate):
     id: int
-
-    class Config:
-        from_attributes = True
 
 
 class UserUpdate(BaseModel):
@@ -24,9 +24,6 @@ class UserUpdate(BaseModel):
 
 class UserOut(UserBase):
     id: int
-
-    class Config:
-        from_attributes = True
 
 
 class UserShortResponse(BaseModel):

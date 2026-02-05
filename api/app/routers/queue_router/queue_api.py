@@ -92,7 +92,7 @@ def next_called_for_client(db: Session = Depends(get_db), operator_id: int = Non
 
 
 @router.get("/current", response_model=QueueDetailItem)
-def get_current_user(db: Session = Depends(get_db)):
+def get_current_served_user(db: Session = Depends(get_db)):
     """
     Retorna o usuário atualmente em atendimento (status = BEING_SERVED).
     Lança exceção se não houver ninguém em atendimento.

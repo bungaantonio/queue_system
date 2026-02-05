@@ -1,5 +1,6 @@
 // src/app/App.tsx
-import { Admin, Resource } from "react-admin";
+import { Admin, Resource, CustomRoutes } from "react-admin";
+import { Route } from "react-router-dom";
 import { adminDataProvider } from "./application/adminDataProvider";
 import { adminAuthProvider } from "./application/adminAuthProvider";
 
@@ -15,13 +16,17 @@ import { UtentesCreate } from "./modules/users/components/UtentesCreate";
 import { UtentesList } from "./modules/users/components/UtentesList";
 import { UtentesEdit } from "./modules/users/components/UtentesEdit";
 
+import { SessionExpiredPage } from "./modules/shared/components/SessionExpiredPage";
+import { NotAuthorizedPage } from "./modules/shared/components/NotAuthorizedPage";
+
 import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvider";
+
+import { withRole } from "./modules/shared/utils/withRole";
 
 // Ícones realistas
 import QueueIcon from "@mui/icons-material/Queue";
 import BadgeIcon from "@mui/icons-material/Badge";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
-import { sessionStore } from "./core/session/sessionStorage";
 
 export const App = () => (
   <AtendimentoProvider>
@@ -41,21 +46,9 @@ export const App = () => (
       {/* Operadores */}
       <Resource
         name="operators"
-        list={(props) => {
-          const user = sessionStore.getUser();
-          if (user?.role !== "admin") return null;
-          return <OperatorsList {...props} />;
-        }}
-        edit={(props) => {
-          const user = sessionStore.getUser();
-          if (user?.role !== "admin") return null;
-          return <OperatorsEdit {...props} />;
-        }}
-        create={(props) => {
-          const user = sessionStore.getUser();
-          if (user?.role !== "admin") return null;
-          return <OperatorsCreate {...props} />;
-        }}
+        list={withRole(OperatorsList, ["admin"])}
+        edit={withRole(OperatorsEdit, ["admin"])}
+        create={withRole(OperatorsCreate, ["admin"])}
         icon={BadgeIcon}
         options={{ label: "Operadores" }}
       />
@@ -63,12 +56,16 @@ export const App = () => (
       {/* Utentes */}
       <Resource
         name="utentes"
-        list={UtentesList}
-        edit={UtentesEdit}
-        create={UtentesCreate}
+        list={withRole(UtentesList, ["admin", "attendant"])}
+        edit={withRole(UtentesEdit, ["admin", "attendant"])}
+        create={withRole(UtentesCreate, ["admin", "attendant"])}
         icon={PersonSearchIcon}
         options={{ label: "Utentes" }}
       />
+      <CustomRoutes>
+        <Route path="/session-expired" element={<SessionExpiredPage />} />
+        <Route path="/not-authorized" element={<NotAuthorizedPage />} />
+      </CustomRoutes>
     </Admin>
   </AtendimentoProvider>
 );

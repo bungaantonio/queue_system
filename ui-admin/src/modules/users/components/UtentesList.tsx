@@ -1,7 +1,7 @@
 import { List, Datagrid, TextField, DateField } from "react-admin";
 
-export const UtentesList = () => (
-  <List title="Utentes">
+export const UtentesList = (props: any) => (
+  <List {...props} title="Utentes">
     <Datagrid rowClick="edit">
       <TextField source="id" label="ID" />
       <TextField source="name" label="Nome" />
