@@ -1,4 +1,6 @@
-import { sessionStorage } from "../core/session/sessionStorage";
+import { sessionStore } from "../core/session/sessionStorage";
+
+const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 interface LoginResponse {
   detail: string;
@@ -6,62 +8,72 @@ interface LoginResponse {
   role?: "admin" | "attendant" | "auditor";
 }
 
-let sessionInvalidated = false; // garante que só ocorre uma vez  
+let sessionInvalidated = false;
 
 export const adminAuthProvider = {
-  login: async ({
-    username,
-    password,
-  }: {
-    username: string;
-    password: string;
-  }) => {
-    const res = await fetch("/auth/login", {
+  login: async ({ username, password }: { username: string; password: string }) => {
+    const res = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
+
     const data: LoginResponse = await res.json().catch(() => ({}));
+
     if (!res.ok) throw new Error(data?.detail || "Credenciais inválidas");
 
-    sessionStorage.setToken(data.access_token);
-    sessionStorage.setUser(username, data.role ?? "attendant");
-    sessionInvalidated = false; // reset após login
+    sessionStore.setToken(data.access_token);
+    sessionStore.setUser(username, data.role!);
+
+    sessionInvalidated = false;
     return Promise.resolve();
   },
 
   logout: () => {
-    sessionStorage.clear();
+    sessionStore.clear();
     sessionInvalidated = true;
     return Promise.resolve();
   },
 
   checkAuth: () => {
-    const token = sessionStorage.getToken();
-    if (!token) return Promise.reject(new Error("Não autenticado"));
-    return Promise.resolve();
+    const token = sessionStore.getToken();
+
+    // Permitir página de login sem rejeitar
+    if (window.location.pathname === "/login") {
+      return Promise.resolve();
+    }
+
+    return token
+      ? Promise.resolve()
+      : Promise.reject(new Error("Não autenticado"));
   },
 
   checkError: async (error: { status: number }) => {
+    // 401 → token inválido, expirado ou inexistente
     if (error.status === 401) {
       if (!sessionInvalidated) {
         sessionInvalidated = true;
-        sessionStorage.clear();
+        sessionStore.clear();
       }
       return Promise.reject(new Error("Sessão expirada"));
     }
 
-    if (error.status === 403)
+    // 403 → usuário está logado, mas sem permissão; NÃO limpa a sessão
+    if (error.status === 403) {
       return Promise.reject(new Error("Não autorizado"));
+    }
 
     return Promise.resolve();
   },
 
-  getPermissions: () => Promise.resolve(sessionStorage.getUser().role),
+  getPermissions: () => {
+    const user = sessionStore.getUser();
+    return Promise.resolve(user ? user.role : null);
+  },
+
   getIdentity: () => {
-    const { username, role } = sessionStorage.getUser();
-    if (!username)
-      return Promise.reject(new Error("Identidade não encontrada"));
-    return Promise.resolve({ id: username, fullName: username, role });
+    const user = sessionStore.getUser();
+    if (!user) return Promise.reject(new Error("Identidade não encontrada"));
+    return Promise.resolve({ id: user.username, fullName: user.username, role: user.role });
   },
 };
