@@ -46,8 +46,16 @@ export const App = () => (
           if (user?.role !== "admin") return null;
           return <OperatorsList {...props} />;
         }}
-        edit={OperatorsEdit}
-        create={OperatorsCreate}
+        edit={(props) => {
+          const user = sessionStore.getUser();
+          if (user?.role !== "admin") return null;
+          return <OperatorsEdit {...props} />;
+        }}
+        create={(props) => {
+          const user = sessionStore.getUser();
+          if (user?.role !== "admin") return null;
+          return <OperatorsCreate {...props} />;
+        }}
         icon={BadgeIcon}
         options={{ label: "Operadores" }}
       />
