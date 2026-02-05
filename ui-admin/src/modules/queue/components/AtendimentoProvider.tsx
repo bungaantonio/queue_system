@@ -6,6 +6,7 @@ import React, {
   useContext,
 } from "react";
 import { atendimentoGateway } from "../atendimentoGateway";
+import { sessionStore } from "../../../core/session/sessionStorage";
 
 // 1. Definição da Interface para o TypeScript não reclamar
 interface AtendimentoContextType {
@@ -72,9 +73,14 @@ export const AtendimentoProvider = ({
       .then(updateState)
       .catch(() => setLoading(false));
 
-    // Tempo real SSE
+    // Tempo real SSE (inclui token como query param para autenticação)
     const baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-    const eventSource = new EventSource(`${baseUrl}/api/v1/sse/stream`);
+    const token = sessionStore.getToken();
+    const sseUrl = `${baseUrl}/api/v1/sse/stream${token ? `?token=${token}` : ""}`;
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.onopen = () => console.log("SSE connected", sseUrl);
+    eventSource.onerror = (err) => console.error("SSE error", err);
 
     eventSource.addEventListener("queue_sync", (e: any) => {
       updateState(JSON.parse(e.data));
