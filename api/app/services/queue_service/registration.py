@@ -1,18 +1,16 @@
 # app/services/queue_service/registration.py
-from typing import Tuple
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.crud.user.create import create_user
 from app.crud.queue.create import enqueue_user
 from app.crud.queue.read import get_existing_queue_item
 from app.exceptions.exceptions import BiometricException, QueueException
+from app.models.enums import AuditAction
 from app.models.user import User
 from app.models.user_credential import UserCredential  # Nova Model
-from app.models.queue_item import QueueItem
-from app.schemas.queue_schema.request import QueueRegister
 from app.services.biometric_service.utils import (
     hash_identifier,
 )
+from app.services.audit_service import AuditService
 
 
 def create_user_with_biometric_and_queue(db, request, operator_id):
@@ -38,6 +36,12 @@ def create_user_with_biometric_and_queue(db, request, operator_id):
     if not queue_item:
         queue_item = enqueue_user(db, db_user, operator_id, request.attendance_type)
 
+    AuditService.log_action(
+        db,
+        user_id=operator_id,
+        action=AuditAction.USER_ENQUEUED,
+        details={"user_id": db_user.id, "queue_item_id": queue_item.id},
+    )
     return db_user, db_cred, queue_item
 
 

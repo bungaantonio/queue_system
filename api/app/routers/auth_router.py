@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from app.db.database import get_db
 from app.models.models import RefreshToken
 from app.models.operator import Operator
-from app.schemas.auth_schema import Token, LoginSchema, LogoutSchema
+from app.schemas.auth_schema import LoginSchema, LogoutSchema
 from app.services.auth_service import (
     authenticate_user,
     create_user_token,

@@ -1,7 +1,7 @@
 from typing import Optional
 from app.crud.operator_crud import get_operator_by_id
 from app.helpers.operators import check_permissions
-from app.models.enums import OperatorRole
+from app.models.enums import AuditAction, OperatorRole
 from sqlalchemy.orm import Session
 
 from app.exceptions.exceptions import QueueException
@@ -34,6 +34,7 @@ from app.crud.queue.read import (
     get_next_waiting_item,
     get_active_service_item,
 )
+from app.services.audit_service import AuditService
 
 
 def call_next_user(db: Session, operator_id: Optional[int] = None) -> QueueCalledItem:
@@ -52,6 +53,13 @@ def call_next_user(db: Session, operator_id: Optional[int] = None) -> QueueCalle
     updated_item = mark_as_called(db, next_item, operator_id=operator_id)
 
     db.flush()
+
+    AuditService.log_action(
+        db,
+        user_id=operator_id,
+        action=AuditAction.USER_CALLED,
+        details={"queue_item_id": updated_item.id, "user_id": updated_item.user_id},
+    )
     return QueueCalledItem.from_orm_item(updated_item)
 
 
@@ -64,6 +72,12 @@ def complete_active_user_service(db: Session) -> QueueDetailItem:
     done_item = mark_as_done(db, current_item)
     _ = get_biometric_for_finished(db, done_item.id)
 
+    AuditService.log_action(
+        db,
+        user_id=done_item.operator_id,
+        action=AuditAction.QUEUE_PROCESSED,
+        details={"queue_item_id": done_item.id, "user_id": done_item.user_id},
+    )
     return QueueDetailItem.from_orm_item(done_item)
 
 
@@ -80,6 +94,13 @@ def skip_called_user(db: Session) -> QueueDetailItem:
         raise QueueException("user_attempted_verification")
 
     updated_item = mark_as_skipped(db, current_item)
+
+    AuditService.log_action(
+        db,
+        user_id=current_item.operator_id,
+        action=AuditAction.USER_SKIPPED,
+        details={"queue_item_id": updated_item.id, "user_id": updated_item.user_id},
+    )
     return QueueDetailItem.from_orm_item(updated_item)
 
 
@@ -98,6 +119,13 @@ def cancel_active_user(db: Session, item_id: int) -> QueueDetailItem:
         raise QueueException("no_active_user")
 
     cancelled_item = mark_as_cancelled(db, queue_item)
+
+    AuditService.log_action(
+        db,
+        user_id=cancelled_item.operator_id,
+        action=AuditAction.USER_CANCELLED,
+        details={"queue_item_id": cancelled_item.id, "user_id": cancelled_item.user_id},
+    )
     return QueueDetailItem.from_orm_item(cancelled_item)
 
 
@@ -127,5 +155,12 @@ def requeue_user_service(db, request: QueueRequeue, operator_id: int):
     )
 
     db.commit()
+
+    AuditService.log_action(
+        db,
+        user_id=operator_id,
+        action=AuditAction.QUEUE_UPDATED,
+        details={"queue_item_id": queue_item.id, "user_id": user.id},
+    )
 
     return QueueConsult.from_queue_item(queue_item)

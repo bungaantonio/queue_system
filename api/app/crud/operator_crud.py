@@ -1,16 +1,33 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
+from app.models import user
+from app.models.enums import AuditAction
 from app.models.operator import Operator
 from app.helpers.password import get_password_hash
+from app.services.audit_service import AuditService
 
 
 def create_operator(db: Session, username: str, password: str, role: str) -> Operator:
     hashed = get_password_hash(password)
-    user = Operator(username=username, hashed_password=hashed, role=role, active=True)
-    db.add(user)
+    operator = Operator(
+        username=username, hashed_password=hashed, role=role, active=True
+    )
+    db.add(operator)
     db.commit()
-    db.refresh(user)
-    return user
+    db.refresh(operator)
+
+    AuditService.log_action(
+        db,
+        user_id=operator.id,
+        action=AuditAction.OPERATOR_CREATED,
+        details={
+            "operator_id": operator.id,
+            "username": operator.username,
+            "role": role,
+        },
+    )
+
+    return operator
 
 
 def get_operator_by_username(db: Session, username: str) -> Optional[Operator]:
@@ -31,6 +48,14 @@ def deactivate_operator(db: Session, operator_id: int) -> Optional[Operator]:
         operator.active = False
         db.commit()
         db.refresh(operator)
+
+        AuditService.log_action(
+            db,
+            user_id=operator.id,
+            action=AuditAction.OPERATOR_DEACTIVATED,
+            details={"operator_id": operator.id, "username": operator.username},
+        )
+
     return operator
 
 
@@ -61,4 +86,15 @@ def update_operator(
 
     db.commit()
     db.refresh(operator)
+
+    AuditService.log_action(
+        db,
+        user_id=operator.id,
+        action=AuditAction.OPERATOR_UPDATED,
+        details={
+            "operator_id": operator.id,
+            "username": operator.username,
+            "role": operator.role,
+        },
+    )
     return operator
