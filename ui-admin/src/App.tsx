@@ -27,6 +27,8 @@ import { withRole } from "./modules/shared/utils/withRole";
 import QueueIcon from "@mui/icons-material/Queue";
 import BadgeIcon from "@mui/icons-material/Badge";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+import { AuditList } from "./modules/auditor/components/AuditList";
+import { AuditShow } from "./modules/auditor/components/AuditShow";
 
 export const App = () => (
   <AtendimentoProvider>
@@ -61,6 +63,14 @@ export const App = () => (
         create={withRole(UtentesCreate, ["admin", "attendant"])}
         icon={PersonSearchIcon}
         options={{ label: "Utentes" }}
+      />
+
+      {/* Auditor */}
+      <Resource
+        name="audit"
+        list={withRole(AuditList, ["auditor"])}
+        show={withRole(AuditShow, ["auditor"])}
+        options={{ label: "Auditor" }}
       />
       <CustomRoutes>
         <Route path="/session-expired" element={<SessionExpiredPage />} />

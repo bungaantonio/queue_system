@@ -3,7 +3,10 @@ from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
 
+from app.core.security import get_current_user
 from app.db.database import get_db
+from app.helpers.operators import check_permissions
+from app.models.enums import OperatorRole
 from app.schemas.audit_schema import (
     AuditChainSummary,
     AuditVerificationDetail,
@@ -16,34 +19,17 @@ router = APIRouter()
 
 @router.get("/", response_model=List[AuditVerificationDetail])
 def list_audits(
-    skip: int = Query(0, description="Número de registros a pular", example=0),
-    limit: int = Query(
-        100, description="Número máximo de registros retornados", example=100
-    ),
-    user_id: int | None = Query(
-        None, description="Filtrar pelo ID do usuário", example=42
-    ),
-    action: str | None = Query(None, description="Filtrar pela ação", example="CREATE"),
-    start: datetime | None = Query(
-        None,
-        description="Data inicial no formato ISO 8601",
-        example="2025-09-27T00:00:00",
-    ),
-    end: datetime | None = Query(
-        None,
-        description="Data final no formato ISO 8601",
-        example="2025-09-27T23:59:59",
-    ),
+    skip: int = Query(0),
+    limit: int = Query(100),
+    user_id: int | None = Query(None),
+    action: str | None = Query(None),
+    start: datetime | None = Query(None),
+    end: datetime | None = Query(None),
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
-    """
-    Lista registros de auditoria com filtros opcionais e paginação.
-
-    - **user_id**: filtra registros de um usuário específico
-    - **action**: filtra registros por tipo de ação
-    - **start / end**: filtra registros por intervalo de data
-    - **skip / limit**: paginação
-    """
+    # Só Auditor pode acessar
+    check_permissions(current_user, allowed_roles=[OperatorRole.AUDITOR])
     return AuditService.generate_audit_report(
         db=db,
         user_id=user_id,
@@ -89,15 +75,11 @@ def verify_single(audit_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/verify-summary", response_model=AuditChainSummary)
-def verify_audit_chain_summary(db: Session = Depends(get_db)):
-    """
-    Retorna um resumo da cadeia de auditoria:
-
-    - **all_valid**: todos os registros são válidos?
-    - **total_records**: total de registros na cadeia
-    - **valid_records**: quantidade de registros válidos
-    - **invalid_records**: quantidade de registros inválidos
-    """
+def verify_audit_chain_summary(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    check_permissions(current_user, allowed_roles=[OperatorRole.AUDITOR])
     records = AuditService.verify_chain(db)
     total = len(records)
     valid_count = sum(r.valid for r in records)

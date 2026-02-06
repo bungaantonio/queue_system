@@ -50,7 +50,26 @@ class OperatorRole(str, Enum):
 
 
 class AuditAction(str, Enum):
+    # Fila / Atendimento
     QUEUE_CREATED = "Fila criada"
     QUEUE_UPDATED = "Fila atualizada"
     QUEUE_VERIFIED = "Fila verificada"
     QUEUE_PROCESSED = "Fila processada"
+    USER_CALLED = "Usuário chamado"
+    USER_SKIPPED = "Usuário ignorado"
+    USER_CANCELLED = "Usuário cancelado"
+
+    # Usuário / Utente
+    USER_CREATED = "Usuário criado"
+    USER_UPDATED = "Usuário atualizado"
+    USER_ENQUEUED = "Usuário adicionado à fila"
+    USER_REMOVED = "Usuário removido da fila"
+
+    # Operador
+    OPERATOR_CREATED = "Operador criado"
+    OPERATOR_UPDATED = "Operador atualizado"
+    OPERATOR_DEACTIVATED = "Operador desativado"
+
+    # Auditoria / Sistema
+    AUDIT_VERIFIED = "Cadeia de auditoria verificada"
+    AUDIT_SUMMARY_GENERATED = "Resumo de auditoria gerado"
