@@ -57,4 +57,4 @@ typing-inspection==0.4.1
 typing_extensions==4.15.0
 urllib3==2.5.0
 uvicorn==0.37.0
-virtualenv==20.34.0
+virtualenv==20.36.1
