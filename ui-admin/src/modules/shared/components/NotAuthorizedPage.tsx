@@ -68,7 +68,7 @@ export const NotAuthorizedPage: React.FC = () => {
               ml: 0.5,
             }}
           >
-            página anterior
+            página Dashboard
           </Button>
           .
         </Typography>
