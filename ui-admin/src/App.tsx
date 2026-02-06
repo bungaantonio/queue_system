@@ -67,10 +67,10 @@ export const App = () => (
 
       {/* Auditor */}
       <Resource
-        name="audit"
+        name="audits"
         list={withRole(AuditList, ["auditor"])}
         show={withRole(AuditShow, ["auditor"])}
-        options={{ label: "Auditor" }}
+        options={{ label: "Auditoria" }}
       />
       <CustomRoutes>
         <Route path="/session-expired" element={<SessionExpiredPage />} />

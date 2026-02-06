@@ -18,6 +18,9 @@ from app.schemas.queue_schema.response import (
 from app.schemas.queue_schema.request import QueueRegister, QueueCancel, QueueRequeue
 from app.services.queue_service import consult, management
 
+from app.core.security import get_current_user
+
+
 from app.services.queue_service.registration import (
     create_user_with_biometric_and_queue,
 )
@@ -171,16 +174,16 @@ def requeue_user_endpoint(
 def skip_current_called_user(
     db: Session = Depends(get_db),
     background_tasks: BackgroundTasks = None,
+    current_user=Depends(get_current_user),
 ):
     """
     Pula o usuário atualmente chamado (CALLED_PENDING), movendo-o algumas posições abaixo
     na fila, mantendo-o como WAITING.
 
     """
-    with db.begin():
-        updated_item = management.skip_called_user(db)
-        if not updated_item:
-            raise QueueException("no_called_user")
+    updated_item = management.skip_called_user(db, current_operator_id=current_user.id)
+    if not updated_item:
+        raise QueueException("no_called_user")
 
     # Atualiza estado global da fila para dashboards/painéis
     if background_tasks:

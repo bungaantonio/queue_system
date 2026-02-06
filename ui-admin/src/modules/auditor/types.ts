@@ -1,7 +1,9 @@
 export interface AuditVerificationDetail {
-  audit_id: number;
+  id: number;
   action: string;
+  operator_id: number | null;
   user_id: number | null;
+  queue_item_id: number | null;
   recalculated_hash: string;
   stored_hash: string;
   previous_hash_matches: boolean;

@@ -79,12 +79,13 @@ app.include_router(
     biometrics_api.router, prefix="/api/v1/biometrics", tags=["Biometrics"]
 )
 app.include_router(auth_router.router, prefix="/auth", tags=["auth"])
-app.include_router(operators_router.router, prefix="/api/v1/operators", tags=["operators"])
+app.include_router(
+    operators_router.router, prefix="/api/v1/operators", tags=["operators"]
+)
 app.include_router(
     audit_router.router,
-    prefix="/audit",
-    tags=["Audit"],
-    responses={404: {"description": "Registro não encontrado"}},
+    prefix="/api/v1/audits",
+    tags=["Audits"],
 )
 app.include_router(utentes.router, prefix="/api/v1", tags=["Utentes"])
 

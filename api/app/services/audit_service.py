@@ -2,6 +2,7 @@ import hashlib
 import json
 import logging
 from datetime import datetime
+from sys import audit
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.audit import Audit
@@ -34,14 +35,7 @@ class AuditService:
         biometric_id: Optional[int] = None,
         details: Optional[dict] = None,
     ) -> Audit:
-        """
-        Cria um registro de auditoria seguro, mantendo a cadeia (hash anterior).
-        - details: dicionário que será serializado em JSON
-        """
-        # Serializar detalhes
-        details_json = json.dumps(details or {}, ensure_ascii=False)
-
-        # Recupera último registro para manter a cadeia
+        """Cria um registro de auditoria com hash encadeado."""
         last_audit = db.query(Audit).order_by(Audit.id.desc()).first()
         hashed_previous = last_audit.hashed_record if last_audit else None
 
@@ -51,86 +45,86 @@ class AuditService:
             queue_item_id=queue_item_id,
             biometric_id=biometric_id,
             action=action,
-            details=details_json,
+            details=details or {},
             hashed_previous=hashed_previous,
         )
-
-        # Calcula hash final
-        audit.hashed_record = audit.hashed_compute()
+        audit.finalize_record()
 
         db.add(audit)
-        db.flush()  # garante id antes de commit
+        db.commit()
+        db.refresh(audit)
+
+        db.add(audit)
+        db.flush()
         logger.info(
             "Audit logged: action=%s, operator_id=%s, user_id=%s, queue_item_id=%s, id=%s",
-            action, operator_id, user_id, queue_item_id, audit.id
+            action,
+            operator_id,
+            user_id,
+            queue_item_id,
+            audit.id,
         )
         return audit
 
     @staticmethod
-    def _verify_single(audit: Audit, previous_hash: Optional[str]) -> AuditVerificationDetail:
-        """
-        Verifica a validade de um registro individual:
-        - hash recalculado
-        - hash anterior correto
-        """
-        recalculated = audit.hashed_compute()
-        previous_matches = audit.hashed_previous == previous_hash
-        valid = (recalculated == audit.hashed_record) and previous_matches
-
-        logger.debug(
-            "Audit %s verification: recalculated=%s, stored=%s, prev_match=%s, valid=%s",
-            audit.id, recalculated, audit.hashed_record, previous_matches, valid
+    def _to_verification_detail(
+        audit: Audit, previous_hash: Optional[str]
+    ) -> AuditVerificationDetail:
+        recalculated = audit.finalize_record()
+        prev_match = (
+            previous_hash == audit.hashed_previous
+            if previous_hash
+            else (previous_hash is None)
         )
+        valid = recalculated == audit.hashed_record and prev_match
 
-        # Desserializa detalhes
-        details = {}
-        if audit.details:
-            try:
-                details = json.loads(audit.details)
-            except json.JSONDecodeError:
-                logger.warning("Audit %s details JSON decode failed", audit.id)
+        try:
+            details = json.loads(audit.details) if audit.details else {}
+        except json.JSONDecodeError:
+            logger.warning("Audit %s details JSON decode failed", audit.id)
+            details = {}
 
         return AuditVerificationDetail(
-            audit_id=audit.id,
-            recalculated_hash=recalculated,
-            stored_hash=audit.hashed_record,
-            previous_hash_matches=previous_matches,
-            valid=valid,
+            id=audit.id,
             action=audit.action,
             operator_id=audit.operator_id,
             user_id=audit.user_id,
             queue_item_id=audit.queue_item_id,
             biometric_id=audit.biometric_id,
+            recalculated_hash=recalculated,
+            stored_hash=audit.hashed_record,
+            previous_hash_matches=prev_match,
+            valid=valid,
             details=details,
-            timestamp=audit.timestamp,
+            timestamp=audit.timestamp.isoformat(),
         )
 
     @staticmethod
     def verify_chain(db: Session) -> List[AuditVerificationDetail]:
-        """Valida toda a cadeia de auditoria em ordem cronológica."""
         audits = db.query(Audit).order_by(Audit.id.asc()).all()
         last_hash = None
-        results: List[AuditVerificationDetail] = []
+        result: List[AuditVerificationDetail] = []
 
         for audit in audits:
-            result = AuditService._verify_single(audit, last_hash)
-            results.append(result)
+            detail = AuditService._to_verification_detail(audit, last_hash)
+            result.append(detail)
             last_hash = audit.hashed_record
 
-        logger.info("Audit chain verification completed: %d records checked", len(results))
-        return results
+        logger.info("Audit chain verification completed: %d records", len(result))
+        return result
 
     @staticmethod
-    def verify_single_audit(db: Session, audit_id: int) -> Optional[AuditVerificationDetail]:
-        """Valida um único registro pelo ID."""
+    def verify_single_audit(
+        db: Session, audit_id: int
+    ) -> Optional[AuditVerificationDetail]:
         audit = audit_crud.get_audit_by_id(db, audit_id)
         if not audit:
             logger.warning("Audit ID %d not found", audit_id)
             return None
 
-        previous_audit = audit_crud.get_previous_audit(db, audit.id)
-        previous_hash = previous_audit.hashed_record if previous_audit else None
-        return AuditService._verify_single(audit, previous_hash)
+        prev_audit = audit_crud.get_previous_audit(db, audit.id)
+        prev_hash = prev_audit.hashed_record if prev_audit else None
+        return AuditService._to_verification_detail(audit, prev_hash)
 
     @staticmethod
     def generate_audit_report(
@@ -142,11 +136,7 @@ class AuditService:
         skip: int = 0,
         limit: int = 100,
     ) -> List[AuditVerificationDetail]:
-        """
-        Gera relatório de auditoria filtrado, mantendo a cadeia de validação.
-        """
         query = db.query(Audit).order_by(Audit.id.asc())
-
         if user_id is not None:
             query = query.filter(Audit.user_id == user_id)
         if action:
@@ -161,7 +151,7 @@ class AuditService:
         report: List[AuditVerificationDetail] = []
 
         for audit in audits:
-            report.append(AuditService._verify_single(audit, last_hash))
+            report.append(AuditService._to_verification_detail(audit, last_hash))
             last_hash = audit.hashed_record
 
         logger.info("Audit report generated: %d records", len(report))

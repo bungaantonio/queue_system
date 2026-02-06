@@ -1,3 +1,4 @@
+// src/modules/auditor/components/AuditSummary.tsx
 import { useEffect, useState } from "react";
 import { Card, CardContent, Typography } from "@mui/material";
 import { auditorGateway } from "../auditorGateway";
