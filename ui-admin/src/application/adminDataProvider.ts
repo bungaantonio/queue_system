@@ -1,10 +1,12 @@
 import type { DataProvider } from "react-admin";
 import { operatorsGateway } from "../modules/operators/operatorsGateway";
 import { utentesGateway } from "../modules/users/utentesGateway";
+import { auditorGateway } from "../modules/auditor/auditorGateway";
 
 const resourceMap: Record<string, any> = {
   operators: operatorsGateway,
   utentes: utentesGateway,
+  audits: auditorGateway,
 };
 
 export const adminDataProvider: DataProvider = {

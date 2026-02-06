@@ -81,11 +81,12 @@ def complete_active_user_service(db: Session) -> QueueDetailItem:
     return QueueDetailItem.from_orm_item(done_item)
 
 
-def skip_called_user(db: Session) -> QueueDetailItem:
+def skip_called_user(db: Session, current_operator_id: int) -> QueueDetailItem:
     """
     Pula o usuário chamado (pendente de verificação), movendo-o algumas posições abaixo.
-    A lógica de reposicionamento está em `update.mark_as_skipped`.
+    A lógica de reposicionamento está em `mark_as_skipped`.
     """
+
     current_item = get_pending_verification_item(db)
     if not current_item:
         raise QueueException("no_called_user")
@@ -95,12 +96,16 @@ def skip_called_user(db: Session) -> QueueDetailItem:
 
     updated_item = mark_as_skipped(db, current_item)
 
+    # 🔹 Registro de auditoria correto
     AuditService.log_action(
         db,
-        user_id=current_item.operator_id,
+        operator_id=current_operator_id,  # operador logado
+        user_id=current_item.user_id,  # usuário da fila
+        queue_item_id=updated_item.id,  # item da fila
         action=AuditAction.USER_SKIPPED,
-        details={"queue_item_id": updated_item.id, "user_id": updated_item.user_id},
+        details={"queue_item_id": updated_item.id, "user_id": current_item.user_id},
     )
+
     return QueueDetailItem.from_orm_item(updated_item)
 
 
