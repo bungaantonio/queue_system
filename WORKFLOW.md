@@ -9,7 +9,7 @@
 
 ---
 
-### Actualizar fork (início do dia)
+### Início do dia
 
 ```bash
 git checkout main
@@ -18,18 +18,36 @@ git rebase upstream/main
 git push origin main
 ```
 
-### Desenvolver uma feature
+### Criar feature
 
 ```bash
 git checkout -b feature/descricao-curta
+```
+
+### Desenvolvimento
+
+#### (editar código)
+
+```bash
+git add <ficheiros>
+git commit -m "feat: descricao clara"
 ```
 
 ### Manter a branch actualizada
 
 ```bash
 git fetch upstream
+git checkout main
 git rebase upstream/main
+git checkout feature/descricao-curta
 git rebase main
+```
+
+### Repetir commits conforme necessário
+
+```bash
+git add <ficheiros>
+git commit -m "fix: ajuste X"
 ```
 
 ### Antes de PR
