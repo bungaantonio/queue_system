@@ -6,6 +6,7 @@
 ```sh
 python -m venv .temp
 ```
+
 Ativar o ambiente:
 
 ```sh
@@ -34,14 +35,19 @@ uvicorn app.main:app --reload
 ```
 
 ### Rodar PostgreSQL
+
 ```sh
 docker-compose up -d
 ```
+
 * Testar conexão:
+
 ```sh
 psql postgresql://devuser:devpass@localhost:5432/devdb
 ```
+
 * Rode migrations Alembic normalmente:
+
 ```sh
 alembic upgrade head
 ```
