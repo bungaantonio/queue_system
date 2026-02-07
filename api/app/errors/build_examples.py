@@ -1,3 +1,4 @@
+# app/errors/build_examples.py
 def examples(error_messages: dict) -> dict:
     return {
         code: {

@@ -1,3 +1,4 @@
+# app/errors/queue_erros.py
 from app.messages.messages import QUEUE_ERRORS
 from .build_examples import examples
 

@@ -1,4 +1,4 @@
-from diagrams import Diagram, Cluster, Node, Edge
+from diagrams import Diagram, Cluster, Node
 
 with Diagram("Arquitetura do Sistema - Três Camadas", show=True, direction="LR"):
 
@@ -17,7 +17,7 @@ with Diagram("Arquitetura do Sistema - Três Camadas", show=True, direction="LR"
     # Backend
     with Cluster("Backend (Regras de Negócio e Serviços)"):
         api = Node("API Gateway / Regras de Negócio")
-        queue_mgmt = Node("Gerenciamento de Fila")
+        queue_mgmt = Node("Gestão de Fila")
         audit = Node("Auditoria / Logs")
         db = Node("Banco de Dados")
         backend_nodes = [api, queue_mgmt, audit, db]

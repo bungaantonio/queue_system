@@ -1,16 +1,12 @@
 from datetime import datetime, timezone
 import logging
-from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload
 
 from app.crud.queue.read import get_existing_queue_item, get_next_position
 from app.helpers.priority_policy import calculate_priority
-from app.helpers.audit_helpers import audit_queue_action
 from app.helpers.sla_policy import calculate_sla
-from app.models.enums import QueueStatus, AttendanceType, AuditAction
+from app.models.enums import QueueStatus, AttendanceType
 from app.models.queue_item import QueueItem
-
-from app.services.user_service import consult
 
 
 logger = logging.getLogger(__name__)
@@ -69,17 +65,7 @@ def _insert(
         item.set_sla_deadline(sla_minutes)
 
     db.add(item)
-    db.flush()  # Garante que item.id existe sem fazer commit
-
-    # Auditoria
-    audit_queue_action(
-        db,
-        AuditAction.QUEUE_CREATED,
-        item,
-        operator_id,
-        f"Inserted user {user.id} into queue at position {item.position}, "
-        f"status={status}, priority={priority_score}, SLA={sla_minutes}min",
-    )
+    db.flush()
 
     # Retorna o item com relacionamento carregado
     return (

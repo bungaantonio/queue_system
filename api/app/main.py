@@ -1,5 +1,7 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from app.db.seed_system_operator import bootstrap_system_operators
 from app.exceptions.handlers import register_exception_handlers
 from app.routers import (
     auth_router,
@@ -35,14 +37,21 @@ origins = [
 ]
 
 
-app = FastAPI(title="Sistema de Gestão de Filas")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 🔹 Startup: garante que SYSTEM e DEFAULT ADMIN existem
+    bootstrap_system_operators()
+    yield
+    # 🔹 Shutdown: nenhuma ação adicional necessária
 
 
-# Apenas cria as tabelas se ainda não existirem
-# Base.metadata.drop_all(bind=engine)
+app = FastAPI(title="Sistema de Gestão de Filas", lifespan=lifespan)
+
+
+# Criação das tabelas
 Base.metadata.create_all(bind=engine)
 
-# Configuração do CORS
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -52,24 +61,11 @@ app.add_middleware(
 )
 
 
-@app.get("/", tags=["Root"])
-def root():
-    return {
-        "message": "Sistema de Gestão de Filas ativo",
-        "endpoints": {
-            "health": "/api/v1/health",
-            "metrics": "/api/v1/metrics",
-            "docs": "/docs",
-            "openapi": "/openapi.json",
-        },
-    }
-
-
 # Middleware global
 setup_monitoring_middleware(app)
 
+# Rotas
 app.include_router(monitoring_router, prefix="/api/v1/monitoring")
-
 app.include_router(queue_api.router, prefix="/api/v1/queue", tags=["Queue"])
 app.include_router(
     queue_stream_router.router, prefix="/api/v1/sse", tags=["Queue Stream"]
@@ -88,8 +84,20 @@ app.include_router(
     tags=["Audits"],
 )
 app.include_router(utentes.router, prefix="/api/v1", tags=["Utentes"])
-
 app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Dedicated"])
 
 
 register_exception_handlers(app)
+
+
+@app.get("/", tags=["Root"])
+def root():
+    return {
+        "message": "Sistema de Gestão de Filas ativo",
+        "endpoints": {
+            "health": "/api/v1/health",
+            "metrics": "/api/v1/metrics",
+            "docs": "/docs",
+            "openapi": "/openapi.json",
+        },
+    }

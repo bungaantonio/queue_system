@@ -7,7 +7,8 @@ class Settings(BaseSettings):
 
     # --- Segurança e autenticação ---
     SECRET_KEY: SecretStr = Field(
-        ..., description="Chave secreta usada para assinar tokens JWT."
+        default=SecretStr("your-secret-key-change-in-production"),
+        description="Chave secreta usada para assinar tokens JWT.",
     )
     ALGORITHM: str = Field(default="HS256", description="Algoritmo de encriptação JWT.")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(
@@ -20,7 +21,8 @@ class Settings(BaseSettings):
         default=2, description="Tempo de expiração do token curto (min)."
     )
     SERVER_SECRET: SecretStr = Field(
-        ..., description="Segredo usado internamente pelo servidor."
+        default=SecretStr("your-server-secret-change-in-production"),
+        description="Segredo usado internamente pelo servidor.",
     )
 
     # --- Ambiente ---
@@ -31,13 +33,26 @@ class Settings(BaseSettings):
     DEBUG: bool = Field(default=True, description="Ativa modo de depuração (DEBUG).")
 
     # --- Base de dados (exemplo) ---
-    DATABASE_URL: str = Field(..., description="URL de conexão à base de dados.")
-
-    SYSTEM_OPERATOR_ID: int = Field(
-        default=1,
-        description="ID do operador sistema (usado em operações automáticas).",
+    DATABASE_URL: str = Field(
+        default="sqlite:///./test.db", description="URL de conexão à base de dados."
     )
 
+    SYSTEM_OPERATOR_USERNAME: str = Field(
+        default="biometric_gateway",
+        description="Username do operador sistema (definido no seed).",
+    )
+    SYSTEM_OPERATOR_PASSWORD: str = Field(
+        default="hashed_password_placeholder",
+        description="Hash da senha do operador sistema (definido no seed).",
+    )
+    DEFAULT_ADMIN_USERNAME: str = Field(
+        default="admin",
+        description="Username do admin padrão (definido no seed).",
+    )
+    DEFAULT_ADMIN_PASSWORD: str = Field(
+        default="123",
+        description="Senha do admin padrão (definido no seed).",
+    )
     # --- Configuração do modelo ---
     model_config = SettingsConfigDict(
         env_file=".env",

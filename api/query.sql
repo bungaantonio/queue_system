@@ -1,0 +1,6 @@
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+
+SELECT * FROM users;
+
+SELECT * FROM operators;

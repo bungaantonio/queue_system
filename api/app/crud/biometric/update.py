@@ -1,4 +1,4 @@
-# app/crud/biometric/update.py 
+# app/crud/biometric/update.py
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
@@ -8,17 +8,19 @@ from app.models.queue_item import QueueItem
 
 
 def mark_biometric_verified(
-    db: Session, item: QueueItem, operator_id: int | None = None
+    db: Session, item: QueueItem, operator_id: int, biometric_id: int
 ) -> QueueItem:
     item.biometric_verified = True
     item.attempted_verification = True
     db.flush()
+
     audit_queue_action(
         db,
-        AuditAction.QUEUE_VERIFIED,
-        item,
-        operator_id,
-        f"biometric_verified: user_id={item.user_id}, status={item.status}",
+        action=AuditAction.QUEUE_VERIFIED,
+        item=item,
+        operator_id=operator_id,
+        biometric_id=biometric_id,  # Importante: vincular qual ID foi lido
+        details={"status": "sucesso"},
     )
     return item
 

@@ -1,4 +1,5 @@
 ## React
+
 ```bash
 src/
 ├── app/
@@ -49,6 +50,7 @@ src/
 ```
 
 ## React Admin
+
 ```bash
 src/
 │
@@ -119,42 +121,45 @@ src/
 ```
 
 ## FastAPI
+
 ```bash
-backend/
-├── app/
-│   ├── main.py                # Inicializa FastAPI, inclui routers
-│   ├── core/
-│   │   ├── config.py          # Configurações do projeto (env, DB)
-│   │   └── security.py        # JWT, auth helpers
-│   ├── db/
-│   │   ├── base.py            # Base declarativa do SQLAlchemy
-│   │   ├── session.py         # Session maker / engine
-│   │   └── models/            # Modelos do SQLAlchemy
-│   │       ├── user.py
-│   │       ├── post.py
-│   │       └── __init__.py
-│   ├── schemas/
-│   │   ├── user.py            # Pydantic models
-│   │   ├── post.py
-│   │   └── __init__.py
-│   ├── crud/
-│   │   ├── user.py            # Funções de acesso a dados
-│   │   ├── post.py
-│   │   └── __init__.py
-│   ├── api/
-│   │   ├── deps.py            # Dependências de injeção (DB, Auth)
-│   │   ├── routers/
-│   │   │   ├── user.py
-│   │   │   ├── post.py
-│   │   │   └── __init__.py
-│   │   └── __init__.py
-│   └── utils/
-│       ├── hashing.py         # Funções de hash de senha
-│       └── helpers.py         # Funções auxiliares
-│
-├── tests/
-│   ├── test_users.py
-│   └── test_posts.py
-│
-└── requirements.txt
+src/
+└── app/
+    ├── api/
+    │   └── v1/
+    │       ├── endpoints/
+    │       │   ├── auth.py          # Login, Refresh, Logout
+    │       │   ├── biometrics.py    # Request-capture, Register-capture
+    │       │   ├── queue.py         # Register, Call-next, Finish, Skip
+    │       │   ├── users.py         # List, Get, Update Utentes
+    |       │   ├── operators.py     #
+    │       │   └── audit.py         # List, Verify-chain, Summary
+    │       └── router.py            # Agregador de rotas v1
+    ├── core/
+    │   ├── config.py                # Variáveis de ambiente
+    │   ├── security.py              # JWT, get_current_user
+    │   └── sse_manager.py           # Broadcaster do SSE
+    ├── crud/
+    │   ├── audit_crud.py            # Operações básicas de Auditoria
+    │   ├── biometric_crud.py        # Operações básicas de Biometria
+    │   ├── queue_crud.py            # Operações básicas de Fila
+    │   ├── operators.py             # Operações básicas de Operador
+    │   └── user_crud.py             # Operações básicas de Utente
+    ├── db/
+    │   ├── base.py                  # Importa todos os models para o Alembic
+    │   ├── database.py              # SessionLocal e get_db
+    │   └── session.py               # Utilitários de sessão
+    ├── errors/                      # Seus build_examples.py e mapeamentos
+    ├── exceptions/                  # Suas classes QueueException e o Handler
+    ├── helpers/                     # Lógica pura (Priority, SLA, TTS)
+    ├── messages/                    # Seus dicionários QUEUE_ERRORS
+    ├── models/                      # Suas classes SQLAlchemy
+    ├── schemas/                     # Seus Pydantic Models (Request/Response)
+    ├── services/                    # O CÉREBRO (Onde o commit e a auditoria vivem)
+    │   ├── audit_service.py         # Lógica de Hashing e Verificação
+    │   ├── biometric_service.py     # Coordenação Hardware <-> Cache
+    │   ├── queue_service.py         # Regras de Negócio da Fila
+    │   ├── operators_service.py
+    │   └── user_service.py          # Gestão de Utentes
+    └── main.py                      # Ponto de entrada do FastAPI
 ```
