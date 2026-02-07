@@ -4,13 +4,14 @@ from app.crud.user.create import create_user
 from app.crud.queue.create import enqueue_user
 from app.crud.queue.read import get_existing_queue_item
 from app.exceptions.exceptions import BiometricException, QueueException
+from app.helpers.audit_helpers import audit_log, audit_queue_action
+from app.helpers.audit_helpers import audit_log
 from app.models.enums import AuditAction
 from app.models.user import User
 from app.models.user_credential import UserCredential  # Nova Model
 from app.services.biometric_service.utils import (
     hash_identifier,
 )
-from app.services.audit_service import AuditService
 
 
 def create_user_with_biometric_and_queue(db, request, operator_id):
@@ -22,7 +23,7 @@ def create_user_with_biometric_and_queue(db, request, operator_id):
         raise QueueException("user_already_registered")
 
     # Criação do usuário
-    db_user = create_user(db, request.user)
+    db_user = create_user(db, request.user, operator_id=operator_id)
 
     # Verifica biometria
     db_cred = _create_or_get_credential(db, db_user.id, request.biometric)
@@ -36,12 +37,18 @@ def create_user_with_biometric_and_queue(db, request, operator_id):
     if not queue_item:
         queue_item = enqueue_user(db, db_user, operator_id, request.attendance_type)
 
-    AuditService.log_action(
+    audit_queue_action(
         db,
-        user_id=operator_id,
-        action=AuditAction.USER_ENQUEUED,
-        details={"user_id": db_user.id, "queue_item_id": queue_item.id},
+        action=AuditAction.QUEUE_CREATED,
+        item=queue_item,
+        operator_id=operator_id,
+        details={
+            "attendance_type": request.attendance_type,
+            "priority_score": queue_item.priority_score,
+        },
     )
+
+    db.commit()
     return db_user, db_cred, queue_item
 
 
@@ -52,7 +59,9 @@ def _create_or_get_credential(
     Gerencia as credenciais do usuário. Aplica Hash HMAC no ID do sensor.
     """
     # 1. Gerar o hash seguro do ID vindo do sensor/middleware
-    hashed_id = hash_identifier(biometric_model.biometric_id)
+    hashed_id = hash_identifier(
+        biometric_model.biometric_hash
+    )  # Supondo que o modelo tenha um campo biometric_hash
 
     # 2. Verifica se este usuário já tem esta digital cadastrada
     existing_user_cred = (

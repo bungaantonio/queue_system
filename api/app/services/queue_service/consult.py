@@ -1,6 +1,11 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
-
+from app.crud.user.read import get_user
+from app.crud.queue.create import enqueue_user
+from app.crud.queue.read import get_existing_queue_item
+from app.models.user_credential import UserCredential
+from app.exceptions.exceptions import BiometricException, QueueException
+from app.services.biometric_service.utils import hash_identifier
 from app.exceptions.exceptions import QueueException
 from app.crud import (
     get_user,
@@ -12,10 +17,12 @@ from app.crud import (
     get_next_waiting_item,
     get_pending_verification_item,
 )
+from app.helpers.audit_helpers import audit_log
 from app.schemas.queue_schema.response import (
     QueueDetailItem,
     QueueListItem,
     QueueCalledItem,
+    QuickEntryResponse,
 )
 
 
@@ -93,7 +100,7 @@ def get_pending_verification_user(db: Session) -> QueueDetailItem:
 
 
 def get_next_called_with_tokens(
-    db: Session, operator_id: int = None
+    db: Session, operator_id: Optional[int] = None
 ) -> QueueCalledItem:
     """
     Próximo usuário chamado pendente de verificação, retornando call_token e biometric_hash.
@@ -103,4 +110,48 @@ def get_next_called_with_tokens(
     if not item:
         raise QueueException("no_called_user")
 
+    audit_log(
+        db,
+        action="get_next_called_with_tokens",
+        operator_id=operator_id,
+        user_id=item.user_id,
+        queue_item_id=item.id,
+        details={"call_token": item.call_token, "biometric_hash": item.biometric_hash},
+    )
+
     return QueueCalledItem.from_orm_item(item)
+
+
+def quick_entry(
+    db: Session, request, biometric_id: str, operator_id: Optional[int] = None
+) -> QuickEntryResponse:
+
+    # 1. Aplica hash ao ID da biometria
+    hashed_id = hash_identifier(biometric_id)
+
+    # 2. Busca usuário pelo hash
+    cred = (
+        db.query(UserCredential).filter(UserCredential.identifier == hashed_id).first()
+    )
+    if not cred:
+        raise BiometricException("biometric_not_found")
+
+    user = get_user(db, cred.user_id)
+    if not user:
+        raise QueueException("user_not_found")
+
+    # 3. Verifica se o usuário já está na fila
+    queue_item = get_existing_queue_item(db, user.id)
+    if queue_item:
+        # Retorna o item existente (idempotente)
+        return QuickEntryResponse.from_orm_item(queue_item)
+
+    # 4. Se não estiver na fila, adiciona
+    queue_item = enqueue_user(
+        db,
+        user=user,
+        operator_id=operator_id or 1,  # ID padrão do sistema/totem
+        attendance_type=request.attendance_type,
+    )
+
+    return QuickEntryResponse.from_orm_item(queue_item)

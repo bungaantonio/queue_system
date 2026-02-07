@@ -5,7 +5,7 @@ from app.models.enums import AuditAction, OperatorRole
 from sqlalchemy.orm import Session
 
 from app.exceptions.exceptions import QueueException
-from app.helpers.audit_helpers import get_biometric_for_finished
+from app.helpers.audit_helpers import audit_queue_action, get_biometric_for_finished
 
 from app.schemas.queue_schema.request import QueueRequeue
 from app.schemas.queue_schema.response import (
@@ -49,35 +49,39 @@ def call_next_user(db: Session, operator_id: Optional[int] = None) -> QueueCalle
     if not next_item:
         raise QueueException("empty")
 
-    # O mark_as_called agora gera apenas o CallToken e o status CALLED_PENDING
-    updated_item = mark_as_called(db, next_item, operator_id=operator_id)
+    updated_item = mark_as_called(db, next_item)
 
-    db.flush()
-
-    AuditService.log_action(
+    audit_queue_action(
         db,
-        user_id=operator_id,
         action=AuditAction.USER_CALLED,
-        details={"queue_item_id": updated_item.id, "user_id": updated_item.user_id},
+        item=updated_item,
+        operator_id=operator_id,
+        details={"msg": "Usuário chamado para o guichê"},
     )
+
+    db.commit()
     return QueueCalledItem.from_orm_item(updated_item)
 
 
-def complete_active_user_service(db: Session) -> QueueDetailItem:
-    """Conclui o atendimento do usuário ativo."""
+def complete_active_user_service(db: Session, operator_id: int) -> QueueDetailItem:
     current_item = get_active_service_item(db)
     if not current_item:
         raise QueueException("no_active_service")
 
-    done_item = mark_as_done(db, current_item)
-    _ = get_biometric_for_finished(db, done_item.id)
+    bio_id = get_biometric_for_finished(db, current_item.id)
 
-    AuditService.log_action(
+    done_item = mark_as_done(db, current_item)
+
+    audit_queue_action(
         db,
-        user_id=done_item.operator_id,
         action=AuditAction.QUEUE_PROCESSED,
-        details={"queue_item_id": done_item.id, "user_id": done_item.user_id},
+        item=done_item,
+        operator_id=operator_id,
+        biometric_id=bio_id,
+        details={"final_status": "DONE"},
     )
+
+    db.commit()
     return QueueDetailItem.from_orm_item(done_item)
 
 
@@ -96,28 +100,27 @@ def skip_called_user(db: Session, current_operator_id: int) -> QueueDetailItem:
 
     updated_item = mark_as_skipped(db, current_item)
 
-    # 🔹 Registro de auditoria correto
-    AuditService.log_action(
+    audit_queue_action(
         db,
-        operator_id=current_operator_id,  # operador logado
-        user_id=current_item.user_id,  # usuário da fila
-        queue_item_id=updated_item.id,  # item da fila
         action=AuditAction.USER_SKIPPED,
-        details={"queue_item_id": updated_item.id, "user_id": current_item.user_id},
+        item=updated_item,
+        operator_id=current_operator_id,
+        details={"reason": "Usuário não compareceu/biometria falhou"},
     )
 
+    db.commit()
     return QueueDetailItem.from_orm_item(updated_item)
 
 
+# Não usado, mas pode ser útil para auditoria ou para casos onde o usuário tenta verificar, mas não tem sucesso (tentativa de fraude, por exemplo)
 def mark_user_verification_attempted(db: Session, user_id: int) -> None:
     """Marca que o usuário tentou verificação biométrica."""
     queue_item = get_called_pending_by_user_queue(db, user_id)
     if queue_item:
         verificated = mark_attempted_verification(db, queue_item)
-    # Criar um scheme para verificação
 
 
-def cancel_active_user(db: Session, item_id: int) -> QueueDetailItem:
+def cancel_active_user(db: Session, item_id: int, operator_id) -> QueueDetailItem:
     """Cancela o atendimento do usuário ativo."""
     queue_item = get_existing_queue_item(db, item_id)
     if not queue_item:
@@ -125,12 +128,15 @@ def cancel_active_user(db: Session, item_id: int) -> QueueDetailItem:
 
     cancelled_item = mark_as_cancelled(db, queue_item)
 
-    AuditService.log_action(
+    audit_queue_action(
         db,
-        user_id=cancelled_item.operator_id,
         action=AuditAction.USER_CANCELLED,
-        details={"queue_item_id": cancelled_item.id, "user_id": cancelled_item.user_id},
+        item=cancelled_item,
+        operator_id=operator_id,
+        details={"item_id_cancelado": item_id},
     )
+
+    db.commit()
     return QueueDetailItem.from_orm_item(cancelled_item)
 
 

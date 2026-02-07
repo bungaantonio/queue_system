@@ -11,8 +11,17 @@ from app.core.config import settings
 from app.db.database import get_db
 from app.crud.operator_crud import get_operator_by_username
 
+# Obrigatório (para endpoints humanos)
+oauth2_scheme_required = OAuth2PasswordBearer(
+    tokenUrl="/auth/login",
+    auto_error=True,
+)
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+# Opcional (para endpoints híbridos)
+oauth2_scheme_optional = OAuth2PasswordBearer(
+    tokenUrl="/auth/login",
+    auto_error=False,
+)
 
 
 def _get_secret_key_value() -> str:
@@ -20,7 +29,6 @@ def _get_secret_key_value() -> str:
     Retorna a SECRET_KEY como str — aceita SecretStr ou str.
     """
     secret = settings.SECRET_KEY
-    # pydantic SecretStr tem método get_secret_value()
     if hasattr(secret, "get_secret_value"):
         return secret.get_secret_value()
     return str(secret)
@@ -49,40 +57,82 @@ def decode_access_token(token: str) -> dict:
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=401,
-            detail="Token expired",
+            detail="Token expirado",
             headers={"WWW-Authenticate": "Bearer"},
         )
     except JWTError:
         raise HTTPException(
             status_code=401,
-            detail="Invalid token",
+            detail="Token inválido",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme_required), db: Session = Depends(get_db)
 ):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
+    """
+    Retorna o operador logado via JWT.
+    Lança exceção se não houver token ou se for inválido.
+    """
     payload = decode_access_token(token)
-    username: str = payload.get("sub") if payload else None
-    if username is None:
-        raise credentials_exception
+    username = payload.get("sub")
+    if not username:
+        raise HTTPException(
+            status_code=401, detail="As credenciais de autenticação são inválidas"
+        )
 
     user = get_operator_by_username(db, username=username)
     if user is None:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=401, detail="As credenciais de autenticação são inválidas"
+        )
 
     return user
 
 
+def get_current_user_optional(
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    db: Session = Depends(get_db),
+):
+    """
+    Retorna o operador logado via JWT, ou None se não houver token válido.
+    Não lança exceção.
+    """
+    if not token:
+        return None
+    try:
+        payload = decode_access_token(token)
+        username = payload.get("sub")
+        if not username:
+            return None
+        user = get_operator_by_username(db, username=username)
+        return user
+    except JWTError:
+        return None
+
+
+def resolve_operator_with_system_fallback(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user_optional),
+):
+    """
+    Retorna o operador ativo:
+      - Humano logado, se houver token válido
+      - SYSTEM (biometric_gateway) como fallback
+    """
+    if current_user:
+        return current_user
+
+    system_operator = get_operator_by_username(db, username="biometric_gateway")
+    if not system_operator:
+        raise RuntimeError("SYSTEM operator não encontrado no banco!")
+    return system_operator
+
+
 def get_operator_id(current_user=Depends(get_current_user)) -> int:
     """
-    Retorna apenas o ID do operador logado.
+    Retorna apenas o `ID` do operador logado.
+    Continua disponível para endpoints que só aceitam operador humano.
     """
     return current_user.id

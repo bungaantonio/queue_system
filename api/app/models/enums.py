@@ -39,6 +39,7 @@ class OperatorRole(str, Enum):
     ADMIN = "admin"
     ATTENDANT = "attendant"
     AUDITOR = "auditor"
+    SYSTEM = "system"
 
     @property
     def label(self):
@@ -73,3 +74,6 @@ class AuditAction(str, Enum):
     # Auditoria / Sistema
     AUDIT_VERIFIED = "Cadeia de auditoria verificada"
     AUDIT_SUMMARY_GENERATED = "Resumo de auditoria gerado"
+    PRIORITY_PROMOTED = "Prioridade promovida"
+    PRIORITY_DEMOTED = "Prioridade rebaixada"
+    POSITION_CHANGED = "Posição alterada"

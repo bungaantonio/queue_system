@@ -50,12 +50,6 @@ class AuditService:
         )
         audit.finalize_record()
 
-        db.add(audit)
-        db.commit()
-        db.refresh(audit)
-
-        db.add(audit)
-        db.flush()
         logger.info(
             "Audit logged: action=%s, operator_id=%s, user_id=%s, queue_item_id=%s, id=%s",
             action,
@@ -64,6 +58,10 @@ class AuditService:
             queue_item_id,
             audit.id,
         )
+
+        db.add(audit)
+        db.flush()
+
         return audit
 
     @staticmethod

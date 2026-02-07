@@ -1,19 +1,14 @@
 # app/crud/queue/update.py
 from datetime import datetime, timezone
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.crud.queue.read import get_next_position
-from app.helpers.audit_helpers import audit_queue_action
-from app.models.enums import QueueStatus, AuditAction
+from app.models.enums import QueueStatus
 from app.models.queue_item import QueueItem
-from app.crud.biometric import get_first_biometric_by_user
 from app.models.user_credential import UserCredential
 from app.services.biometric_service import utils
 
 
-def mark_as_called(
-    db: Session, item: QueueItem, operator_id: int | None = None
-) -> QueueItem:
+def mark_as_called(db: Session, item: QueueItem) -> QueueItem:
     """
     Marca o usuário como chamado e gera os tokens de sessão.
     """
@@ -44,41 +39,19 @@ def mark_as_called(
         item.biometric_hash = None
 
     db.flush()
-    db.refresh(item)
-
-    audit_queue_action(
-        db,
-        AuditAction.QUEUE_UPDATED,
-        item,
-        operator_id,
-        f"mark_as_called: {old_status} -> {item.status}, token generated",
-    )
     return item
 
 
-def mark_as_done(
-    db: Session, item: QueueItem, operator_id: int | None = None
-) -> QueueItem:
+def mark_as_done(db: Session, item: QueueItem) -> QueueItem:
     old_status = item.status
     item.status = QueueStatus.DONE
     item.timestamp = datetime.now(timezone.utc)
 
     db.flush()
-    db.refresh(item)
-
-    audit_queue_action(
-        db,
-        AuditAction.QUEUE_UPDATED,
-        item,
-        operator_id,
-        f"mark_as_done: {old_status} -> {item.status}",
-    )
     return item
 
 
-def mark_as_cancelled(
-    db: Session, item: QueueItem, operator_id: int | None = None
-) -> QueueItem:
+def mark_as_cancelled(db: Session, item: QueueItem) -> QueueItem:
     """
     Marca o item como CANCELLED e ajusta as posições subsequentes de forma transacional.
     """
@@ -86,8 +59,6 @@ def mark_as_cancelled(
     old_status = item.status
 
     item.status = QueueStatus.CANCELLED
-    db.flush()
-    db.refresh(item)
 
     # Ajusta posições de forma segura
     db.query(QueueItem).filter(
@@ -97,22 +68,14 @@ def mark_as_cancelled(
         {QueueItem.position: QueueItem.position - 1},
         synchronize_session="fetch",
     )
-    db.flush()
 
-    audit_queue_action(
-        db,
-        AuditAction.QUEUE_UPDATED,
-        item,
-        operator_id,
-        f"mark_as_cancelled: {old_status} -> {item.status}, adjusted positions from {old_position}",
-    )
+    db.flush()
     return item
 
 
 def mark_as_skipped(
     db: Session,
     item: QueueItem,
-    operator_id: int | None = None,
     offset: int = 2,
 ) -> QueueItem:
     """
@@ -140,34 +103,14 @@ def mark_as_skipped(
     item.timestamp = datetime.now(timezone.utc)
 
     db.flush()
-    db.refresh(item)
-
-    audit_queue_action(
-        db,
-        AuditAction.QUEUE_UPDATED,
-        item,
-        operator_id,
-        f"mark_as_skipped: {old_status} -> WAITING (moved from pos {old_position} to {new_position})",
-    )
     return item
 
 
-def mark_attempted_verification(
-    db: Session, queue_item: QueueItem, operator_id: int | None = None
-) -> QueueItem:
+def mark_attempted_verification(db: Session, queue_item: QueueItem) -> QueueItem:
     """
     Marca que o usuário tentou a verificação biométrica.
     """
     queue_item.attempted_verification = True
 
     db.flush()
-    db.refresh(queue_item)
-
-    audit_queue_action(
-        db,
-        AuditAction.QUEUE_UPDATED,
-        queue_item,
-        operator_id,
-        f"mark_attempted_verification: user_id={queue_item.user_id}",
-    )
     return queue_item

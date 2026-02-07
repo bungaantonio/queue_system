@@ -7,12 +7,9 @@ from app.helpers.queue_notifier import queue_notifier
 from app.helpers.queue_broadcast import broadcast_state_sync
 from app.schemas.queue_schema.response import QueueDetailItem
 from app.services.biometric_service import scan
-from app.schemas.biometric_schema.response import QuickQueueEntryBiometric
 from app.schemas.biometric_schema.request import (
-    BiometricScan,
     BiometricAuthRequest,
 )
-from app.exceptions.exceptions import QueueException
 from app.services.biometric_service.authentication import BiometricAuthService
 from app.utils.helpers import resolve_operator_id
 
@@ -21,32 +18,6 @@ router = APIRouter()
 
 # Cache temporário para o cadastro
 temp_biometric_cache = {}
-
-
-@router.post("/quick-entry", response_model=QuickQueueEntryBiometric)
-def entry(
-    request: BiometricScan,
-    db: Session = Depends(get_db),
-    operator_id: int = Depends(resolve_operator_id),
-    background_tasks: BackgroundTasks = None,
-):
-    """
-    Entrada rápida na fila.
-
-    - Se feita por operador logado → usa ID do operador
-    - Se feita pelo usuário final → usa operador padrão do sistema
-    """
-
-    result = scan.quick_entry(
-        db, request, request.biometric_id, operator_id=operator_id
-    )
-
-    db.commit()
-
-    if background_tasks:
-        background_tasks.add_task(broadcast_state_sync)
-
-    return result
 
 
 @router.post("/authenticate", response_model=QueueDetailItem)
@@ -95,9 +66,9 @@ async def request_capture(operator_id: int):
 async def receive_capture(payload: dict):
     s_id = payload.get("session_id")
     b_id = payload.get("biometric_id")
-    
+
     if s_id and b_id:
-        temp_biometric_cache[s_id] = b_id # Grava no dicionário global
+        temp_biometric_cache[s_id] = b_id  # Grava no dicionário global
         print(f"DEBUG: Gravado {s_id}")
         return {"status": "ok"}
     return {"status": "error"}

@@ -1,24 +1,14 @@
 ### Backend - Operadores
-### Criar primeiro operador (bootstrap)
-POST http://127.0.0.1:8000/api/v1/operators/bootstrap
-Content-Type: application/json
 
-{
-  "username": "admin",
-  "password": "123",
-  "role": "admin"
-}
-
-###
 GET http://127.0.0.1:8000/api/v1/operators/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJzdWIiOiJhZG1pbiIsImlhdCI6MTc3MDM3MjAyOCwiZXhwIjoxNzcwMzc1NjI4LCJqdGkiOiI2YTVmZWYwZWQwZmI0N2FhOGE0ZmFmOWM2MjZlMWU4MyJ9.8DmipUijOXFCjYqAHYAhEhlAhnX6HmI9CoTwxkyvhEk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA0NzA5MjgsImV4cCI6MTc3MDQ3MTUyOCwianRpIjoiMTM5NTkwODc4NWQ3NGM5NTkyOTc2ODdlMjIwZDhiODcifQ.xgOkG9YqzW6Q539e8w7w9ZPPO0-nw8Ibzbg2MaRQhhU
 
 ### Login
 POST http://127.0.0.1:8000/auth/login
 Content-Type: application/json
 
 {
-  "username": "auditor",
+  "username": "admin",
   "password": "123"
 }
 
@@ -41,16 +31,14 @@ Content-Type: application/json
     "phone": "945678901"
   },
   "biometric": {
-    "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e",
-    "finger_index": 4
+    "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e"
   },
-  "attendance_type": "urgent",
-  "operator_id": 26
+  "attendance_type": "urgent"
 }
 
 ### Registrar usuário com biometria #3
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA0ODA5OTcsImV4cCI6MTc3MDQ4MTU5NywianRpIjoiYWFkYjM2MmVhYTA0NDM4NzlhNDA0ZmNmZTMwZjQ5ZTUifQ.aJNWXv0pmwmOliwpMXrwMeJ3ZY8Jb8mOW0SAr2cAyVI
 
 {
   "user": {
@@ -64,11 +52,9 @@ Content-Type: application/json
     "phone": "912345678"
   },
   "biometric": {
-    "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e",
-    "finger_index": 1
+    "biometric_hash": "HASH_TESTE_DEDO_1"
   },
-  "attendance_type": "normal",
-  "operator_id": 26
+  "attendance_type": "normal"
 }
 
 
@@ -76,7 +62,7 @@ Content-Type: application/json
 
 ### Registrar usuário com biometria #4
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA0ODA5OTcsImV4cCI6MTc3MDQ4MTU5NywianRpIjoiYWFkYjM2MmVhYTA0NDM4NzlhNDA0ZmNmZTMwZjQ5ZTUifQ.aJNWXv0pmwmOliwpMXrwMeJ3ZY8Jb8mOW0SAr2cAyVI
 
 {
   "user": {
@@ -90,20 +76,19 @@ Content-Type: application/json
     "phone": "956789012"
   },
   "biometric": {
-    "biometric_id": "HASH_TESTE_DEDO_1"
+    "biometric_hash": "HASH_TESTE_DEDO_2"
   },
-  "attendance_type": "priority",
-  "operator_id": 26
+  "attendance_type": "priority"
 }
 
 
 
 ### Entrada rapida na fila
-POST http://127.0.0.1:8000/api/v1/biometrics/quick-entry
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzcwMTY0NTM2LCJzdWIiOiJhZG1pbiIsImlhdCI6MTc3MDE2MDkzNn0.MafUYUNg9xk3_YpFXLiHbB-dqjCvZIEeP72fX545t5E
+POST http://127.0.0.1:8000/api/v1/queue/quick-entry
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA0ODA5OTcsImV4cCI6MTc3MDQ4MTU5NywianRpIjoiYWFkYjM2MmVhYTA0NDM4NzlhNDA0ZmNmZTMwZjQ5ZTUifQ.aJNWXv0pmwmOliwpMXrwMeJ3ZY8Jb8mOW0SAr2cAyVI
 
 {
-  "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc13e",
+  "biometric_hash": "HASH_TESTE_DEDO_1",
   "attendance_type": "normal"
 }
 

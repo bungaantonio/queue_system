@@ -1,4 +1,4 @@
-from sqlalchemy import func
+from sqlalchemy import Enum, func
 from sqlalchemy.orm import Session
 
 from app.crud.queue.read import get_next_position
@@ -18,14 +18,14 @@ def promote_priority(
     db.commit()
     db.refresh(item)
 
+    # Audita a mudança de prioridade
     audit_queue_action(
         db,
-        AuditAction.QUEUE_UPDATED,
-        item,
-        operator_id,
-        f"promote_priority: {old_priority} -> {item.priority_score}",
+        action=AuditAction.PRIORITY_PROMOTED,
+        item=item,
+        operator_id=operator_id,
+        details={"old_priority": old_priority, "new_priority": item.priority_score},
     )
-
     return item
 
 
@@ -40,14 +40,14 @@ def demote_priority(
     db.commit()
     db.refresh(item)
 
+    # Audita a mudança de prioridade
     audit_queue_action(
         db,
-        AuditAction.QUEUE_UPDATED,
-        item,
-        operator_id,
-        f"demote_priority: {old_priority} -> {item.priority_score}",
+        action=AuditAction.PRIORITY_DEMOTED,
+        item=item,
+        operator_id=operator_id,
+        details={"old_priority": old_priority, "new_priority": item.priority_score},
     )
-
     return item
 
 
@@ -89,15 +89,15 @@ def reinsert_at_position(
         )
 
     item.position = position
-    db.commit()
-    db.refresh(item)
 
+    # Audita a mudança de posição
     audit_queue_action(
         db,
-        AuditAction.QUEUE_UPDATED,
-        item,
-        operator_id,
-        f"reinsert_at_position: {old_position} -> {position}",
+        action=AuditAction.POSITION_CHANGED,
+        item=item,
+        operator_id=operator_id,
+        details={"old_position": old_position, "new_position": position},
     )
+    db.refresh(item)
 
     return item
