@@ -1,8 +1,6 @@
-import hashlib
 import json
 import logging
 from datetime import datetime
-from sys import audit
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.models.audit import Audit
@@ -12,28 +10,16 @@ from app.schemas.audit_schema import AuditVerificationDetail
 logger = logging.getLogger(__name__)
 
 
-class AuditAction(str):
-    QUEUE_CREATED = "Fila criada"
-    QUEUE_UPDATED = "Fila atualizada"
-    QUEUE_VERIFIED = "Fila verificada"
-    QUEUE_PROCESSED = "Fila processada"
-    QUEUE_CALLED = "Usuário chamado"
-    QUEUE_SKIPPED = "Usuário pulado"
-    QUEUE_CANCELLED = "Usuário cancelado"
-    USER_CREATED = "Usuário criado"
-    USER_UPDATED = "Usuário atualizado"
-
-
 class AuditService:
     @staticmethod
     def log_action(
-        db: Session,
-        action: str,
-        operator_id: Optional[int] = None,
-        user_id: Optional[int] = None,
-        queue_item_id: Optional[int] = None,
-        biometric_id: Optional[int] = None,
-        details: Optional[dict] = None,
+            db: Session,
+            action: str,
+            operator_id: Optional[int] = None,
+            user_id: Optional[int] = None,
+            queue_item_id: Optional[int] = None,
+            credential_id: Optional[int] = None,
+            details: Optional[dict] = None,
     ) -> Audit:
         """Cria um registro de auditoria com hash encadeado."""
         last_audit = db.query(Audit).order_by(Audit.id.desc()).first()
@@ -43,7 +29,7 @@ class AuditService:
             operator_id=operator_id,
             user_id=user_id,
             queue_item_id=queue_item_id,
-            biometric_id=biometric_id,
+            credential_id=credential_id,
             action=action,
             details=details or {},
             hashed_previous=hashed_previous,
@@ -66,7 +52,7 @@ class AuditService:
 
     @staticmethod
     def _to_verification_detail(
-        audit: Audit, previous_hash: Optional[str]
+            audit: Audit, previous_hash: Optional[str]
     ) -> AuditVerificationDetail:
         recalculated = audit.finalize_record()
         prev_match = (
@@ -88,13 +74,13 @@ class AuditService:
             operator_id=audit.operator_id,
             user_id=audit.user_id,
             queue_item_id=audit.queue_item_id,
-            biometric_id=audit.biometric_id,
+            credential_id=audit.credential_id,
             recalculated_hash=recalculated,
             stored_hash=audit.hashed_record,
             previous_hash_matches=prev_match,
             valid=valid,
             details=details,
-            timestamp=audit.timestamp.isoformat(),
+            timestamp=audit.timestamp,
         )
 
     @staticmethod
@@ -113,7 +99,7 @@ class AuditService:
 
     @staticmethod
     def verify_single_audit(
-        db: Session, audit_id: int
+            db: Session, audit_id: int
     ) -> Optional[AuditVerificationDetail]:
         audit = audit_crud.get_audit_by_id(db, audit_id)
         if not audit:
@@ -126,13 +112,13 @@ class AuditService:
 
     @staticmethod
     def generate_audit_report(
-        db: Session,
-        user_id: Optional[int] = None,
-        action: Optional[str] = None,
-        start: Optional[datetime] = None,
-        end: Optional[datetime] = None,
-        skip: int = 0,
-        limit: int = 100,
+            db: Session,
+            user_id: Optional[int] = None,
+            action: Optional[str] = None,
+            start: Optional[datetime] = None,
+            end: Optional[datetime] = None,
+            skip: int = 0,
+            limit: int = 100,
     ) -> List[AuditVerificationDetail]:
         query = db.query(Audit).order_by(Audit.id.asc())
         if user_id is not None:

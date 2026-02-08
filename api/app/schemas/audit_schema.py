@@ -13,7 +13,7 @@ class AuditVerificationDetail(BaseModel):
     operator_id: Optional[int]
     user_id: Optional[int]
     queue_item_id: Optional[int]
-    biometric_id: Optional[int]
+    credential_id: Optional[int]
     details: Optional[dict] = Field(default_factory=dict)
     timestamp: datetime
 

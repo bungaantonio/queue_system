@@ -1,30 +1,30 @@
 # app/schemas/queue_schema.py
 from pydantic import BaseModel, Field
-from datetime import datetime, timezone
-from typing import Optional
-from app.models.enums import QueueStatus, AttendanceType
 from app.models.enums import AttendanceType
 from app.schemas.user_schema import UserCreate
 
 
-class BiometricCreate(BaseModel):
-    biometric_hash: str
+class CredentialRegister(BaseModel):
+    identifier: str = Field(
+        ...,
+        description="Identificador único da credencial capturada (hash, UUID, public key, etc).",
+    )
 
 
 class QueueRegister(BaseModel):
     user: UserCreate
-    biometric: BiometricCreate
+    credential: CredentialRegister
     attendance_type: AttendanceType = AttendanceType.NORMAL
 
 
 class QuickEntryRequest(BaseModel):
     """
-    Representa a requisição para leitura de uma biometria.
+    Representa a requisição para entrada rápida via credencial.
     """
 
-    biometric_hash: str = Field(
+    identifier: str = Field(
         ...,
-        description="Identificador único do template biométrico capturado (hash, UUID, etc).",
+        description="Identificador único da credencial capturada.",
     )
     attendance_type: AttendanceType = Field(
         ...,

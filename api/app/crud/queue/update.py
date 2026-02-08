@@ -5,7 +5,42 @@ from app.crud.queue.read import get_next_position
 from app.models.enums import QueueStatus
 from app.models.queue_item import QueueItem
 from app.models.user_credential import UserCredential
-from app.services.biometric_service import utils
+from app.utils import credential_utils
+
+
+def set_priority(db: Session, item: QueueItem, new_priority: int) -> QueueItem:
+    """Atualiza diretamente a prioridade de um item. Não commit nem auditoria."""
+    item.priority_score = new_priority
+    db.flush()
+    return item
+
+
+def set_position(db: Session, item: QueueItem, new_position: int) -> QueueItem:
+    """Move item para nova posição, ajustando outros itens ativos."""
+    old_position = item.position
+    if old_position == new_position:
+        return item
+
+    active_statuses = [QueueStatus.WAITING, QueueStatus.CALLED_PENDING]
+
+    if new_position < old_position:
+        # sobe o item: empurra os acima uma posição abaixo
+        db.query(QueueItem).filter(
+            QueueItem.position >= new_position,
+            QueueItem.position < old_position,
+            QueueItem.status.in_(active_statuses)
+        ).update({QueueItem.position: QueueItem.position + 1}, synchronize_session="fetch")
+    else:
+        # desce o item: puxa os abaixo uma posição acima
+        db.query(QueueItem).filter(
+            QueueItem.position <= new_position,
+            QueueItem.position > old_position,
+            QueueItem.status.in_(active_statuses)
+        ).update({QueueItem.position: QueueItem.position - 1}, synchronize_session="fetch")
+
+    item.position = new_position
+    db.flush()
+    return item
 
 
 def mark_as_called(db: Session, item: QueueItem) -> QueueItem:
@@ -19,7 +54,7 @@ def mark_as_called(db: Session, item: QueueItem) -> QueueItem:
 
     # 1. Gerar Call Token (Obrigatório para a sessão de atendimento)
     # Usando o nome correto da função em utils.py
-    item.call_token, item.call_token_expires_at = utils.generate_call_token()
+    item.call_token, item.call_token_expires_at = credential_utils.generate_call_token()
 
     # 2. Buscar a credencial do usuário (Opcional aqui, obrigatório na autenticação)
     # Não travamos o processo se não encontrar, apenas logamos.
@@ -74,9 +109,9 @@ def mark_as_cancelled(db: Session, item: QueueItem) -> QueueItem:
 
 
 def mark_as_skipped(
-    db: Session,
-    item: QueueItem,
-    offset: int = 2,
+        db: Session,
+        item: QueueItem,
+        offset: int = 2,
 ) -> QueueItem:
     """
     Marca o item como 'pulado' e o move algumas posições abaixo na fila.

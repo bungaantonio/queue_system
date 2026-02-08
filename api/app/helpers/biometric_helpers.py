@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 from app.crud.biometric import get_by_biometric_id
 from app.models.biometric import Biometric
-from app.exceptions.exceptions import BiometricException
+from app.exceptions.exceptions import CredentialException
 
 
 def validate_biometric(template: str, bio: Biometric) -> None:
@@ -11,11 +11,11 @@ def validate_biometric(template: str, bio: Biometric) -> None:
     Lança BiometricException se não bater.
     """
     if bio.template != template:
-        raise BiometricException("biometric_mismatch")
+        raise CredentialException("biometric_mismatch")
 
 
 def identify_user(db: Session, biometric_id: str) -> int:
     bio = get_by_biometric_id(db, biometric_id)
     if not bio:
-        raise BiometricException("biometric_not_found")
+        raise CredentialException("biometric_not_found")
     return bio.user_id

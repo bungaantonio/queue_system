@@ -11,12 +11,12 @@ def get_operator_by_username(db: Session, username: str) -> Optional[Operator]:
     return db.query(Operator).filter(Operator.username == username).first()
 
 
-def get_all_operators(db: Session) -> List[Operator]:
+def get_all_operators(db: Session):
     return db.query(Operator).all()
 
 
 def create_operator_record(
-    db: Session, username: str, hashed_password: str, role: str
+        db: Session, username: str, hashed_password: str, role: str
 ) -> Operator:
     """Cria o registro no banco. Não faz commit."""
     db_obj = Operator(
