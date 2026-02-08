@@ -22,7 +22,7 @@ class CredentialRegisterRequest(BaseModel):
     Registro de nova credencial vinculada a um utilizador.
     Recebido diretamente do middleware (hash, UUID, etc).
     """
-    identifier: str = Field(
+    credential: str = Field(
         ...,
         description="Identificador único do template capturado (hash, UUID, etc)."
     )
@@ -41,7 +41,7 @@ class CredentialVerifyRequest(BaseModel):
     Verificação de credencial durante atendimento, vinculado a um ‘item’ da fila.
     """
     queue_item_id: int
-    identifier: str  # hash / UUID do template
+    credential: str  # hash / UUID do template
     cred_type: CredentialType = Field(default=CredentialType.ZKTECO)
 
 
@@ -50,7 +50,7 @@ class CredentialAuthRequest(BaseModel):
     Autenticação formal com operador e ‘token’ de chamada.
     """
     queue_item_id: int
-    identifier: str
+    credential: str
     operator_id: int
     call_token: str
     cred_type: CredentialType = Field(default=CredentialType.ZKTECO)
@@ -65,7 +65,7 @@ class CredentialVerifyResponse(BaseModel):
     Resultado da verificação ou autenticação de credencial.
     """
     user_id: Optional[int] = None  # None se não encontrado
-    verified: bool
+    credential_verified: bool
     message: str
     confidence: Optional[float] = Field(
         default=None,
@@ -96,7 +96,7 @@ class CredentialScanEvent(BaseModel):
     Evento efémero de leitura de credencial do middleware.
     Útil para fluxos descolados (scan antes da fila).
     """
-    identifier: str
+    credential: str
     cred_type: CredentialType = Field(default=CredentialType.ZKTECO)
     metadata: Optional[Dict[str, str]] = None
     timestamp: datetime

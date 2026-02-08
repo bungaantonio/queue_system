@@ -34,12 +34,12 @@ class QueueItem(Base):
     sla_deadline = Column(DateTime(timezone=True), nullable=True)
     attendance_type = Column(String(32), default=AttendanceType.NORMAL)
 
-    biometric_hash = Column(String(64), nullable=True)
+    credential = Column(String(64), nullable=True)
     call_token = Column(String(64), nullable=True, index=True)
     call_token_expires_at = Column(DateTime(timezone=True), nullable=True)
 
     attempted_verification = Column(Boolean, default=False, nullable=False)
-    biometric_verified = Column(Boolean, default=False, nullable=False)
+    credential_verified = Column(Boolean, default=False, nullable=False)
 
     user = relationship("User", back_populates="queue_items", lazy="joined")
 
@@ -49,8 +49,8 @@ class QueueItem(Base):
         CheckConstraint("position >= 0", name="ck_queue_position_non_negative"),
         CheckConstraint("priority_score >= 0", name="ck_queue_priority_non_negative"),
         CheckConstraint(
-            "(status != 'being_served') OR (biometric_verified = TRUE)",
-            name="ck_served_requires_biometric_verification",
+            "(status != 'being_served') OR (credential_verified = TRUE)",
+            name="ck_served_requires_credential_verified",
         ),
     )
 
@@ -58,8 +58,16 @@ class QueueItem(Base):
     # Métodos utilitários
     # -------------------------
 
+    def reset_authentication_state(self) -> None:
+        """Limpa completamente qualquer estado de autenticação."""
+        self.credential = None
+        self.credential_verified = False
+        self.attempted_verification = False
+        self.call_token = None
+        self.call_token_expires_at = None
+
     def is_expired(self) -> bool:
-        """Retorna True se o item excedeu o SLA definido."""
+        """Retorna True se o ‘item’ excedeu o SLA definido."""
         if self.sla_deadline is None:
             return False
         return datetime.now(timezone.utc) > self.sla_deadline

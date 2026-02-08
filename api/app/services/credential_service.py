@@ -20,63 +20,54 @@ class CredentialAuthService:
 
     @staticmethod
     def authenticate_user(
-        db: Session,
-        queue_item_id: int,
-        presented_credential_hash: str,
-        presented_call_token: str,
-        operator_id: int,
+            db: Session,
+            queue_item_id: int,
+            input_credential: str,
+            presented_call_token: str,
+            operator_id: int,
     ):
-
         # 1️⃣ Busca item chamado
         item = get_called_pending_by_queue_item_id(db, queue_item_id)
         if not item:
             raise AppException("queue.item_not_called")
 
         # 2️⃣ Valida token
-        if not utils.validate_call_token(
-            presented_call_token,
-            item.call_token,
-            item.call_token_expires_at,
-        ):
-            raise AppException("queue.invalid_or_expired_call_token")
+        if not utils.validate_call_token(presented_call_token, item.call_token, item.call_token_expires_at):
+            raise AppException("queue.invalid_call_token")
 
         # 3️⃣ Verifica se já existe alguém em atendimento
-        active = get_active_being_served(db)
-        if active:
+        if get_active_being_served(db):
             raise AppException("queue.already_being_served")
 
-        # 4️⃣ Busca credencial
-        hashed_input = utils.compute_server_hash(presented_credential_hash)
-
-        credential = (
+        # 4️⃣ Verifica credencial
+        hashed_input = utils.compute_server_hash(input_credential)
+        user_credential = (
             db.query(UserCredential)
-            .filter(
-                UserCredential.user_id == item.user_id,
-                UserCredential.cred_type == "zkteco",
-            )
+            .filter(UserCredential.user_id == item.user_id, UserCredential.cred_type == "zkteco")
             .first()
         )
 
-        if not credential or not utils.verify_credential_hash(
-            hashed_input,
-            credential.identifier,
-        ):
+        if not user_credential or not utils.verify_credential_hash(hashed_input, user_credential.identifier):
             mark_credential_attempt(db, item)
-
             audit_log(
                 db=db,
                 action=AuditAction.CREDENTIAL_FAILED,
                 operator_id=operator_id,
                 user_id=item.user_id,
                 queue_item_id=item.id,
-                credential_id=credential.id if credential else None,
+                credential_id=user_credential.id if user_credential else None,
             )
-
+            db.commit()  # garante persistência do attempt
             raise AppException("credential.mismatch")
 
-        # 5️⃣ Sucesso
-        mark_credential_verified(db, item)
-        set_being_served(db, item)
+        # 5️⃣ Marcação de sucesso
+        try:
+            mark_credential_verified(db, item)
+            set_being_served(db, item)
+            db.commit()
+        except:
+            db.rollback()
+            raise
 
         audit_log(
             db=db,
@@ -84,7 +75,7 @@ class CredentialAuthService:
             operator_id=operator_id,
             user_id=item.user_id,
             queue_item_id=item.id,
-            credential_id=credential.id,
+            credential_id=user_credential.id,
         )
 
         return item

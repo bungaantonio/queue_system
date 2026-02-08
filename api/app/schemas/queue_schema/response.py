@@ -144,8 +144,11 @@ class QueueDetailItem(BaseModel):
 # Interno/Dev: chamado com call_token e hash
 # --------------------------
 class QueueCalledItem(QueueDetailItem):
-    biometric_hash: str
+    credential: str
+    credential_verified: bool
     call_token: str
+    call_token_expires_at: datetime
+    attempted_verification: bool
 
     @classmethod
     def from_orm_item(cls, item):
@@ -168,8 +171,12 @@ class QueueCalledItem(QueueDetailItem):
             id_hint=document_id,
             phone=phone_safe,
             birth_date=item.user.birth_date,
-            biometric_hash=item.biometric_hash,
+            credential=item.credential,
+            credential_verified=item.credential_verified,
             call_token=item.call_token,
+            call_token_expires_at=item.call_token_expires_at,
+            attempted_verification=item.attempted_verification,
+
         )
 
 

@@ -19,7 +19,7 @@ from app.schemas.queue_schema.request import (
     QuickEntryRequest,
 )
 from app.services.queue_service import consult, management
-from app.services.queue_service.registration import create_user_with_biometric_and_queue
+from app.services.queue_service.registration import create_user_with_credential_and_queue
 
 from app.core.security import get_current_user, resolve_operator_with_system_fallback
 
@@ -34,7 +34,7 @@ def register_user(
         background_tasks: BackgroundTasks = None,
         current_operator=Depends(get_current_user),  # exige ‘login’ humano
 ):
-    db_user, db_bio, queue_item = create_user_with_biometric_and_queue(
+    db_user, db_bio, queue_item = create_user_with_credential_and_queue(
         db,
         request,
         operator_id=current_operator.id,
@@ -89,7 +89,7 @@ def call_next(
 
 
 # 🔹 Endpoint interno para clientes confiáveis
-@router.get("/next-called-for-client", response_model=QueueCalledItem)
+@router.get("/next-called-for-client", response_model=ApiResponse[QueueCalledItem])
 def next_called_for_client(
         db: Session = Depends(get_db), operator_id: Optional[int] = None
 ):
@@ -98,9 +98,9 @@ def next_called_for_client(
 
 
 # 🔹 Usuário atualmente em atendimento
-@router.get("/current", response_model=QueueDetailItem)
+@router.get("/current", response_model=ApiResponse[QueueDetailItem])
 def get_current_served_user(db: Session = Depends(get_db)):
-    active_user = consult.get_active_user(db)
+    active_user = consult.get_served_user(db)
     return success_response(active_user)
 
 

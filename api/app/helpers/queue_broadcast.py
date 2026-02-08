@@ -30,7 +30,7 @@ def build_queue_state(db: Session) -> dict:
     Usa a camada Service para obter os dados e o Pydantic para transformar em JSON.
     """
     # Usando suas funções de service exatamente como você postou
-    current_orm = consult.get_current_user(db)
+    current_orm = consult.get_served_user(db)
     called_orm = consult.get_called_user(db)
     waiting_list_orm = consult.list_waiting_users(db)
 
