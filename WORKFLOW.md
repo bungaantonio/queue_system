@@ -15,9 +15,10 @@
 
 ```bash
 git checkout main
-git fetch upstream
-git rebase upstream/main
+git fetch origin
+git rebase origin/main
 git push origin main
+
 ```
 
 ### Criar feature
@@ -38,11 +39,12 @@ git commit -m "feat: descricao clara"
 ### Manter a branch actualizada
 
 ```bash
-git fetch upstream
+git fetch origin
 git checkout main
-git rebase upstream/main
+git rebase origin/main
 git checkout feature/descricao-curta
 git rebase main
+
 ```
 
 ### Repetir commits conforme necessário
