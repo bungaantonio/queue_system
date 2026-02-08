@@ -15,7 +15,7 @@ from app.helpers.audit_helpers import audit_queue_action
 
 
 
-def create_user_with_biometric_and_queue(db, request, operator_id):
+def create_user_with_credential_and_queue(db, request, operator_id):
     # Verifica se utilizador já existe
     user_exists = (
         db.query(User).filter(User.id_number == request.user.document_id).first()

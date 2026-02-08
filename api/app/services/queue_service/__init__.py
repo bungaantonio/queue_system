@@ -1,4 +1,4 @@
-from .registration import create_user_with_biometric_and_queue
+from .registration import create_user_with_credential_and_queue
 from .management import (
     call_next_user,
     complete_active_user_service,
@@ -10,7 +10,7 @@ from .consult import (
 )
 
 __all__ = [
-    "create_user_with_biometric_and_queue",
+    "create_user_with_credential_and_queue",
     "call_next_user",
     "complete_active_user_service",
     "skip_called_user",

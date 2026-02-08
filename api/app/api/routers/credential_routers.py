@@ -7,7 +7,7 @@ from app.core.exceptions import AppException
 from app.db.database import get_db
 from app.helpers.queue_notifier import queue_notifier
 from app.helpers.queue_broadcast import broadcast_state_sync
-from app.helpers.response_helpers import success_response
+from app.helpers.response_helpers import success_response, ApiResponse
 from app.schemas.queue_schema.response import QueueDetailItem
 from app.schemas.credential_schemas import CredentialAuthRequest
 from app.services.credential_service import CredentialAuthService
@@ -19,7 +19,7 @@ router = APIRouter()
 temp_credential_cache: dict[str, str] = {}
 
 
-@router.post("/authenticate", response_model=QueueDetailItem)
+@router.post("/authenticate", response_model=ApiResponse[QueueDetailItem])
 def authenticate_user(
         request: CredentialAuthRequest,
         db: Session = Depends(get_db),
@@ -37,7 +37,7 @@ def authenticate_user(
     item = CredentialAuthService.authenticate_user(
         db=db,
         queue_item_id=request.queue_item_id,
-        presented_identifier=request.identifier,
+        credential=request.credential,
         presented_call_token=request.call_token,
         operator_id=request.operator_id,
     )

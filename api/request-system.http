@@ -17,7 +17,7 @@ Content-Type: application/json
 
 ### Registrar usuário com biometria #2
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1NzcyNDgsImV4cCI6MTc3MDU3Nzg0OCwianRpIjoiZmM4YTA3NDM0MmUyNDM0MWJmNTViYzQ3MTZiZmNlZTcifQ.u62Krd-4iqgmPox7rbwzjsJPNkaqh-RuPBBD0P9OCBE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODE1NjAsImV4cCI6MTc3MDU4MjE2MCwianRpIjoiNDBiNWQxYjE0YjUwNDM0YWEwYzEwZjVmYzY2M2NiNDIifQ.sok5crlWcNcKQBUl9h_XkGAV0Y52JEKZNGFv4CrEMnY
 
 {
   "user": {
@@ -38,8 +38,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 
 ### Registrar usuário com biometria #3
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1NzcyNDgsImV4cCI6MTc3MDU3Nzg0OCwianRpIjoiZmM4YTA3NDM0MmUyNDM0MWJmNTViYzQ3MTZiZmNlZTcifQ.u62Krd-4iqgmPox7rbwzjsJPNkaqh-RuPBBD0P9OCBE
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODE1NjAsImV4cCI6MTc3MDU4MjE2MCwianRpIjoiNDBiNWQxYjE0YjUwNDM0YWEwYzEwZjVmYzY2M2NiNDIifQ.sok5crlWcNcKQBUl9h_XkGAV0Y52JEKZNGFv4CrEMnY
 
 {
   "user": {
@@ -63,8 +62,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 
 ### Registrar usuário com biometria #4
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1NzcyNDgsImV4cCI6MTc3MDU3Nzg0OCwianRpIjoiZmM4YTA3NDM0MmUyNDM0MWJmNTViYzQ3MTZiZmNlZTcifQ.u62Krd-4iqgmPox7rbwzjsJPNkaqh-RuPBBD0P9OCBE
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODE1NjAsImV4cCI6MTc3MDU4MjE2MCwianRpIjoiNDBiNWQxYjE0YjUwNDM0YWEwYzEwZjVmYzY2M2NiNDIifQ.sok5crlWcNcKQBUl9h_XkGAV0Y52JEKZNGFv4CrEMnY
 
 {
   "user": {
@@ -100,9 +98,9 @@ POST http://127.0.0.1:8000/api/v1/biometrics/authenticate
 Content-Type: application/json
 
 {
-  "queue_item_id": 2,
-  "biometric_hash": "324f6a4ad46a978e00094d5a4f49c80d13d3d119df6579b0ca8a21d354031b17",
-  "call_token": "a7c90bdb-03b7-4c34-be7f-8495bc5c2a95",
+  "queue_item_id": 3,
+  "credential": "HASH_TESTE_DEDO_2",
+  "call_token": "d37083d8-dbf5-47d9-8902-b7ae39c29e50",
   "operator_id": 1
 }
 

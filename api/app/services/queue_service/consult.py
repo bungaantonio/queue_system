@@ -15,7 +15,7 @@ from app.helpers.audit_helpers import audit_log, build_audit_details
 
 
 # 🔹 Consulta simples: cada função tem 1 responsabilidade
-def get_current_user(db: Session) -> Optional[QueueItem]:
+def get_served_user(db: Session) -> Optional[QueueItem]:
     """Usuário atualmente em atendimento (BEING_SERVED)."""
     return get_active_service_item(db)
 
@@ -47,7 +47,6 @@ def quick_entry_user(db: Session, user, operator_id: Optional[int] = None,
                      attendance_type: str = "normal") -> QueueItem:
     """
     Entrada rápida de usuário (via biometria), retorna item CRUD.
-    Não converte para Pydantic, apenas retorna o objeto.
     """
 
     queue_item = get_existing_queue_item(db, user.id)
@@ -71,3 +70,22 @@ def quick_entry_user(db: Session, user, operator_id: Optional[int] = None,
     )
 
     return queue_item
+
+
+def get_next_called_with_tokens(db: Session, operator_id: Optional[int] = None) -> QueueItem:
+    """ Próximo usuário chamado pendente de verificação, retornando call_token e credential.
+    Para uso apenas por clientes confiáveis (internos / backend). """
+    item = get_pending_verification_item(db)
+    if not item:
+        raise AppException("queue.no_called_user")
+
+    audit_log(db,
+              action="get_next_called_with_tokens",
+              operator_id=operator_id, user_id=item.user_id,
+              queue_item_id=item.id,
+              details=build_audit_details(
+                  action="get_next_called_with_tokens",
+                  msg="get_next_called_with_tokens",
+                  extra={"credential": item.credential_verified, "call_token": item.call_token}
+              ))
+    return item

@@ -86,7 +86,7 @@ def setup_monitoring_middleware(app):
 @monitoring_router.get("/timer", response_model=TimerResponse)
 def timer(db: Session = Depends(get_db)):
     """Retorna dados para alimentar Timer do frontend"""
-    user_item = consult.get_current_user(db)  # status=BEING_SERVED
+    user_item = consult.get_served_user(db)  # status=BEING_SERVED
     if not user_item:
         return {
             "current_user": None,
