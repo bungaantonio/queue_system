@@ -1,4 +1,3 @@
-from sqlalchemy.exc import SQLAlchemyError
 from app.db.database import SessionLocal
 from app.crud import operator_crud
 from app.services.operator_service import OperatorService

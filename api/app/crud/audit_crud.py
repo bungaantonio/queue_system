@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 from app.models.audit import Audit
-from typing import List, Optional
+from typing import Optional
 
 
 def create_audit(
@@ -10,7 +10,7 @@ def create_audit(
     details: Optional[dict | str] = None,
     user_id: Optional[int] = None,
     queue_item_id: Optional[int] = None,
-    biometric_id: Optional[int] = None,
+    credential_id: Optional[int] = None,
     operator_id: Optional[int] = None,
     hashed_previous: Optional[str] = None,  # passado externamente pelo serviço
 ) -> Audit:
@@ -23,7 +23,7 @@ def create_audit(
         details=details,
         user_id=user_id,
         queue_item_id=queue_item_id,
-        biometric_id=biometric_id,
+        credential_id=credential_id,
         operator_id=operator_id,
         hashed_previous=hashed_previous,
         timestamp=datetime.now(timezone.utc),
@@ -44,7 +44,7 @@ def get_audits(
     queue_item_id: Optional[int] = None,
     user_id: Optional[int] = None,
     action: Optional[str] = None,
-) -> List[Audit]:
+) -> list[type[Audit]]:
     """
     Lista auditorias, opcionalmente filtrando por queue_item_id, user_id ou action.
     """

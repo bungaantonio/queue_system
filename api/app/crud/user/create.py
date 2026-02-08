@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user_schema import UserCreate
 
-from app.helpers.audit_helpers import audit_log
 
 
 def create_user(db: Session, user: UserCreate, operator_id: int):

@@ -2,51 +2,56 @@
 
 ```bash
 src/
+│
+├── main.tsx
+│
 ├── app/
-│   ├── App.tsx                  # Componente raiz, roteamento principal
-│   ├── routes.tsx               # Rotas (React Router)
-│   └── providers/               # Contextos globais (auth, theme)
-│       ├── AuthProvider.tsx
-│       └── ThemeProvider.tsx
+│   ├── App.tsx
+│   ├── routes.tsx
+│   └── providers/
+│       └── QueueStreamProvider.tsx   ← controla SSE globalmente
 │
-├── components/
-│   ├── ui/                      # Componentes genéricos e reutilizáveis
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   └── Modal.tsx
-│   ├── layout/                  # Menu, sidebar, header, footer
-│   └── widgets/                 # Componentes mais complexos, dashboards
+├── core/                              ← infraestrutura isolada
+│   ├── http/
+│   │   └── apiClient.ts               ← apenas se necessário
+│   │
+│   ├── stream/
+│   │   ├── sseClient.ts               ← wrapper do EventSource
+│   │   └── streamEvents.ts            ← tipagem dos eventos
+│   │
+│   ├── config/
+│   │   └── env.ts
+│   │
+│   └── errors/
+│       └── ApiError.ts
 │
-├── features/
-│   ├── users/
-│   │   ├── UsersList.tsx
-│   │   ├── UsersForm.tsx        # Edit/Create combinados
-│   │   └── types.ts             # Interfaces TS específicas do recurso
-│   ├── posts/
-│   │   ├── PostsList.tsx
-│   │   ├── PostsForm.tsx
-│   │   └── types.ts
-│   └── ...
+├── domain/                            ← modelo de domínio do display
+│   └── queue/
+│       ├── queue.types.ts
+│       ├── queue.mapper.ts            ← transforma payload da API
+│       ├── queue.state.ts             ← shape oficial do estado
+│       └── queue.selectors.ts         ← lógica derivada
 │
-├── services/                    # Comunicação com API
-│   ├── usersService.ts
-│   ├── postsService.ts
-│   └── api.ts                   # Axios/fetch base
+├── features/                          ← funcionalidades visuais reais
+│   ├── called-user/
+│   │   ├── CalledUser.tsx
+│   │   └── useCalledUser.ts
+│   │
+│   ├── waiting-list/
+│   │   ├── WaitingList.tsx
+│   │   └── useWaitingList.ts
+│   │
+│   └── timer/
+│       ├── Timer.tsx
+│       └── useTimer.ts
 │
-├── hooks/                       # Hooks customizados
-│   ├── useUsers.ts
-│   ├── usePosts.ts
-│   └── useAuth.ts
+├── ui/                                ← componentes puros reutilizáveis
+│   ├── Card.tsx
+│   ├── Badge.tsx
+│   └── EmptyState.tsx
 │
-├── utils/                       # Funções auxiliares e formatações
-│   ├── helpers.ts
-│   └── formatters.ts
-│
-├── types/                       # Tipos globais
-│   └── global.d.ts
-│
-└── index.tsx
-
+└── shared/
+    └── formatters.ts
 ```
 
 ## React Admin
@@ -138,6 +143,8 @@ src/
     ├── core/
     │   ├── config.py                # Variáveis de ambiente
     │   ├── security.py              # JWT, get_current_user
+    │   ├── errors.py
+    │   ├── exceptions.py
     │   └── sse_manager.py           # Broadcaster do SSE
     ├── crud/
     │   ├── audit_crud.py            # Operações básicas de Auditoria
@@ -149,10 +156,7 @@ src/
     │   ├── base.py                  # Importa todos os models para o Alembic
     │   ├── database.py              # SessionLocal e get_db
     │   └── session.py               # Utilitários de sessão
-    ├── errors/                      # Seus build_examples.py e mapeamentos
-    ├── exceptions/                  # Suas classes QueueException e o Handler
     ├── helpers/                     # Lógica pura (Priority, SLA, TTS)
-    ├── messages/                    # Seus dicionários QUEUE_ERRORS
     ├── models/                      # Suas classes SQLAlchemy
     ├── schemas/                     # Seus Pydantic Models (Request/Response)
     ├── services/                    # O CÉREBRO (Onde o commit e a auditoria vivem)

@@ -3,21 +3,21 @@ from typing import Optional
 from pydantic import BaseModel
 
 from .user_schema import UserCreate, UserFullResponse
-from .biometric_schema import BiometricBase, BiometricCreate
+from .credential_schemas import CredentialCreate, CredentialBase
 
 # ============================================================
 # =============== QUEUE REQUEST MODELS ========================
 # ============================================================
 
 class QueueInsertRequest(BaseModel):
-    """Requisição simples para inserir usuário existente na fila."""
+    """Requisição simples para inserir utilizador existente na fila."""
     user_id: int
 
 
 class QueueRegisterRequest(BaseModel):
     """Registro completo: cria usuário e biometria, e insere na fila."""
     user: UserCreate
-    biometric: BiometricCreate
+    credential: CredentialCreate
 
 
 # ============================================================
@@ -40,14 +40,14 @@ class QueueBase(BaseModel):
 
 # ---------- LISTAGEM / CONSULTA SIMPLES ----------
 class QueueListResponse(QueueBase):
-    """Item resumido para listas e atualizações em tempo real (SSE)."""
+    """‘Item’ resumido para listas e atualizações em tempo real (SSE)."""
     name: str
     id_hint: Optional[str] = None
 
 
 # ---------- DETALHE COMPLETO ----------
 class QueueDetailResponse(QueueBase):
-    """Item detalhado com dados do usuário."""
+    """‘Item’ detalhado com dados do utilizador."""
     name: str
     id_number: Optional[str] = None
     phone: Optional[str] = None
@@ -68,10 +68,10 @@ class QueueCreateResponse(QueueActionResponse):
     """Resposta para criação de fila com novo registro de usuário."""
     status: str
     user: UserFullResponse
-    biometric: Optional[BiometricBase] = None
+    credential: Optional[CredentialBase] = None
 
 
-# Alias semântico para legibilidade nos routers:
+# Aliases semântico para legibilidade nos encaminhadores:
 QueueNextResponse = QueueActionResponse
 QueueDoneResponse = QueueActionResponse
 QueueSkipResponse = QueueActionResponse
@@ -90,7 +90,7 @@ class QueueConsultResponse(BaseModel):
 
 
 class QueueCalledOut(BaseModel):
-    """Usuário chamado para verificação biométrica."""
+    """Utilizador chamado para verificação biométrica."""
     queue_id: int
     user_id: int
     status: str
@@ -99,4 +99,4 @@ class QueueCalledOut(BaseModel):
 class QueueVerifyIn(BaseModel):
     """Entrada de verificação biométrica (scan)."""
     queue_id: int
-    biometric_id: str
+    credential_id: str

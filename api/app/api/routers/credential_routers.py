@@ -1,5 +1,5 @@
 # app/api/routers/credential_router.py
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 import uuid, logging
 

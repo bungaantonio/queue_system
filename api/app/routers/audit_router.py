@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 
-from app.core.security import get_current_user
+from app.core.exceptions import AppException
+from app.core.permissions import require_roles
 from app.db.database import get_db
-from app.helpers.operators import check_permissions
+from app.helpers.response_helpers import success_response
 from app.models.enums import OperatorRole
 from app.schemas.audit_schema import (
     AuditVerificationDetail,
@@ -19,17 +20,16 @@ router = APIRouter()
 
 @router.get("/", response_model=List[AuditVerificationDetail])
 def list_audits(
-    skip: int = Query(0),
-    limit: int = Query(100),
-    user_id: Optional[int] = Query(None),
-    action: Optional[str] = Query(None),
-    start: Optional[datetime] = Query(None),
-    end: Optional[datetime] = Query(None),
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+        skip: int = Query(0),
+        limit: int = Query(100),
+        user_id: Optional[int] = Query(None),
+        action: Optional[str] = Query(None),
+        start: Optional[datetime] = Query(None),
+        end: Optional[datetime] = Query(None),
+        db: Session = Depends(get_db),
+        current_user=Depends(require_roles(OperatorRole.AUDITOR)),
 ):
-    check_permissions(current_user, allowed_roles=[OperatorRole.AUDITOR])
-    return AuditService.generate_audit_report(
+    audits = AuditService.generate_audit_report(
         db=db,
         user_id=user_id,
         action=action,
@@ -38,33 +38,32 @@ def list_audits(
         skip=skip,
         limit=limit,
     )
+    return success_response(audits)
 
 
 @router.get("/verify-summary", response_model=AuditChainSummary)
 def verify_audit_chain_summary(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+        db: Session = Depends(get_db),
+        current_user=Depends(require_roles(OperatorRole.AUDITOR)),
 ):
-    check_permissions(current_user, allowed_roles=[OperatorRole.AUDITOR])
     records = AuditService.verify_chain(db)
     total = len(records)
     valid_count = sum(r.valid for r in records)
-    return AuditChainSummary(
+    summary = AuditChainSummary(
         all_valid=(valid_count == total),
         total_records=total,
         valid_records=valid_count,
         invalid_records=total - valid_count,
     )
+    return success_response(summary)
 
 
 @router.get("/verify/{audit_id}", response_model=AuditVerificationDetail)
 def verify_single(audit_id: int, db: Session = Depends(get_db)):
     result = AuditService.verify_single_audit(db, audit_id)
     if not result:
-        raise HTTPException(
-            status_code=404, detail=f"Audit record {audit_id} not found"
-        )
-    return result
+        raise AppException("audit.not_found")
+    return success_response(result)
 
 
 @router.get("/verify", response_model=AuditChainValidationResult)
@@ -74,7 +73,9 @@ def verify_audit_chain(db: Session = Depends(get_db)):
     Retorna um resumo com validade de cada registro.
     """
     records = AuditService.verify_chain(db)
-    return AuditChainValidationResult(
+    verify = AuditChainValidationResult(
         all_valid=all(r.valid for r in records),
         records=records,
     )
+
+    return success_response(verify)

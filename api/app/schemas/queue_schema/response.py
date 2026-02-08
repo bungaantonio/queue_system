@@ -1,7 +1,7 @@
-from pydantic import BaseModel
-from datetime import datetime, date
+from pydantic import BaseModel, ConfigDict, computed_field
+from datetime import date
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 from app.models.enums import QueueStatus, AttendanceType
 
 
@@ -76,7 +76,7 @@ class QueueConsult(BaseModel):
     attendance_type: Optional[str] = None
 
     @classmethod
-    def from_queue_item(cls, queue_item, msg="Usuário registrado na fila com sucesso"):
+    def from_orm_item(cls, queue_item, msg="Usuário registado na fila com sucesso"):
         if not queue_item:
             return cls(in_queue=False, message="Usuário não está na fila")
 
@@ -171,3 +171,45 @@ class QueueCalledItem(QueueDetailItem):
             biometric_hash=item.biometric_hash,
             call_token=item.call_token,
         )
+
+
+class UserSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    name: str
+    id_number: Optional[str] = None  # necessário para calcular document_id
+
+
+class QueueItemSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    status: str
+    position: int
+    attendance_type: Optional[str] = None
+    timestamp: Optional[datetime] = None
+    user: Optional[UserSchema] = None
+
+    @computed_field
+    @property
+    def short_name(self) -> Optional[str]:
+        if not self.user or not self.user.name:
+            return None
+        name_parts = self.user.name.split(" ")
+        return (
+            f"{name_parts[0]} {name_parts[-1][0]}."
+            if len(name_parts) > 1
+            else self.user.name
+        )
+
+    @computed_field
+    @property
+    def ticket(self) -> Optional[str]:
+        if not self.user or not self.user.id_number:
+            return None
+        return self.user.id_number[-5:]
+
+
+class QueueStateSchema(BaseModel):
+    current: Optional[QueueItemSchema] = None
+    called: Optional[QueueItemSchema] = None
+    queue: List[QueueItemSchema] = []

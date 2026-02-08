@@ -18,5 +18,5 @@ class User(Base):
     disabled_until = Column(DateTime(timezone=True), nullable=True)
 
     queue_items = relationship("QueueItem", back_populates="user")
-    biometric = relationship("Biometric", uselist=False, back_populates="user")
+    credentials = relationship("UserCredential", back_populates="user", cascade="all, delete-orphan")
     audits = relationship("Audit", back_populates="user")

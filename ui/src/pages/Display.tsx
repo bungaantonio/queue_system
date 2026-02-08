@@ -1,86 +1,121 @@
 // src/pages/Display.tsx
-import { useMemo, useState } from "react";
+import { useState, useEffect } from "react";
+import useQueueData from "../features/called-user/useQueueData";
 import VideoPlayer from "../components/VideoPlayer";
-import CurrentUser from "../components/CurrentUser";
-import CalledUser from "../components/CalledUser";
-import NextUsers from "../components/NextUsers";
+import CalledUser from "../features/called-user/CalledUser";
+import NextUsers from "../features/waiting-list/NextUsers";
 import Timer from "../components/Timer";
 import QrCodeBox from "../components/QrCodeBox";
 import Clock from "../components/Clock";
-import useQueueData from "../hooks/useQueueData";
-import { useAnnounce } from "../hooks/useAnnounce";
-import { requestAudioPermission, isAudioAllowed } from "../utils/audioPermission";
-import { beepManager } from "../services/beepManager";
+import MarqueeTicker from "../components/MarqueeTicker";
+import CallOverlay from "../features/called-user/CallOverlay";
+import AudioOnboarding from "../components/AudioOnboarding";
 
 export default function Display() {
   const { currentUser, calledUser, nextUsers } = useQueueData();
+  const [showOverlay, setShowOverlay] = useState(false);
 
-  // Estado para verificar se o usuário ativou áudio/TTS
-  const [audioReady, setAudioReady] = useState(isAudioAllowed());
-
-  const handleEnableAudio = () => {
-    requestAudioPermission();
-    beepManager.initBeep("/sounds/notification.mp3");
-    beepManager.playBeep().finally(() => setAudioReady(true));
-  };
-
-  useAnnounce(audioReady ? calledUser : null, { repetitions: 3, interval: 10000 });
-
+  useEffect(() => {
+    if (calledUser?.id) {
+      setShowOverlay(true);
+      const timer = setTimeout(() => setShowOverlay(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [calledUser?.id]);
 
   return (
-    <div className="flex flex-col lg:flex-row w-full min-h-screen lg:h-screen gap-6 px-4 py-6 bg-gradient-to-br from-white via-sky-50 to-amber-50 text-slate-900 lg:gap-8 lg:px-8 lg:py-10">
+    <div className="h-screen w-screen flex flex-col bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans">
+      <AudioOnboarding />
+      <CallOverlay user={showOverlay ? calledUser : null} />
 
-      {/* Botão de ativação de áudio/TTS */}
-      {!audioReady && (
-        <div className="absolute top-4 left-4 z-50">
-          <button
-            onClick={handleEnableAudio}
-            className="p-4 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition"
-          >
-            Ativar Áudio/TTS
-          </button>
-        </div>
-      )}
+      {/* Grid de Conteúdo Principal */}
+      <main className="flex-1 grid grid-cols-12 gap-6 p-6 min-h-0">
+        {/* Esquerda: Vídeo + Notícias */}
+        <section className="col-span-8 flex flex-col rounded-[2.5rem] bg-black shadow-2xl overflow-hidden border border-slate-200">
+          <div className="flex-1 relative min-h-0">
+            <VideoPlayer />
+          </div>
+          <div className="h-14 flex items-center bg-slate-900">
+            <MarqueeTicker />
+          </div>
+        </section>
 
-      {/* Área de vídeo */}
-      <div className="flex-[2] flex flex-col gap-6 min-h-[200px] lg:min-h-0">
-        <VideoPlayer />
-      </div>
+        {/* Direita: Painel de Informações */}
+        <aside className="col-span-4 flex flex-col gap-6 min-h-0">
+          <CalledUser user={calledUser} />
 
-      {/* Aside com informações e próximos usuários */}
-      <aside className="flex-[1] flex flex-col gap-6 rounded-[36px] border border-sky-200/80 bg-white/90 p-6 shadow-[0_40px_80px_-48px_rgba(14,116,144,0.5)] backdrop-blur-xl max-h-[80vh] lg:max-h-full overflow-y-auto">
-
-        {/* Usuário chamado */}
-        {!currentUser && <CalledUser user={calledUser} />}
-
-        {/* Usuário atual + Timer */}
-        <div className="grid grid-cols-1 gap-5">
-          {currentUser && <CurrentUser user={{ ...currentUser, name: currentUser.name }} />}
-          <div className="rounded-3xl border border-amber-200/80 bg-gradient-to-br from-amber-100/70 via-white to-sky-100/70 p-6 shadow-[0_18px_40px_-24px_rgba(234,88,12,0.4)]">
-            <div className="mb-4 flex items-center justify-between text-xs uppercase tracking-[0.4em] text-slate-500">
-              <span>Tempo em atendimento</span>
-              <span className="text-[0.78rem] font-semibold text-slate-600">Atualiza automaticamente</span>
+          {/* Container do Meio: Timer */}
+          <div className="flex-1 min-h-0 flex flex-col bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 relative overflow-hidden">
+            <div className="flex justify-between items-center mb-6 flex-none">
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase tracking-[0.3em] font-black text-slate-400 mb-1">
+                  Status
+                </span>
+                <h4 className="text-lg font-black text-slate-800 tracking-tighter uppercase leading-none">
+                  Em Atendimento
+                </h4>
+              </div>
+              <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl">
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black text-emerald-600 uppercase">
+                  Live
+                </span>
+              </div>
             </div>
-            <Timer keyProp={currentUser?.id} />
+
+            <div className="flex-1 flex flex-col justify-center min-h-0">
+              <Timer keyProp={currentUser?.id} />
+            </div>
+          </div>
+
+          {/* Próximos na Fila */}
+          <div className="flex-none h-[32%]">
+            <NextUsers users={nextUsers} reduced />
+          </div>
+        </aside>
+      </main>
+
+      {/* Rodapé Corporativo Integrado */}
+      <footer className="h-24 bg-white border-t border-slate-200 px-12 flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+        <div className="flex items-center gap-12">
+          {/* Relógio */}
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-black mb-2 leading-none">
+              Horário Local
+            </span>
+            <div className="bg-slate-900 px-5 py-2.5 rounded-2xl shadow-lg border border-slate-700">
+              <Clock reduced />
+            </div>
+          </div>
+
+          <div className="h-10 w-px bg-slate-200" />
+
+          {/* Identificação do Terminal */}
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-black mb-1 leading-none">
+              Terminal Atual
+            </span>
+            <p className="text-2xl font-black text-slate-800 tracking-tighter uppercase leading-none">
+              Guichê 01
+            </p>
           </div>
         </div>
 
-        {/* Próximos usuários */}
-        <div className="overflow-y-auto max-h-[30vh] lg:max-h-none">
-          <NextUsers users={nextUsers || []} />
-        </div>
-
-        {/* QR + Clock */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
-          <QrCodeBox />
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-sky-200 bg-white/90 p-6 text-center shadow-[0_16px_34px_-26px_rgba(14,165,233,0.6)]">
-            <span className="text-xs uppercase tracking-[0.4em] text-slate-500">Horário atual</span>
-            <Clock />
-            <span className="text-sm text-slate-600">Atualização em tempo real</span>
+        {/* CHAMADA PARA O QR CODE (Integrado Perfeitamente) */}
+        <div className="flex items-center gap-6 bg-amber-50/50 p-3 pr-6 rounded-[2rem] border border-amber-100/80 shadow-sm">
+          <QrCodeBox reduced />
+          <div className="flex flex-col">
+            {/* O texto aqui pode ser amber-900 para manter a cor quente, 
+        mas o QR Code sendo Slate-900 traz a seriedade técnica necessária */}
+            <p className="text-amber-900 font-black text-xs uppercase leading-none mb-1.5">
+              Acompanhe pelo celular
+            </p>
+            <p className="text-amber-800/60 text-[9px] font-bold uppercase tracking-widest leading-none">
+              Acesso rápido via QR Code
+            </p>
           </div>
         </div>
-
-      </aside>
+      </footer>
     </div>
   );
 }

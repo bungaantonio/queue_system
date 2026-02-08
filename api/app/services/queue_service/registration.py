@@ -1,41 +1,47 @@
 # app/services/queue_service/registration.py
 from sqlalchemy.orm import Session
+
+from app.core.exceptions import AppException
 from app.crud.user.create import create_user
 from app.crud.queue.create import enqueue_user
 from app.crud.queue.read import get_existing_queue_item
-from app.exceptions.exceptions import BiometricException, QueueException
-from app.helpers.audit_helpers import audit_log, audit_queue_action
-from app.helpers.audit_helpers import audit_log
-from app.models.enums import AuditAction
+
+from app.models.enums import AuditAction, QueueStatus
 from app.models.user import User
-from app.models.user_credential import UserCredential  # Nova Model
-from app.services.biometric_service.utils import (
-    hash_identifier,
-)
+from app.models.user_credential import UserCredential
+
+from app.utils.credential_utils import hash_identifier
+from app.helpers.audit_helpers import audit_queue_action
+
 
 
 def create_user_with_biometric_and_queue(db, request, operator_id):
-    # Verifica se usuário já existe
+    # Verifica se utilizador já existe
     user_exists = (
         db.query(User).filter(User.id_number == request.user.document_id).first()
     )
     if user_exists:
-        raise QueueException("user_already_registered")
+        raise AppException("queue.user_already_registered")
 
-    # Criação do usuário
+    # Criação do utilizador
     db_user = create_user(db, request.user, operator_id=operator_id)
 
     # Verifica biometria
-    db_cred = _create_or_get_credential(db, db_user.id, request.biometric)
+    db_cred = _create_or_get_credential(db, db_user.id, request.credential)
 
     # Verifica fila
     queue_item = get_existing_queue_item(db, db_user.id)
     if queue_item:
-        raise QueueException("user_already_in_queue")
+        if queue_item.status == QueueStatus.BEING_SERVED:
+            raise AppException("queue.user_already_active")
+        elif queue_item.status in [QueueStatus.WAITING, QueueStatus.CALLED_PENDING]:
+            raise AppException("queue.user_already_registered")
+        else:
+            # Opcional: outros status (DONE, CANCELLED, SKIPPED) podem permitir nova fila
+            pass
 
-    # Cria item de fila se não existir
-    if not queue_item:
-        queue_item = enqueue_user(db, db_user, operator_id, request.attendance_type)
+    # Cria ‘item’ de fila se não existir
+    queue_item = enqueue_user(db, db_user, operator_id, request.attendance_type)
 
     audit_queue_action(
         db,
@@ -53,21 +59,21 @@ def create_user_with_biometric_and_queue(db, request, operator_id):
 
 
 def _create_or_get_credential(
-    db: Session, user_id: int, biometric_model
-) -> UserCredential:
+        db: Session, user_id: int, credential_model
+) -> type[UserCredential] | UserCredential:
     """
-    Gerencia as credenciais do usuário. Aplica Hash HMAC no ID do sensor.
+    Gerencia as credenciais do utilizador. Aplica Hash HMAC no ‘ID’ do sensor.
     """
     # 1. Gerar o hash seguro do ID vindo do sensor/middleware
-    hashed_id = hash_identifier(
-        biometric_model.biometric_hash
+    hashed_identifier = hash_identifier(
+        credential_model.identifier
     )  # Supondo que o modelo tenha um campo biometric_hash
 
-    # 2. Verifica se este usuário já tem esta digital cadastrada
+    # 2. Verifica se este utilizador já tem esta digital cadastrada
     existing_user_cred = (
         db.query(UserCredential)
         .filter(
-            UserCredential.user_id == user_id, UserCredential.identifier == hashed_id
+            UserCredential.user_id == user_id, UserCredential.identifier == hashed_identifier
         )
         .first()
     )
@@ -76,17 +82,18 @@ def _create_or_get_credential(
 
     # 3. Segurança Global: Verifica se esta digital pertence a outra pessoa
     existing_global = (
-        db.query(UserCredential).filter(UserCredential.identifier == hashed_id).first()
+        db.query(UserCredential).filter(UserCredential.identifier == hashed_identifier).first()
     )
     if existing_global:
-        raise BiometricException("biometric_already_registered")
+        raise AppException("credential.already_registered")
 
-    # 4. Cria a nova credencial híbrida
+    # 4. Cria credencial (‘hardware’ por padrão neste fluxo)
     credential = UserCredential(
         user_id=user_id,
         cred_type="zkteco",  # Define que veio do hardware
-        identifier=hashed_id,
+        identifier=hashed_identifier,
     )
     db.add(credential)
     db.flush()
+
     return credential

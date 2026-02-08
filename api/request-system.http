@@ -17,7 +17,7 @@ Content-Type: application/json
 
 ### Registrar usuário com biometria #2
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1NzcyNDgsImV4cCI6MTc3MDU3Nzg0OCwianRpIjoiZmM4YTA3NDM0MmUyNDM0MWJmNTViYzQ3MTZiZmNlZTcifQ.u62Krd-4iqgmPox7rbwzjsJPNkaqh-RuPBBD0P9OCBE
 
 {
   "user": {
@@ -30,15 +30,16 @@ Content-Type: application/json
     "document_id": "009834221LA012",
     "phone": "945678901"
   },
-  "biometric": {
-    "biometric_id": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e"
+  "credential": {
+    "identifier": "e6f3a9d2-1b44-4c7e-8d96-fc1d5a2b9f3e"
   },
   "attendance_type": "urgent"
 }
 
 ### Registrar usuário com biometria #3
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA0ODA5OTcsImV4cCI6MTc3MDQ4MTU5NywianRpIjoiYWFkYjM2MmVhYTA0NDM4NzlhNDA0ZmNmZTMwZjQ5ZTUifQ.aJNWXv0pmwmOliwpMXrwMeJ3ZY8Jb8mOW0SAr2cAyVI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1NzcyNDgsImV4cCI6MTc3MDU3Nzg0OCwianRpIjoiZmM4YTA3NDM0MmUyNDM0MWJmNTViYzQ3MTZiZmNlZTcifQ.u62Krd-4iqgmPox7rbwzjsJPNkaqh-RuPBBD0P9OCBE
+
 
 {
   "user": {
@@ -51,8 +52,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
     "document_id": "003211990LA003",
     "phone": "912345678"
   },
-  "biometric": {
-    "biometric_hash": "HASH_TESTE_DEDO_1"
+  "credential": {
+    "identifier": "HASH_TESTE_DEDO_1"
   },
   "attendance_type": "normal"
 }
@@ -62,7 +63,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 
 ### Registrar usuário com biometria #4
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA0ODA5OTcsImV4cCI6MTc3MDQ4MTU5NywianRpIjoiYWFkYjM2MmVhYTA0NDM4NzlhNDA0ZmNmZTMwZjQ5ZTUifQ.aJNWXv0pmwmOliwpMXrwMeJ3ZY8Jb8mOW0SAr2cAyVI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1NzcyNDgsImV4cCI6MTc3MDU3Nzg0OCwianRpIjoiZmM4YTA3NDM0MmUyNDM0MWJmNTViYzQ3MTZiZmNlZTcifQ.u62Krd-4iqgmPox7rbwzjsJPNkaqh-RuPBBD0P9OCBE
+
 
 {
   "user": {
@@ -75,8 +77,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
     "document_id": "001245678LA018",
     "phone": "956789012"
   },
-  "biometric": {
-    "biometric_hash": "HASH_TESTE_DEDO_2"
+  "credential": {
+    "identifier": "HASH_TESTE_DEDO_2"
   },
   "attendance_type": "priority"
 }
@@ -98,10 +100,10 @@ POST http://127.0.0.1:8000/api/v1/biometrics/authenticate
 Content-Type: application/json
 
 {
-  "queue_item_id": 4,
-  "biometric_hash": "ae046e6a2d025537ce34ca171d8241315866f85eae030c7eecae7c92d2c9a3c9",
-  "call_token": "3939dbed-f64b-4eea-b749-bc89e7dea148",
-  "operator_id": 26
+  "queue_item_id": 2,
+  "biometric_hash": "324f6a4ad46a978e00094d5a4f49c80d13d3d119df6579b0ca8a21d354031b17",
+  "call_token": "a7c90bdb-03b7-4c34-be7f-8495bc5c2a95",
+  "operator_id": 1
 }
 
 

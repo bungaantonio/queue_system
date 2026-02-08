@@ -60,7 +60,13 @@ class AuditAction(str, Enum):
     USER_SKIPPED = "Usuário ignorado"
     USER_CANCELLED = "Usuário cancelado"
 
-    # Usuário / Utente
+    # Biometria
+    CREDENTIAL_CREATED = "Biometria criada"
+    CREDENTIAL_UPDATED = "Biometria atualizada"
+    CREDENTIAL_VERIFIED = "Biometria verificada"
+    CREDENTIAL_FAILED = "Biometria falhada"
+
+    # Utilizador / Utente
     USER_CREATED = "Usuário criado"
     USER_UPDATED = "Usuário atualizado"
     USER_ENQUEUED = "Usuário adicionado à fila"

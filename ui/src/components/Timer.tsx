@@ -1,3 +1,4 @@
+// src/components/Timer.tsx
 import { useEffect, useState } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
@@ -27,11 +28,14 @@ export default function Timer({ keyProp, reduced = false }: TimerProps) {
     elapsed_seconds: 0,
   });
 
+  // Atualiza os dados do timer a cada 5s
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/v1/monitoring/timer");
-        const data = await res.json();
+        const res = await fetch(
+          "http://localhost:8000/api/v1/monitoring/timer",
+        );
+        const data: TimerData = await res.json();
         setTimerData(data);
       } catch (err) {
         console.error("Erro ao buscar dados do timer", err);
@@ -43,27 +47,30 @@ export default function Timer({ keyProp, reduced = false }: TimerProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Evita NaN
+  // Evita NaN e valores negativos
   const totalSeconds = Math.max(timerData.sla_minutes * 60, 0);
   const elapsed = Math.max(timerData.elapsed_seconds, 0);
   const initialRemaining = Math.max(totalSeconds - elapsed, 0);
   const progressPercentage =
-    totalSeconds > 0 ? ((totalSeconds - initialRemaining) / totalSeconds) * 100 : 0;
+    totalSeconds > 0
+      ? ((totalSeconds - initialRemaining) / totalSeconds) * 100
+      : 0;
 
-  // Cor da barra de progresso baseada no status
-  const progressColor = timerData.status === "Ultrapassado" ? "#dc2626" : "#22c55e";
+  const progressColor =
+    timerData.status === "Ultrapassado" ? "#dc2626" : "#22c55e";
+
+  // Definir key seguro para reinício somente quando usuário muda
+  const timerKey = keyProp ?? timerData.current_user?.id ?? "none";
 
   return (
     <div className="flex flex-col items-center w-full space-y-4">
       {/* Timer visual */}
       <div
-        className={`flex justify-center ${
-          reduced ? "min-h-[80px]" : "min-h-[140px]"
-        } w-full`}
+        className={`flex justify-center ${reduced ? "min-h-[80px]" : "min-h-[140px]"} w-full`}
       >
         {totalSeconds > 0 && (
           <CountdownCircleTimer
-            key={keyProp || timerData.current_user?.id || 0}
+            key={timerKey}
             isPlaying
             duration={totalSeconds}
             initialRemainingTime={initialRemaining}
@@ -75,7 +82,9 @@ export default function Timer({ keyProp, reduced = false }: TimerProps) {
             {({ remainingTime }) => (
               <span
                 className={`font-semibold tracking-tight transition-colors duration-300 ${
-                  remainingTime <= 10 ? "text-rose-500" : "text-slate-800"
+                  remainingTime > 0 && remainingTime <= 10
+                    ? "text-rose-500 animate-pulse"
+                    : "text-slate-800"
                 } ${reduced ? "text-xl lg:text-2xl" : "text-2xl lg:text-4xl"}`}
               >
                 {formatTime(remainingTime)}
@@ -89,7 +98,9 @@ export default function Timer({ keyProp, reduced = false }: TimerProps) {
       <div className="text-center space-y-1">
         <p className="text-sm text-slate-600">
           Usuário:{" "}
-          <span className="font-medium">{timerData.current_user?.name || "Nenhum"}</span>
+          <span className="font-medium">
+            {timerData.current_user?.name ?? "Nenhum"}
+          </span>
         </p>
         <p className="text-sm text-slate-600">
           SLA previsto:{" "}
@@ -97,10 +108,12 @@ export default function Timer({ keyProp, reduced = false }: TimerProps) {
         </p>
         <p
           className={`text-xs font-semibold uppercase tracking-wide ${
-            timerData.status === "Ultrapassado" ? "text-rose-500" : "text-emerald-600"
+            timerData.status === "Ultrapassado"
+              ? "text-rose-500"
+              : "text-emerald-600"
           }`}
         >
-          {timerData.status}
+          {timerData.status ?? "Pendente"}
         </p>
       </div>
 
@@ -108,7 +121,10 @@ export default function Timer({ keyProp, reduced = false }: TimerProps) {
       <div className="w-full max-w-[240px] bg-slate-200/50 rounded-full h-2 overflow-hidden">
         <div
           className="h-full transition-all duration-500"
-          style={{ width: `${progressPercentage}%`, backgroundColor: progressColor }}
+          style={{
+            width: `${isNaN(progressPercentage) ? 0 : progressPercentage}%`,
+            backgroundColor: progressColor,
+          }}
         />
       </div>
     </div>

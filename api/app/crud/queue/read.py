@@ -1,101 +1,43 @@
-from typing import Sequence, Optional
-from sqlalchemy import asc, desc, func
+from typing import Optional
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import asc, desc, func
 
-from app.models.enums import QueueStatus
 from app.models.queue_item import QueueItem
+from app.models.enums import QueueStatus
 
 
 def get_queue_item(
     db: Session,
     user_id: int,
-    status: QueueStatus = QueueStatus.WAITING,
+    status: QueueStatus
 ) -> Optional[QueueItem]:
-    """
-    Retorna o item ativo de um usuário na fila, se existir.
-    """
+    """Retorna o item de fila de um usuário por status."""
     return (
         db.query(QueueItem)
         .options(joinedload(QueueItem.user))
-        .filter(
-            QueueItem.user_id == user_id,
-            QueueItem.status == status,
-        )
-        .first()
-    )
-
-
-def get_queue(db: Session) -> Sequence[QueueItem]:
-    """
-    Retorna todos os itens da fila, com os dados do usuário carregados.
-    """
-    return db.query(QueueItem).options(joinedload(QueueItem.user)).all()
-
-
-def get_by_user(db: Session, user_id: int) -> Optional[QueueItem]:
-    """
-    Retorna o item da fila associado a um usuário específico (qualquer status).
-    """
-    return (
-        db.query(QueueItem)
-        .options(joinedload(QueueItem.user))
-        .filter(QueueItem.user_id == user_id)
+        .filter(QueueItem.user_id == user_id, QueueItem.status == status)
         .first()
     )
 
 
 def get_existing_queue_item(db: Session, user_id: int) -> Optional[QueueItem]:
-    """
-    Retorna o item ativo de um usuário na fila.
-    Status ativos: WAITING, CALLED_PENDING, BEING_SERVED
-    """
+    """Retorna item ativo do usuário (WAITING, CALLED_PENDING, BEING_SERVED)."""
     return (
         db.query(QueueItem)
         .filter(
             QueueItem.user_id == user_id,
-            QueueItem.status.in_(
-                [
-                    QueueStatus.WAITING,
-                    QueueStatus.CALLED_PENDING,
-                    QueueStatus.BEING_SERVED,
-                ]
-            ),
+            QueueItem.status.in_([
+                QueueStatus.WAITING,
+                QueueStatus.CALLED_PENDING,
+                QueueStatus.BEING_SERVED
+            ])
         )
         .first()
     )
 
 
-def get_active_service_item(db: Session) -> Optional[QueueItem]:
-    """
-    Retorna o item atualmente sendo atendido (status BEING_SERVED).
-    """
-    return (
-        db.query(QueueItem)
-        .options(joinedload(QueueItem.user))
-        .filter(QueueItem.status == QueueStatus.BEING_SERVED)
-        .first()
-    )
-
-
-def get_called_pending_by_user_queue(db: Session, user_id: int) -> Optional[QueueItem]:
-    """
-    Retorna o item da fila do usuário que está em status CALLED_PENDING.
-    """
-    return (
-        db.query(QueueItem)
-        .filter(
-            QueueItem.user_id == user_id,
-            QueueItem.status == QueueStatus.CALLED_PENDING,
-        )
-        .first()
-    )
-
-
-def get_all_waiting(db: Session) -> Sequence[QueueItem]:
-    """
-    Retorna todos os cidadãos que estão na fila de espera (WAITING),
-    ordenados por prioridade (desc) e posição (asc).
-    """
+def get_all_waiting(db: Session) -> list[type[QueueItem]]:
+    """Retorna todos os itens WAITING, ordenados por prioridade e posição."""
     return (
         db.query(QueueItem)
         .options(joinedload(QueueItem.user))
@@ -106,9 +48,7 @@ def get_all_waiting(db: Session) -> Sequence[QueueItem]:
 
 
 def get_next_waiting_item(db: Session) -> Optional[QueueItem]:
-    """
-    Retorna o próximo item da fila, considerando prioridade e ordem.
-    """
+    """Retorna o próximo item a ser chamado (WAITING)."""
     return (
         db.query(QueueItem)
         .options(joinedload(QueueItem.user))
@@ -118,27 +58,21 @@ def get_next_waiting_item(db: Session) -> Optional[QueueItem]:
     )
 
 
-def has_active_service(db: Session) -> bool:
-    """
-    Retorna True se houver algum item sendo atendido ou chamado.
-    """
+def get_active_service_item(db: Session) -> Optional[QueueItem]:
+    """Retorna o item atualmente sendo atendido (BEING_SERVED)."""
     return (
         db.query(QueueItem)
-        .filter(
-            QueueItem.status.in_([QueueStatus.BEING_SERVED, QueueStatus.CALLED_PENDING])
-        )
+        .options(joinedload(QueueItem.user))
+        .filter(QueueItem.status == QueueStatus.BEING_SERVED)
         .first()
-        is not None
     )
 
 
 def get_pending_verification_item(db: Session) -> Optional[QueueItem]:
-    """
-    Retorna o item que está chamado e pendente de verificação (CALLED_PENDING),
-    assumindo que só existe um por vez.
-    """
+    """Retorna item chamado e pendente de verificação (CALLED_PENDING)."""
     return (
         db.query(QueueItem)
+        .options(joinedload(QueueItem.user))
         .filter(QueueItem.status == QueueStatus.CALLED_PENDING)
         .order_by(asc(QueueItem.position))
         .first()
@@ -146,10 +80,16 @@ def get_pending_verification_item(db: Session) -> Optional[QueueItem]:
 
 
 def get_next_position(db: Session) -> int:
-    """
-    Retorna a próxima posição disponível na fila.
-    Deve ser chamado dentro de uma transação atômica (`with db.begin()`).
-    """
-    # SQLite não tem lock de linha, mas dentro de `db.begin()` já reduz conflitos
+    """Retorna próxima posição disponível na fila."""
     max_position = db.query(func.max(QueueItem.position)).scalar()
     return (max_position or 0) + 1
+
+
+def has_active_service(db: Session) -> bool:
+    """Retorna True se algum item estiver em atendimento ou chamado."""
+    return (
+        db.query(QueueItem)
+        .filter(QueueItem.status.in_([QueueStatus.BEING_SERVED, QueueStatus.CALLED_PENDING]))
+        .first()
+        is not None
+    )

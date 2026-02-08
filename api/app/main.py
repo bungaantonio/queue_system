@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from app.db.base import Base
+from app.db.database import engine
 from app.db.seed_system_operator import bootstrap_system_operators
-from app.exceptions.handlers import register_exception_handlers
+
 from app.routers import (
     auth_router,
     dedicated_router,
@@ -10,14 +12,12 @@ from app.routers import (
     audit_router,
     queue_stream_router,
 )
-
-from app.db.base import Base
-from app.db.database import engine
-
 from app.routers.queue_router import queue_api
-from app.routers.biometric_router import biometrics_api
 from app.routers.monitoring_router import monitoring_router, setup_monitoring_middleware
-from app.api.routers import utentes
+from app.api.routers import credential_routers, utentes
+
+from app.core.exception_handlers import register_exception_handlers
+
 import logging
 
 logging.basicConfig(
@@ -29,10 +29,7 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 origins = [
-    "http://localhost:3001",
-    "http://localhost:3002",
-    "http://127.0.0.1:3001",
-    "http://127.0.0.1:3002",
+    "*"
     # depois pode adicionar o domínio real (ex: https://painel.fila.ao)
 ]
 
@@ -47,7 +44,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Sistema de Gestão de Filas", lifespan=lifespan)
 
-
 # Criação das tabelas
 Base.metadata.create_all(bind=engine)
 
@@ -60,7 +56,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # Middleware global
 setup_monitoring_middleware(app)
 
@@ -72,11 +67,11 @@ app.include_router(
 )
 # app.include_router(user_router.router, prefix="/users", tags=["Users"])
 app.include_router(
-    biometrics_api.router, prefix="/api/v1/biometrics", tags=["Biometrics"]
+    credential_routers.router, prefix="/api/v1/biometrics", tags=["Credências"]
 )
-app.include_router(auth_router.router, prefix="/auth", tags=["auth"])
+app.include_router(auth_router.router, prefix="/auth", tags=["Auth"])
 app.include_router(
-    operators_router.router, prefix="/api/v1/operators", tags=["operators"]
+    operators_router.router, prefix="/api/v1/operators", tags=["Operadores"]
 )
 app.include_router(
     audit_router.router,
@@ -85,7 +80,6 @@ app.include_router(
 )
 app.include_router(utentes.router, prefix="/api/v1", tags=["Utentes"])
 app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Dedicated"])
-
 
 register_exception_handlers(app)
 

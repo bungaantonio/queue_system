@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from jose.exceptions import ExpiredSignatureError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.exceptions import AppException
 from app.db.database import get_db
 from app.crud.operator_crud import get_operator_by_username
 
@@ -39,7 +40,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     now = datetime.now(timezone.utc)
 
     expire = now + (
-        expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
     to_encode.update(
@@ -55,48 +56,36 @@ def decode_access_token(token: str) -> dict:
         secret_key = _get_secret_key_value()
         return jwt.decode(token, secret_key, algorithms=[settings.ALGORITHM])
     except ExpiredSignatureError:
-        raise HTTPException(
-            status_code=401,
-            detail="Token expirado",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise AppException("auth.refresh_expired")
     except JWTError:
-        raise HTTPException(
-            status_code=401,
-            detail="Token inválido",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise AppException("auth.invalid_credentials")
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme_required), db: Session = Depends(get_db)
+        token: str = Depends(oauth2_scheme_required), db: Session = Depends(get_db)
 ):
     """
     Retorna o operador logado via JWT.
-    Lança exceção se não houver token ou se for inválido.
+    Lança exceção se não houver ‘token’ ou se for inválido.
     """
     payload = decode_access_token(token)
     username = payload.get("sub")
     if not username:
-        raise HTTPException(
-            status_code=401, detail="As credenciais de autenticação são inválidas"
-        )
+        raise AppException("auth.invalid_credentials")
 
     user = get_operator_by_username(db, username=username)
     if user is None:
-        raise HTTPException(
-            status_code=401, detail="As credenciais de autenticação são inválidas"
-        )
+        raise AppException("auth.invalid_credentials")
 
     return user
 
 
 def get_current_user_optional(
-    token: Optional[str] = Depends(oauth2_scheme_optional),
-    db: Session = Depends(get_db),
+        token: Optional[str] = Depends(oauth2_scheme_optional),
+        db: Session = Depends(get_db),
 ):
     """
-    Retorna o operador logado via JWT, ou None se não houver token válido.
+    Retorna o operador logado via JWT, ou None se não houver ‘token’ válido.
     Não lança exceção.
     """
     if not token:
@@ -108,13 +97,13 @@ def get_current_user_optional(
             return None
         user = get_operator_by_username(db, username=username)
         return user
-    except JWTError:
+    except AppException:
         return None
 
 
 def resolve_operator_with_system_fallback(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user_optional),
+        db: Session = Depends(get_db),
+        current_user=Depends(get_current_user_optional),
 ):
     """
     Retorna o operador ativo:
@@ -126,13 +115,13 @@ def resolve_operator_with_system_fallback(
 
     system_operator = get_operator_by_username(db, username="biometric_gateway")
     if not system_operator:
-        raise RuntimeError("SYSTEM operator não encontrado no banco!")
+        raise AppException("operator.not_found")
     return system_operator
 
 
 def get_operator_id(current_user=Depends(get_current_user)) -> int:
     """
-    Retorna apenas o `ID` do operador logado.
+    Retorna apenas o 'ID' do operador logado.
     Continua disponível para endpoints que só aceitam operador humano.
     """
     return current_user.id
