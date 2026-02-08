@@ -37,7 +37,7 @@ def authenticate_user(
     item = CredentialAuthService.authenticate_user(
         db=db,
         queue_item_id=request.queue_item_id,
-        credential=request.credential,
+        input_credential=request.credential,
         presented_call_token=request.call_token,
         operator_id=request.operator_id,
     )
