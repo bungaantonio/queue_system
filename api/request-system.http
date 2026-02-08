@@ -17,7 +17,7 @@ Content-Type: application/json
 
 ### Registrar usuário com biometria #2
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODE1NjAsImV4cCI6MTc3MDU4MjE2MCwianRpIjoiNDBiNWQxYjE0YjUwNDM0YWEwYzEwZjVmYzY2M2NiNDIifQ.sok5crlWcNcKQBUl9h_XkGAV0Y52JEKZNGFv4CrEMnY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODYyOTEsImV4cCI6MTc3MDU4Njg5MSwianRpIjoiYWMzMzE5MjY5NjA2NDYzMTg0YWI5MGZiMzZhMDFjOWMifQ.XDAV6VV07CjEJL2chClZzGajS_F3WOuOgfhARa-NSZU
 
 {
   "user": {
@@ -38,7 +38,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 
 ### Registrar usuário com biometria #3
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODE1NjAsImV4cCI6MTc3MDU4MjE2MCwianRpIjoiNDBiNWQxYjE0YjUwNDM0YWEwYzEwZjVmYzY2M2NiNDIifQ.sok5crlWcNcKQBUl9h_XkGAV0Y52JEKZNGFv4CrEMnY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODYyOTEsImV4cCI6MTc3MDU4Njg5MSwianRpIjoiYWMzMzE5MjY5NjA2NDYzMTg0YWI5MGZiMzZhMDFjOWMifQ.XDAV6VV07CjEJL2chClZzGajS_F3WOuOgfhARa-NSZU
 
 {
   "user": {
@@ -62,7 +62,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 
 ### Registrar usuário com biometria #4
 POST http://127.0.0.1:8000/api/v1/queue/register 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODE1NjAsImV4cCI6MTc3MDU4MjE2MCwianRpIjoiNDBiNWQxYjE0YjUwNDM0YWEwYzEwZjVmYzY2M2NiNDIifQ.sok5crlWcNcKQBUl9h_XkGAV0Y52JEKZNGFv4CrEMnY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODYyOTEsImV4cCI6MTc3MDU4Njg5MSwianRpIjoiYWMzMzE5MjY5NjA2NDYzMTg0YWI5MGZiMzZhMDFjOWMifQ.XDAV6VV07CjEJL2chClZzGajS_F3WOuOgfhARa-NSZU
 
 {
   "user": {
@@ -100,7 +100,7 @@ Content-Type: application/json
 {
   "queue_item_id": 3,
   "credential": "HASH_TESTE_DEDO_2",
-  "call_token": "d37083d8-dbf5-47d9-8902-b7ae39c29e50",
+  "call_token": "5f594030-5429-4ace-8003-ff3dd99df497",
   "operator_id": 1
 }
 

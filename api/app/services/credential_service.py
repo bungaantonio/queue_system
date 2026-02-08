@@ -65,6 +65,7 @@ class CredentialAuthService:
             mark_credential_verified(db, item)
             set_being_served(db, item)
             db.commit()
+            db.refresh(item)
         except:
             db.rollback()
             raise

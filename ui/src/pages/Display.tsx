@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import useQueueData from "../features/called-user/useQueueData";
 import VideoPlayer from "../components/VideoPlayer";
 import CalledUser from "../features/called-user/CalledUser";
-import NextUsers from "../components/NextUsers";
+import NextUsers from "../features/waiting-list/NextUsers";
 import Timer from "../components/Timer";
 import QrCodeBox from "../components/QrCodeBox";
 import Clock from "../components/Clock";
 import MarqueeTicker from "../components/MarqueeTicker";
-import CallOverlay from "../components/CallOverlay";
+import CallOverlay from "../features/called-user/CallOverlay";
 import AudioOnboarding from "../components/AudioOnboarding";
 
 export default function Display() {

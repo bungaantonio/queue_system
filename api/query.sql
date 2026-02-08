@@ -6,3 +6,4 @@ SELECT * FROM user_credentials;
 SELECT * FROM operators;
 
 SELECT * FROM queue_items;
+
