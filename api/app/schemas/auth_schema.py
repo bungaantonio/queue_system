@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 # Schemas de request
 class LoginSchema(BaseModel):
     username: str
@@ -20,6 +21,10 @@ class LoginResponseData(BaseModel):
 class RefreshResponseData(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class RefreshTokenSchema(BaseModel):
+    refresh_token: str
 
 
 class LogoutResponseData(BaseModel):

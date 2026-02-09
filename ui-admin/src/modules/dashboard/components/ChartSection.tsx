@@ -1,11 +1,11 @@
 // src/dashboard/components/charts/ChartSection.tsx
 import { Box } from "@mui/material";
-import { WaitTimeChart } from "./waitTime/WaitTimeChart";
-import { VolumeChart } from "./volume/VolumeChart";
-import { SLAMetricsChart } from "./sla/SLAMetricsChart";
+import { WaitTimeChart } from "../../../dashboard/components/charts/waitTime/WaitTimeChart.tsx";
+import { VolumeChart } from "../../../dashboard/components/charts/volume/VolumeChart.tsx";
+import { SLAMetricsChart } from "../../../dashboard/components/charts/sla/SLAMetricsChart.tsx";
 
-import { volumeData } from "./volume/data";
-import { waitTimeData } from "./waitTime/data";
+import { volumeData } from "../../../dashboard/components/charts/volume/data.ts";
+import { waitTimeData } from "../../../dashboard/components/charts/waitTime/data.ts";
 
 export const ChartSection = () => (
     <Box
