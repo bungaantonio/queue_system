@@ -1,63 +1,66 @@
-// components/kpis/KpiCard.tsx
-import { Card, CardContent, Box, Typography } from "@mui/material";
-import { ReactNode } from "react";
+import { Card, CardContent, Box, Typography } from '@mui/material';
+import { Kpi } from './types';
+import { colorMap, getTrendColor, formatTrend } from './utils';
 
-interface KpiCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon?: ReactNode;
-  color?: "primary" | "success" | "warning" | "error";
-}
+export const KpiCard = ({ title, value, subtitle, icon, color = 'primary', trend }: Kpi) => {
+    const colors = colorMap[color];
 
-export const KpiCard = ({
-  title,
-  value,
-  subtitle,
-  icon,
-  color = "primary",
-}: KpiCardProps) => (
-  <Card
-    sx={{
-      height: "100%",
-      transition: "0.3s",
-      "&:hover": {
-        transform: "translateY(-2px)",
-        boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
-      },
-    }}
-  >
-    <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-      {icon && (
-        <Box
-          sx={{
-            p: 1.5,
-            borderRadius: 2,
-            bgcolor: `${color}.50`,
-            color: `${color}.main`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: 48,
-            minHeight: 48,
-          }}
+    return (
+        <Card
+            sx={{
+                height: '100%',
+                transition: 'all 0.3s ease-in-out',
+                '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+                },
+            }}
         >
-          {icon}
-        </Box>
-      )}
-      <Box sx={{ flex: 1 }}>
-        <Typography variant="body2" color="text.secondary">
-          {title}
-        </Typography>
-        <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          {value}
-        </Typography>
-        {subtitle && (
-          <Typography variant="body2" color="text.secondary">
-            {subtitle}
-          </Typography>
-        )}
-      </Box>
-    </CardContent>
-  </Card>
-);
+            <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+
+                    {/* Bloco de Texto */}
+                    <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            {title}
+                        </Typography>
+                        <Typography variant="h4" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                            {value}
+                        </Typography>
+                        {subtitle && (
+                            <Typography variant="body2" color="text.secondary">
+                                {subtitle}
+                            </Typography>
+                        )}
+                        {trend && (
+                            <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 600, color: getTrendColor(trend.isPositive), mt: 0.5 }}
+                            >
+                                {formatTrend(trend.value, trend.isPositive)} vs. ontem
+                            </Typography>
+                        )}
+                    </Box>
+
+                    {/* Ícone */}
+                    <Box
+                        sx={{
+                            p: 2,
+                            borderRadius: 2,
+                            backgroundColor: colors.bg,
+                            color: colors.text,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minWidth: 56,
+                            minHeight: 56,
+                            ml: 2,
+                        }}
+                    >
+                        {icon}
+                    </Box>
+                </Box>
+            </CardContent>
+        </Card>
+    );
+};
