@@ -10,7 +10,6 @@ RUN dotnet restore
 
 # Copia o resto do código e a DLL externa
 COPY . .
-COPY ../../../Downloads/zkfinger_sdk_v10.0-windows-lite-zk9500/ZKFinger\ SDK\ V10.0-Windows-Lite/C#/lib/x64/libzkfpcsharp.dll ./dlls/
 
 # Compila a aplicação
 RUN dotnet publish -c Release -o /app

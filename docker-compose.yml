@@ -1,0 +1,48 @@
+services:
+  # API
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi-app
+    env_file:
+      - ./api/.env
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+  # UI Admin
+  ui-admin:
+    build:
+      context: ./ui-admin
+      dockerfile: Dockerfile.ui-admin
+    container_name: ui-admin
+    depends_on:
+      - app
+    ports:
+      - "3000:80"
+
+  # UI
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile.ui
+    container_name: ui
+    depends_on:
+      - app
+    ports:
+      - "3001:80"
+
+  # Banco de dados Postgres
+  db:
+    image: postgres:16
+    container_name: fastapi-db
+    restart: always
+    env_file:
+      - ./api/.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
