@@ -1,51 +1,60 @@
 import { jwtDecode } from "jwt-decode";
 
+interface JwtPayload {
+  username: string;
+  role: string;
+  exp: number;
+}
+
 export const sessionStore = {
-  // Access token: agora só em memória
   accessToken: null as string | null,
 
   setAccessToken(token: string) {
     this.accessToken = token;
   },
+
   getAccessToken() {
     return this.accessToken;
   },
-  clearAccessToken() {
-    this.accessToken = null;
-  },
 
-  // Refresh token: persistente
   setRefreshToken(token: string) {
     localStorage.setItem("refresh_token", token);
   },
+
   getRefreshToken() {
     return localStorage.getItem("refresh_token");
   },
-  clearRefreshToken() {
-    localStorage.removeItem("refresh_token");
+
+  // Útil para persistir o username/role mesmo após F5,
+  // já que o accessToken em memória some.
+  setUserInfo(username: string, role: string) {
+    localStorage.setItem("user_name", username);
+    localStorage.setItem("user_role", role);
   },
 
-  // Usuário
-  setUser(username: string, role: string) {
-    localStorage.setItem("username", username);
-    localStorage.setItem("role", role);
-  },
   getUser() {
-    if (!this.accessToken) return null;
-    try {
-      const decoded: { username: string; role: string } = jwtDecode(
-        this.accessToken,
-      );
-      return { username: decoded.username, role: decoded.role };
-    } catch {
-      return null;
+    // Tenta pegar do token em memória
+    if (this.accessToken) {
+      try {
+        const decoded = jwtDecode<JwtPayload>(this.accessToken);
+        return { username: decoded.username, role: decoded.role };
+      } catch {
+        return null;
+      }
     }
+
+    // Fallback para localStorage se a memória estiver vazia (pós-F5)
+    const username = localStorage.getItem("user_name");
+    const role = localStorage.getItem("user_role");
+    if (username && role) return { username, role };
+
+    return null;
   },
 
   clear() {
-    this.clearAccessToken();
-    this.clearRefreshToken();
-    localStorage.removeItem("username");
-    localStorage.removeItem("role");
+    this.accessToken = null;
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_name");
+    localStorage.removeItem("user_role");
   },
 };

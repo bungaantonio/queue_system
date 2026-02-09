@@ -10,7 +10,7 @@ import { OperatorsEdit } from "./modules/operators/components/OperatorsEdit";
 
 import { ControlPage } from "./modules/queue/components/ControlPage";
 
-import { DashboardPage } from "./modules/dashboard/pages/DashboardPage";
+import { DashboardPage } from "./modules/dashboard/DashboardPage.tsx";
 
 import { UtentesCreate } from "./modules/users/components/UtentesCreate";
 import { UtentesList } from "./modules/users/components/UtentesList";
@@ -23,6 +23,9 @@ import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvi
 
 import { withRole } from "./modules/shared/utils/withRole";
 
+import { premiumTheme } from "./ui/theme.ts";
+import { AdminLayout } from "./ui/layout/AdminLayout";
+
 // Ícones realistas
 import QueueIcon from "@mui/icons-material/Queue";
 import BadgeIcon from "@mui/icons-material/Badge";
@@ -33,6 +36,8 @@ import { AuditShow } from "./modules/auditor/components/AuditShow";
 export const App = () => (
   <AtendimentoProvider>
     <Admin
+      theme={premiumTheme}
+      layout={AdminLayout}
       authProvider={adminAuthProvider}
       dataProvider={adminDataProvider}
       dashboard={DashboardPage}
