@@ -57,6 +57,8 @@ git commit -m "fix: ajuste X"
 ### Antes de PR
 
 ```bash
+git fetch upstream
+git rebase upstream/main
 # executar testes do projecto
 ```
 
@@ -64,6 +66,28 @@ git commit -m "fix: ajuste X"
 
 ```bash
 git checkout main
+git fetch upstream
+git rebase upstream/main
+git push origin main
 git branch -d feature/descricao-curta
 git push origin --delete feature/descricao-curta
+```
+
+### Recuperação de erro comum (extra importante)
+
+#### Fiz commits por engano em `main`
+
+```bash
+git checkout -b feature/descricao-curta
+git checkout main
+git fetch upstream
+git reset --hard upstream/main
+git push --force-with-lease origin main
+```
+
+### Higiene do repositório (extra)
+
+```bash
+git branch -vv
+git branch -d <branch-inutil>
 ```

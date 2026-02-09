@@ -1,0 +1,18 @@
+FROM node:20-slim
+
+WORKDIR /app
+
+# Copia manifests
+COPY package*.json ./
+
+# Instala dependências
+RUN npm install
+
+# Copia o código
+COPY . .
+
+# Porta configurada no script dev (vite --port 3001)
+EXPOSE 3001
+
+# Dev server com hot reload
+CMD ["npm", "run", "dev", "--", "--host"]
