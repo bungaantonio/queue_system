@@ -26,6 +26,8 @@ git push origin main
 ```bash
 git checkout -b feature/descricao-curta
 ```
+git push -u origin feature/descricao-curta
+
 
 ### Desenvolvimento
 
