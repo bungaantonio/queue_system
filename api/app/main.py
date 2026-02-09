@@ -29,7 +29,8 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 origins = [
-    "*"
+    "http://localhost:3001",
+    "http://localhost:3002",
     # depois pode adicionar o domínio real (ex: https://painel.fila.ao)
 ]
 

@@ -1,14 +1,21 @@
 # app/routers/auth.py
 from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from app.core.exceptions import AppException
 from app.db.database import get_db
 from app.models.models import RefreshToken
 from app.models.operator import Operator
-from app.schemas.auth_schema import LoginSchema, LogoutSchema, LoginResponseData, RefreshResponseData, \
+from app.schemas.auth_schema import (
+    LoginSchema,
+    LogoutSchema,
+    RefreshTokenSchema,
+    LoginResponseData,
+    RefreshResponseData,
     LogoutResponseData
+)
+
 from app.services.auth_service import authenticate_user, create_user_token, create_refresh_token
 from app.helpers.response_helpers import success_response, ApiResponse
 
@@ -16,7 +23,7 @@ router = APIRouter()
 
 
 @router.post("/login", response_model=ApiResponse[LoginResponseData])
-def login(form_data: LoginSchema, db: Session = Depends(get_db), response: Response = None):
+def login(payload: LoginSchema, db: Session = Depends(get_db), response: Response = None):
     """
     🔹 Autenticação do usuário
 
@@ -45,7 +52,7 @@ def login(form_data: LoginSchema, db: Session = Depends(get_db), response: Respo
         )
     """
 
-    user = authenticate_user(db, form_data.username, form_data.password)
+    user = authenticate_user(db, payload.username, payload.password)
 
     access_token = create_user_token(user)
     refresh_token = create_refresh_token(db, user.id)
@@ -59,7 +66,7 @@ def login(form_data: LoginSchema, db: Session = Depends(get_db), response: Respo
 
 
 @router.post("/refresh", response_model=ApiResponse[RefreshResponseData])
-def refresh_token(refresh_token: str, db: Session = Depends(get_db), response: Response = None):
+def refresh_token(payload: RefreshTokenSchema, db: Session = Depends(get_db), response: Response = None):
     """
     🔹 Gera novo access token usando refresh token válido
 
@@ -81,7 +88,7 @@ def refresh_token(refresh_token: str, db: Session = Depends(get_db), response: R
 
     token_entry = (
         db.query(RefreshToken)
-        .filter(RefreshToken.token == refresh_token, RefreshToken.revoked == False)
+        .filter(RefreshToken.token == payload.refresh_token, RefreshToken.revoked == False)
         .first()
     )
 
