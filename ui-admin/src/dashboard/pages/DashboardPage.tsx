@@ -1,9 +1,9 @@
 // pages/DashboardPage.tsx
 import { ThemeProvider, createTheme, CssBaseline, Container, Box, Fade } from '@mui/material';
-import { KpiBar } from '../components/kpis/KpiBar';
-import { ChartSection } from '../components/charts/ChartSection';
-import { AlertsPanel } from '../components/alerts/AlertsPanel';
-import { RecentActivity } from '../components/activity/RecentActivity';
+import { KpiBar } from '../../modules/dashboard/components/KpiBar.tsx';
+import { ChartSection } from '../../modules/dashboard/components/ChartSection.tsx';
+import { AlertsPanel } from '../../modules/dashboard/components/AlertsPanel.tsx';
+import { RecentActivity } from '../../modules/dashboard/components/RecentActivity.tsx';
 
 const theme = createTheme({
   palette: {

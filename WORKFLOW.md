@@ -25,8 +25,8 @@ git push origin main
 
 ```bash
 git checkout -b feature/descricao-curta
-```
 git push -u origin feature/descricao-curta
+```
 
 
 ### Desenvolvimento
@@ -36,6 +36,7 @@ git push -u origin feature/descricao-curta
 ```bash
 git add <ficheiros>
 git commit -m "feat: descricao clara"
+git push
 ```
 
 ### Manter a branch actualizada
@@ -46,7 +47,7 @@ git checkout main
 git rebase origin/main
 git checkout feature/descricao-curta
 git rebase main
-
+git push
 ```
 
 ### Repetir commits conforme necessário
@@ -54,6 +55,7 @@ git rebase main
 ```bash
 git add <ficheiros>
 git commit -m "fix: ajuste X"
+git push
 ```
 
 ### Antes de PR
@@ -61,7 +63,8 @@ git commit -m "fix: ajuste X"
 ```bash
 git fetch upstream
 git rebase upstream/main
-# executar testes do projecto
+# executar testes do projeto
+git push
 ```
 
 ### Limpeza após merge
