@@ -1,0 +1,24 @@
+# Imagem base leve com Python 3.12
+FROM python:3.12-slim
+
+# Evita prompts durante instalação de pacotes
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Dependências do sistema necessárias
+RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
+
+# Diretório de trabalho
+WORKDIR /app
+
+# Copia dependências e instala
+COPY requirements/base.txt .
+RUN pip install --no-cache-dir -r base.txt
+
+# Copia o código da aplicação
+COPY ./app ./app
+
+# Expõe porta padrão FastAPI
+EXPOSE 8000
+
+# Comando padrão para rodar a app
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
