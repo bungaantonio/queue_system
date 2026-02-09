@@ -57,6 +57,8 @@ git commit -m "fix: ajuste X"
 ### Antes de PR
 
 ```bash
+git fetch upstream
+git rebase upstream/main
 # executar testes do projecto
 ```
 
@@ -64,6 +66,9 @@ git commit -m "fix: ajuste X"
 
 ```bash
 git checkout main
+git fetch upstream
+git rebase upstream/main
+git push origin main
 git branch -d feature/descricao-curta
 git push origin --delete feature/descricao-curta
 ```
