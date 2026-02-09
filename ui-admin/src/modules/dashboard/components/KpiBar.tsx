@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
-import { KpiCard } from './KpiCard';
-import { Kpi } from './types';
+import { KpiCard } from './KpiCard.tsx';
+import { Kpi } from '../../../dashboard/components/kpis/types.ts';
 import { Users, Phone, UserCheck, Clock, CheckCircle, TrendingUp } from 'lucide-react';
 
 // Dados de exemplo traduzidos para português
