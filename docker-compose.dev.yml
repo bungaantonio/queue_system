@@ -1,0 +1,59 @@
+services:
+  # Serviço FastAPI
+  app:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.api.dev
+    container_name: fastapi-app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./api:/app
+      - ./requirements:/app/requirements
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./api/.env
+    depends_on:
+      - db
+
+  # Serviço React
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile.ui.dev
+    container_name: ui
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
+    depends_on:
+      - app
+
+  # Serviço React Admin
+  ui-admin:
+    build:
+      context: ./ui-admin
+      dockerfile: Dockerfile.ui-admin.dev
+    container_name: ui-admin
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./ui-admin:/app
+      - /app/node_modules
+    depends_on:
+      - app
+
+  # Banco de dados Postgres
+  db:
+    image: postgres:16
+    container_name: fastapi-db
+    restart: always
+    env_file:
+      - ./api/.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+# Volumes persistentes
+volumes:
+  pgdata:
