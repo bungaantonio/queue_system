@@ -84,7 +84,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 
 
 ### Entrada rapida na fila
-POST http://127.0.0.1:8000/api/v1/queue/quick-entry
+POST http://localhost:8000/api/v1/queue/quick-entry
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA3MzA4MzUsImV4cCI6MTc3MDczNDQzNSwianRpIjoiY2JhNzI0NmQwMDgxNDVhM2FkMTVjOGNkZTkyMjcyMjMifQ.sUxmuiHRW5S9sEoDQmeMAufVI1EYLRiRMEWxxBiKHDU
 
 {
@@ -94,7 +94,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 
 
 ### Autenticar user chamado
-POST http://127.0.0.1:8000/api/v1/biometrics/authenticate
+POST http://localhost:8000/api/v1/credential/authenticate
 Content-Type: application/json
 
 {

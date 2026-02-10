@@ -6,6 +6,7 @@ from app.core.exceptions import AppException
 from app.db.database import get_db
 from app.helpers.queue_broadcast import broadcast_state_sync, build_queue_state
 from app.helpers.response_helpers import success_response, ApiResponse
+from app.models.enums import AttendanceType
 from app.schemas.queue_schema.response import (
     QueueCalledItem,
     QueueConsult,
@@ -64,7 +65,7 @@ def entry(
         db=db,
         identifier=request.identifier,
         operator_id=operator_id,
-        attendance_type=request.attendance_type,
+        attendance_type=AttendanceType.NORMAL,
     )
 
     db.commit()
