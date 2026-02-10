@@ -10,6 +10,7 @@ annotated-types==0.7.0
     # via pydantic
 anyio==4.12.1
     # via
+    #   sse-starlette
     #   starlette
     #   watchfiles
 argon2-cffi==25.1.0
@@ -95,6 +96,8 @@ rsa==4.9.1
 six==1.17.0
     # via ecdsa
 sqlalchemy==2.0.46
+    # via -r requirements/base.in
+sse-starlette==3.0.2
     # via -r requirements/base.in
 starlette==0.52.1
     # via fastapi
