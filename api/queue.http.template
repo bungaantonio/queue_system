@@ -1,17 +1,22 @@
 ### Backend - Operadores
 
 GET http://127.0.0.1:8000/api/v1/operators/
+<<<<<<< HEAD
 <<<<<<<< HEAD:api/queue.http.template
 Authorization: Bearer <TOKEN>
 ========
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA0NzA5MjgsImV4cCI6MTc3MDQ3MTUyOCwianRpIjoiMTM5NTkwODc4NWQ3NGM5NTkyOTc2ODdlMjIwZDhiODcifQ.xgOkG9YqzW6Q539e8w7w9ZPPO0-nw8Ibzbg2MaRQhhU
 >>>>>>>> abd5bf9 (feat: integração E2E inicial, entre middleware e backend):api/queue.http
+=======
+Authorization: Bearer <TOKEN>
+>>>>>>> 80d2f78 (e2e initial commit)
 
 ### Login
 POST http://127.0.0.1:8000/auth/login
 Content-Type: application/json
 
 {
+<<<<<<< HEAD
 <<<<<<<< HEAD:api/queue.http.template
   "username": "username",
   "password": "0000"
@@ -19,12 +24,17 @@ Content-Type: application/json
   "username": "auditor",
   "password": "123"
 >>>>>>>> abd5bf9 (feat: integração E2E inicial, entre middleware e backend):api/queue.http
+=======
+  "username": "username",
+  "password": "0000"
+>>>>>>> 80d2f78 (e2e initial commit)
 }
 
 ### Middleware - Biometria
 ### Parte do middleware C#
 
 ### Registrar usuário com biometria #2
+<<<<<<< HEAD
 <<<<<<<< HEAD:api/queue.http.template
 POST http://127.0.0.1:8000/api/v1/queue/register
 Authorization: Bearer <TOKEN>
@@ -32,6 +42,10 @@ Authorization: Bearer <TOKEN>
 POST http://127.0.0.1:8000/api/v1/queue/register 
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA1ODYyOTEsImV4cCI6MTc3MDU4Njg5MSwianRpIjoiYWMzMzE5MjY5NjA2NDYzMTg0YWI5MGZiMzZhMDFjOWMifQ.XDAV6VV07CjEJL2chClZzGajS_F3WOuOgfhARa-NSZU
 >>>>>>>> abd5bf9 (feat: integração E2E inicial, entre middleware e backend):api/queue.http
+=======
+POST http://127.0.0.1:8000/api/v1/queue/register
+Authorization: Bearer <TOKEN>
+>>>>>>> 80d2f78 (e2e initial commit)
 
 {
   "user": {
@@ -50,6 +64,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
   "attendance_type": "urgent"
 }
 
+<<<<<<< HEAD
 <<<<<<<< HEAD:api/queue.http.template
 ### Entrada rapida na fila
 POST http://127.0.0.1:8000/api/v1/queue/quick-entry
@@ -106,6 +121,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 POST http://127.0.0.1:8000/api/v1/queue/quick-entry
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA3MzA4MzUsImV4cCI6MTc3MDczNDQzNSwianRpIjoiY2JhNzI0NmQwMDgxNDVhM2FkMTVjOGNkZTkyMjcyMjMifQ.sUxmuiHRW5S9sEoDQmeMAufVI1EYLRiRMEWxxBiKHDU
 >>>>>>>> abd5bf9 (feat: integração E2E inicial, entre middleware e backend):api/queue.http
+=======
+### Entrada rapida na fila
+POST http://127.0.0.1:8000/api/v1/queue/quick-entry
+Authorization: Bearer <TOKEN>
+>>>>>>> 80d2f78 (e2e initial commit)
 
 {
   "identifier": "HASH_TESTE_DEDO_2",
@@ -132,11 +152,15 @@ POST http://127.0.0.1:8000/api/v1/queue/call-next
 
 ### Finalizar atendimento
 POST http://127.0.0.1:8000/api/v1/queue/finish
+<<<<<<< HEAD
 <<<<<<<< HEAD:api/queue.http.template
 Authorization: Bearer <TOKEN>
 ========
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzA3MzU3MDksImV4cCI6MTc3MDczOTMwOSwianRpIjoiZjkyOTM2MTRkMDdjNDcyMThmOGQ5MWE0YmQyNTgxYzUifQ.tWVGzNzwNFy7TIzI1V1c5IMQKy-8TrGlVlCMVJ5psMw
 >>>>>>>> abd5bf9 (feat: integração E2E inicial, entre middleware e backend):api/queue.http
+=======
+Authorization: Bearer <TOKEN>
+>>>>>>> 80d2f78 (e2e initial commit)
 
 ### Cancelar atendimento
 POST http://127.0.0.1:8000/api/v1/queue/cancel
@@ -149,11 +173,15 @@ Content-Type: application/json
 ### Reagendar
 POST http://127.0.0.1:8000/api/v1/queue/requeue
 Content-Type: application/json
+<<<<<<< HEAD
 <<<<<<<< HEAD:api/queue.http.template
 Authorization: Bearer <TOKEN>
 ========
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiZXhwIjoxNzYzOTE4MTYxLCJzdWIiOiJhZG1pbiIsImlhdCI6MTc2MzkxNDU2MX0.u_bZhBuTdBiAsxbaLm5q4ncYwlSOr7KzT9qLyJxfqZc
 >>>>>>>> abd5bf9 (feat: integração E2E inicial, entre middleware e backend):api/queue.http
+=======
+Authorization: Bearer <TOKEN>
+>>>>>>> 80d2f78 (e2e initial commit)
 
 {
   "user_id": 3,
@@ -164,11 +192,15 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkb
 POST http://127.0.0.1:8000/api/v1/queue/skip
 
 
+<<<<<<< HEAD
 <<<<<<<< HEAD:api/queue.http.template
 ### React - Display Público
 ========
 ### React - Display Público 
 >>>>>>>> abd5bf9 (feat: integração E2E inicial, entre middleware e backend):api/queue.http
+=======
+### React - Display Público
+>>>>>>> 80d2f78 (e2e initial commit)
 
 ### Listar a fila com usuários em espera e chamados em espera de verificação
 GET http://127.0.0.1:8000/api/v1/queue/waiting-and-called
@@ -181,11 +213,15 @@ GET http://127.0.0.1:8000/api/v1/queue/current
 ### Parte do middleware C# (uso interno)
 GET http://127.0.0.1:8000/api/v1/queue/next-called-for-client
 
+<<<<<<< HEAD
 <<<<<<<< HEAD:api/queue.http.template
 ################################ OLD | LEGACY ################################
 ========
 ################################ OLD | LEGACY ################################ 
 >>>>>>>> abd5bf9 (feat: integração E2E inicial, entre middleware e backend):api/queue.http
+=======
+################################ OLD | LEGACY ################################
+>>>>>>> 80d2f78 (e2e initial commit)
 
 ### Consultar posição na fila
 ### Usando número de identificação
