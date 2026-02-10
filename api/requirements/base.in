@@ -18,4 +18,4 @@ PyYAML
 Jinja2
 
 gTTS==2.5.4
-sse-starlette=2.0.43
+sse-starlette==3.0.2

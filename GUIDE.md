@@ -62,6 +62,8 @@ Produção:
 docker compose down
 ```
 
+> docker compose down -v
+
 ### Dockerfiles de cada serviço
 
 | Serviço            | Dockerfile dev                     | Dockerfile produção            |
