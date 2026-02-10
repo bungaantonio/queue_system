@@ -1,5 +1,11 @@
-// src/features/utentes/UtentesCreate.tsx
-import { Create, SimpleForm, TextInput, DateInput, BooleanInput, SelectInput } from "react-admin";
+import {
+  Create,
+  SimpleForm,
+  TextInput,
+  DateInput,
+  BooleanInput,
+  SelectInput,
+} from "react-admin";
 import { BiometricInput } from "./BiometricInput";
 
 export const UtentesCreate = () => (
@@ -30,7 +36,10 @@ export const UtentesCreate = () => (
 
       <BooleanInput source="is_pregnant" label="Está Grávida?" />
       <DateInput source="pregnant_until" label="Até quando?" />
-      <BooleanInput source="is_disabled_temp" label="Tem deficiência temporária?" />
+      <BooleanInput
+        source="is_disabled_temp"
+        label="Tem deficiência temporária?"
+      />
       <DateInput source="disabled_until" label="Até quando?" />
 
       <BiometricInput source="biometric_id" operatorId={42} />

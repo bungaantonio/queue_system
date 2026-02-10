@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 
 namespace BiometricMiddleware.Services
 {
-    public class MockBiometricProvider : IBiometricProvider
+    public class MockBiometricProvider : ICredentialProvider
     {
-        public async Task<string> CaptureHashAsync(CancellationToken ct = default)
+        public async Task<string> CaptureIdentifierAsync(CancellationToken ct = default)
         {
             // Resolve o aviso CS1998 usando Task.Delay
             await Task.Delay(100);

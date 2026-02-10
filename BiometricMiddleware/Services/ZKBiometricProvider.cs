@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace BiometricMiddleware.Services
 {
-    public class ZKBiometricProvider : IBiometricProvider, IDisposable
+    public class ZKBiometricProvider : ICredentialProvider, IDisposable
     {
         private readonly zkfp _fpInstance = new();
         private readonly ILogger<ZKBiometricProvider> _logger;
@@ -21,7 +21,7 @@ namespace BiometricMiddleware.Services
             _logger.LogInformation("[INIT] ZKBiometricProvider criado");
         }
 
-        public async Task<string> CaptureHashAsync(CancellationToken ct = default)
+        public async Task<string> CaptureIdentifierAsync(CancellationToken ct = default)
         {
             try
             {
