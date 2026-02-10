@@ -122,7 +122,7 @@ def timer(db: Session = Depends(get_db)):
 
     return TimerResponse(
         current_user=(
-            UserInfo(id=user_item.id, name=user_item.name) if user_item else None
+            UserInfo(id=user_item.id, name=user_item.user.name) if user_item else None
         ),
         sla_minutes=sla_minutes,
         elapsed_seconds=elapsed,

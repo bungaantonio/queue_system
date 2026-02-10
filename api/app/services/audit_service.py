@@ -13,13 +13,13 @@ logger = logging.getLogger(__name__)
 class AuditService:
     @staticmethod
     def log_action(
-            db: Session,
-            action: str,
-            operator_id: Optional[int] = None,
-            user_id: Optional[int] = None,
-            queue_item_id: Optional[int] = None,
-            credential_id: Optional[int] = None,
-            details: Optional[dict] = None,
+        db: Session,
+        action: str,
+        operator_id: Optional[int] = None,
+        user_id: Optional[int] = None,
+        queue_item_id: Optional[int] = None,
+        credential_id: Optional[int] = None,
+        details: Optional[dict] = None,
     ) -> Audit:
         """Cria um registro de auditoria com hash encadeado."""
         last_audit = db.query(Audit).order_by(Audit.id.desc()).first()
@@ -52,7 +52,7 @@ class AuditService:
 
     @staticmethod
     def _to_verification_detail(
-            audit: Audit, previous_hash: Optional[str]
+        audit: Audit, previous_hash: Optional[str]
     ) -> AuditVerificationDetail:
         recalculated = audit.finalize_record()
         prev_match = (
@@ -62,11 +62,15 @@ class AuditService:
         )
         valid = recalculated == audit.hashed_record and prev_match
 
-        try:
-            details = json.loads(audit.details) if audit.details else {}
-        except json.JSONDecodeError:
-            logger.warning("Audit %s details JSON decode failed", audit.id)
+        if isinstance(audit.details, dict):
+            details = audit.details
+        else:
             details = {}
+            logger.warning(
+                "Audit %s details têm tipo inesperado: %s",
+                audit.id,
+                type(audit.details),
+            )
 
         return AuditVerificationDetail(
             id=audit.id,
@@ -99,7 +103,7 @@ class AuditService:
 
     @staticmethod
     def verify_single_audit(
-            db: Session, audit_id: int
+        db: Session, audit_id: int
     ) -> Optional[AuditVerificationDetail]:
         audit = audit_crud.get_audit_by_id(db, audit_id)
         if not audit:
@@ -112,13 +116,13 @@ class AuditService:
 
     @staticmethod
     def generate_audit_report(
-            db: Session,
-            user_id: Optional[int] = None,
-            action: Optional[str] = None,
-            start: Optional[datetime] = None,
-            end: Optional[datetime] = None,
-            skip: int = 0,
-            limit: int = 100,
+        db: Session,
+        user_id: Optional[int] = None,
+        action: Optional[str] = None,
+        start: Optional[datetime] = None,
+        end: Optional[datetime] = None,
+        skip: int = 0,
+        limit: int = 100,
     ) -> List[AuditVerificationDetail]:
         query = db.query(Audit).order_by(Audit.id.asc())
         if user_id is not None:
