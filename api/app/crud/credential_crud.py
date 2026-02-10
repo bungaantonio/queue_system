@@ -22,15 +22,19 @@ def get_called_pending_by_queue_item_id(
 
 def get_by_identifier(db: Session, identifier: str) -> UserCredential | None:
     return (
-        db.query(UserCredential)
-        .filter(UserCredential.identifier == identifier)
-        .first()
+        db.query(UserCredential).filter(UserCredential.identifier == identifier).first()
     )
 
 
-def get_first_credential_by_user(
-    db: Session, user_id: int
-) -> UserCredential | None:
+def get_user_id_by_identifier(
+    db: Session,
+    identifier: str,
+) -> int | None:
+    credential = get_by_identifier(db, identifier)
+    return credential.user_id if credential else None
+
+
+def get_first_credential_by_user(db: Session, user_id: int) -> UserCredential | None:
     return (
         db.query(UserCredential)
         .filter(UserCredential.user_id == user_id)
@@ -39,13 +43,8 @@ def get_first_credential_by_user(
     )
 
 
-def create_credential(
-    db: Session, user_id: int, identifier: str
-) -> UserCredential:
-    credential = UserCredential(
-        user_id=user_id,
-        identifier=identifier
-    )
+def create_credential(db: Session, user_id: int, identifier: str) -> UserCredential:
+    credential = UserCredential(user_id=user_id, identifier=identifier)
     db.add(credential)
     db.flush()
     return credential
@@ -70,7 +69,5 @@ def set_being_served(db: Session, item: QueueItem) -> None:
 
 def get_active_being_served(db: Session) -> QueueItem | None:
     return (
-        db.query(QueueItem)
-        .filter(QueueItem.status == QueueStatus.BEING_SERVED)
-        .first()
+        db.query(QueueItem).filter(QueueItem.status == QueueStatus.BEING_SERVED).first()
     )

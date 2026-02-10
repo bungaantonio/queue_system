@@ -40,7 +40,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     now = datetime.now(timezone.utc)
 
     expire = now + (
-            expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
     to_encode.update(
@@ -62,7 +62,7 @@ def decode_access_token(token: str) -> dict:
 
 
 def get_current_user(
-        token: str = Depends(oauth2_scheme_required), db: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme_required), db: Session = Depends(get_db)
 ):
     """
     Retorna o operador logado via JWT.
@@ -81,8 +81,8 @@ def get_current_user(
 
 
 def get_current_user_optional(
-        token: Optional[str] = Depends(oauth2_scheme_optional),
-        db: Session = Depends(get_db),
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    db: Session = Depends(get_db),
 ):
     """
     Retorna o operador logado via JWT, ou None se não houver ‘token’ válido.
@@ -102,8 +102,8 @@ def get_current_user_optional(
 
 
 def resolve_operator_with_system_fallback(
-        db: Session = Depends(get_db),
-        current_user=Depends(get_current_user_optional),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user_optional),
 ):
     """
     Retorna o operador ativo:
@@ -117,6 +117,27 @@ def resolve_operator_with_system_fallback(
     if not system_operator:
         raise AppException("operator.not_found")
     return system_operator
+
+
+def get_operator_id_with_system_fallback(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user_optional),
+) -> int:
+    """
+    Retorna sempre um operator_id válido:
+    - humano autenticado
+    - SYSTEM (biometric_gateway)
+
+    Boundary-safe: retorna apenas tipo primitivo (int).
+    """
+    if current_user:
+        return current_user.id
+
+    system_operator = get_operator_by_username(db, username="biometric_gateway")
+    if not system_operator:
+        raise AppException("operator.not_found")
+
+    return system_operator.id
 
 
 def get_operator_id(current_user=Depends(get_current_user)) -> int:
