@@ -1,4 +1,7 @@
 from typing import Optional, List
+from app.crud.credential_crud import get_by_identifier
+from app.models.enums import AttendanceType
+from app.utils.credential_utils import hash_identifier
 from sqlalchemy.orm import Session
 
 from app.crud.queue import (
@@ -7,7 +10,7 @@ from app.crud.queue import (
     get_next_waiting_item,
     get_existing_queue_item,
     get_pending_verification_item,
-    enqueue_user
+    enqueue_user,
 )
 from app.models.queue_item import QueueItem
 from app.core.exceptions import AppException
@@ -43,19 +46,31 @@ def get_next_user_to_call(db: Session) -> Optional[QueueItem]:
     return get_next_waiting_item(db)
 
 
-def quick_entry_user(db: Session, user, operator_id: Optional[int] = None,
-                     attendance_type: str = "normal") -> QueueItem:
-    """
-    Entrada rápida de usuário (via biometria), retorna item CRUD.
-    """
+def quick_entry_user(
+    db: Session,
+    identifier: str,
+    operator_id: int,
+    attendance_type: AttendanceType,
+) -> QueueItem:
+
+    hashed_identifier = hash_identifier(identifier)
+    credential = get_by_identifier(db, hashed_identifier)
+    if not credential:
+        raise AppException("credential.not_found")
+
+    user = credential.user
 
     queue_item = get_existing_queue_item(db, user.id)
     if queue_item:
         return queue_item
 
-    queue_item = enqueue_user(db, user=user, operator_id=operator_id or 1, attendance_type=attendance_type)
+    queue_item = enqueue_user(
+        db,
+        user=user,
+        operator_id=operator_id,
+        attendance_type=attendance_type,
+    )
 
-    # Auditoria
     audit_log(
         db,
         action="quick_entry",
@@ -65,27 +80,35 @@ def quick_entry_user(db: Session, user, operator_id: Optional[int] = None,
         details=build_audit_details(
             action="quick_entry",
             msg="Usuário entrou rapidamente na fila",
-            extra={"attendance_type": attendance_type}
-        )
+            extra={"attendance_type": attendance_type},
+        ),
     )
 
     return queue_item
 
 
-def get_next_called_with_tokens(db: Session, operator_id: Optional[int] = None) -> QueueItem:
-    """ Próximo usuário chamado pendente de verificação, retornando call_token e credential.
-    Para uso apenas por clientes confiáveis (internos / backend). """
+def get_next_called_with_tokens(
+    db: Session, operator_id: Optional[int] = None
+) -> QueueItem:
+    """Próximo usuário chamado pendente de verificação, retornando call_token e credential.
+    Para uso apenas por clientes confiáveis (internos / backend)."""
     item = get_pending_verification_item(db)
     if not item:
         raise AppException("queue.no_called_user")
 
-    audit_log(db,
-              action="get_next_called_with_tokens",
-              operator_id=operator_id, user_id=item.user_id,
-              queue_item_id=item.id,
-              details=build_audit_details(
-                  action="get_next_called_with_tokens",
-                  msg="get_next_called_with_tokens",
-                  extra={"credential": item.credential_verified, "call_token": item.call_token}
-              ))
+    audit_log(
+        db,
+        action="get_next_called_with_tokens",
+        operator_id=operator_id,
+        user_id=item.user_id,
+        queue_item_id=item.id,
+        details=build_audit_details(
+            action="get_next_called_with_tokens",
+            msg="get_next_called_with_tokens",
+            extra={
+                "credential": item.credential_verified,
+                "call_token": item.call_token,
+            },
+        ),
+    )
     return item

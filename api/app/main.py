@@ -63,22 +63,12 @@ setup_monitoring_middleware(app)
 # Rotas
 app.include_router(monitoring_router, prefix="/api/v1/monitoring")
 app.include_router(queue_api.router, prefix="/api/v1/queue", tags=["Queue"])
-app.include_router(
-    queue_stream_router.router, prefix="/api/v1/sse", tags=["Queue Stream"]
-)
+app.include_router(queue_stream_router.router, prefix="/api/v1/sse", tags=["Queue Stream"])
 # app.include_router(user_router.router, prefix="/users", tags=["Users"])
-app.include_router(
-    credential_routers.router, prefix="/api/v1/biometrics", tags=["Credências"]
-)
+app.include_router(credential_routers.router, prefix="/api/v1/biometrics", tags=["Credências"])
 app.include_router(auth_router.router, prefix="/auth", tags=["Auth"])
-app.include_router(
-    operators_router.router, prefix="/api/v1/operators", tags=["Operadores"]
-)
-app.include_router(
-    audit_router.router,
-    prefix="/api/v1/audits",
-    tags=["Audits"],
-)
+app.include_router(operators_router.router, prefix="/api/v1/operators", tags=["Operadores"])
+app.include_router(audit_router.router, prefix="/api/v1/audits", tags=["Audits"])
 app.include_router(utentes.router, prefix="/api/v1", tags=["Utentes"])
 app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Dedicated"])
 
