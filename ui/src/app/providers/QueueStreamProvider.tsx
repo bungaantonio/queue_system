@@ -24,7 +24,7 @@ export function QueueStreamProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Usando o IP configurado para a sua rede
     const stream = new QueueStream(
-      "http://192.168.18.7:8000/api/v1/sse/stream",
+      "http://localhost:8000/api/v1/sse/stream",
       (data: QueueState) => {
         // 1. Defesa: Se os dados forem nulos ou malformados, ignoramos para não quebrar o estado
         if (!data) return;

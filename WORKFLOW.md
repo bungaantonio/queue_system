@@ -15,67 +15,57 @@
 
 ```bash
 git checkout main
-git fetch origin
-git rebase origin/main
-git push origin main
-
+git fetch origin        # Baixar as últimas mudanças do repositório remoto
+git rebase origin/main  # Sincronizar com a versão remota da 'main'
+git push origin main    # Se houver algo novo, enviar para o remoto
 ```
 
 ### Criar feature
 
 ```bash
 git checkout -b feature/descricao-curta
-git push -u origin feature/descricao-curta
+git push -u origin feature/descricao-curta  # Envia a branch e cria o link com o remoto
 ```
-
 
 ### Desenvolvimento
 
 #### (editar código)
 
 ```bash
-git add <ficheiros>
-git commit -m "feat: descricao clara"
-git push
+git add <arquivos>
+git commit -m "feat: Implementa a funcionalidade X"
+git push  # Enviar os commits para o remoto
 ```
 
 ### Manter a branch actualizada
 
 ```bash
-git fetch origin
-git checkout main
-git rebase origin/main
-git checkout feature/descricao-curta
-git rebase main
-git push
-```
-
-### Repetir commits conforme necessário
-
-```bash
-git add <ficheiros>
-git commit -m "fix: ajuste X"
-git push
+git fetch origin       # Baixar as últimas alterações do repositório remoto
+git checkout main      # Garantir que está na branch principal
+git rebase origin/main # Aplicar alterações da 'main' remota na sua branch
+git checkout feature/descricao-curta  # Voltar para a branch de feature
+git rebase main        # Atualizar a branch de feature com a 'main'
+git push               # Enviar as mudanças para o remoto
 ```
 
 ### Antes de PR
 
 ```bash
-git fetch upstream
-git rebase upstream/main
-# executar testes do projeto
-git push
+git fetch origin
+git rebase origin/main   # Certifique-se de que a sua branch esteja alinhada com a 'main'
+# Executar os testes para garantir que nada foi quebrado
+git push                # Enviar quaisquer mudanças finais para o remoto
 ```
 
 ### Limpeza após merge
 
 ```bash
-git checkout main
-git fetch upstream
-git rebase upstream/main
-git push origin main
-git branch -d feature/descricao-curta
-git push origin --delete feature/descricao-curta
+git checkout main       # Voltar para a branch principal
+git fetch origin        # Baixar as últimas mudanças
+git rebase origin/main  # Garantir que a 'main' está atualizada
+git push origin main    # Se necessário, envie as alterações
+git branch -d feature/descricao-curta  # Apagar a branch local
+git push origin --delete feature/descricao-curta  # Apagar a branch remota
 ```
 
 ### Recuperação de erro comum (extra importante)
@@ -85,9 +75,9 @@ git push origin --delete feature/descricao-curta
 ```bash
 git checkout -b feature/descricao-curta
 git checkout main
-git fetch upstream
-git reset --hard upstream/main
-git push --force-with-lease origin main
+git fetch origin
+git reset --hard origin/main    # Alinhar a 'main' local com a remota
+git push --force-with-lease origin main   # Forçar o envio da 'main' corrigida
 ```
 
 ### Higiene do repositório (extra)
