@@ -5,7 +5,7 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        string baseUrl = "http://127.0.0.1:8000";
+        string baseUrl = "http://localhost:8000";
         int operatorId = 42;
 
         // -------------------------------
@@ -31,7 +31,7 @@ class Program
         // -------------------------------
         // 2. Inicializa o provedor biométrico com logger
         // -------------------------------
-        IBiometricProvider biometricProvider = new ZKBiometricProvider(biometricLogger);
+        ICredentialProvider biometricProvider = new ZKBiometricProvider(biometricLogger);
 
         // -------------------------------
         // 3. Inicializa o QueueListener

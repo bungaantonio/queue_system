@@ -24,7 +24,6 @@ def _insert(
     Insere um novo item na fila, evitando duplicidade.
     Define posição, prioridade, tipo de atendimento, status e SLA.
     Registra auditoria.
-    NÃO faz commit — transação deve ser controlada pelo serviço chamador.
     """
 
     if not allow_duplicate:
