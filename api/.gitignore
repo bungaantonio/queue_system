@@ -65,3 +65,4 @@ dist/
 *.bak
 *.swp
 *.swo
+queue.http

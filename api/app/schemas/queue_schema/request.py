@@ -26,10 +26,6 @@ class QuickEntryRequest(BaseModel):
         ...,
         description="Identificador único da credencial capturada.",
     )
-    attendance_type: AttendanceType = Field(
-        ...,
-        description="Tipo de atendimento (NORMAL, PRIORITY, URGENT).",
-    )
 
 
 class QueueRequeue(BaseModel):

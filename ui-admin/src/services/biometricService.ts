@@ -1,17 +1,20 @@
 import { httpClient } from "../core/http/apiClient";
 
 export const biometricService = {
-  requestCapture: (operatorId: number) =>
-    httpClient.post<{ session_id: string }>(
-      `/biometrics/request-capture/${operatorId}`,
+  // Registra captura via middleware; envia session_id + credential_id no corpo
+  registerCapture: (payload: { session_id: string; credential_id: string }) =>
+    httpClient.post<{ status: string }>(
+      "/credential/register-capture",
+      payload,
     ),
 
+  // Busca hash/identificador da credencial
   fetchHash: async (sessionId: string) => {
     try {
-      const res = await httpClient.get<{ biometric_id: string }>(
-        `/biometrics/fetch-hash/${sessionId}`,
+      const res = await httpClient.get<{ identifier: string }>(
+        `/credential/fetch-identifier/${sessionId}`,
       );
-      return res.biometric_id;
+      return res.identifier;
     } catch (e: any) {
       if (e.status === 404) return null;
       throw e;

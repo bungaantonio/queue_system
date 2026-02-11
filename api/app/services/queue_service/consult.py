@@ -50,7 +50,7 @@ def quick_entry_user(
     db: Session,
     identifier: str,
     operator_id: int,
-    attendance_type: AttendanceType,
+    attendance_type: AttendanceType.NORMAL,
 ) -> QueueItem:
 
     hashed_identifier = hash_identifier(identifier)
