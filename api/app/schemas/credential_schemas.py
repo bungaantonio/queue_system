@@ -9,8 +9,8 @@ from enum import Enum
 # ============================================================
 
 class CredentialType(str, Enum):
-    ZKTECO = "zkteco"        # hardware
-    WEBAUTHN = "webauthn"    # mobile / passkey
+    ZKTECO = "zkteco"  # hardware
+    WEBAUTHN = "webauthn"  # mobile / passkey
 
 
 # ============================================================
@@ -100,3 +100,9 @@ class CredentialScanEvent(BaseModel):
     cred_type: CredentialType = Field(default=CredentialType.ZKTECO)
     metadata: Optional[Dict[str, str]] = None
     timestamp: datetime
+
+
+class ActiveTemplateResponse(BaseModel):
+    id: int
+    user_id: int
+    template: str

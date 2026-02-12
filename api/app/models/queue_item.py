@@ -6,7 +6,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
-    CheckConstraint,
+    CheckConstraint, Text,
 )
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import relationship, validates
@@ -34,7 +34,7 @@ class QueueItem(Base):
     sla_deadline = Column(DateTime(timezone=True), nullable=True)
     attendance_type = Column(String(32), default=AttendanceType.NORMAL)
 
-    credential = Column(String(64), nullable=True)
+    credential = Column(Text, nullable=True)
     call_token = Column(String(64), nullable=True, index=True)
     call_token_expires_at = Column(DateTime(timezone=True), nullable=True)
 

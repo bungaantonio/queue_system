@@ -67,6 +67,7 @@ class QuickEntryResponse(BaseModel):
 
 
 class QueueConsult(BaseModel):
+    id: int
     in_queue: bool
     message: str
     position: Optional[int] = None
@@ -88,6 +89,7 @@ class QueueConsult(BaseModel):
         )
 
         return cls(
+            id=queue_item.id,
             in_queue=True,
             message=msg,
             position=queue_item.position,
@@ -98,15 +100,13 @@ class QueueConsult(BaseModel):
         )
 
 
-# --------------------------
-# Público: detalhes do usuário (não sensível)
-# --------------------------
 class QueueDetailItem(BaseModel):
     id: int
+    user_id: int  # Identificador numérico do utilizador
     position: int
     status: str
     timestamp: datetime
-    name: str
+    name: str  # Nome formatado (ex: Bunga A.)
     document_id: Optional[str] = None
     id_hint: Optional[str] = None
     phone: Optional[str] = None
@@ -117,68 +117,47 @@ class QueueDetailItem(BaseModel):
     @classmethod
     def from_orm_item(cls, item):
         name_parts = item.user.name.split(" ")
-        short_name = (
-            f"{name_parts[0]} {name_parts[-1][0]}."
-            if len(name_parts) > 1
-            else item.user.name
-        )
-        document_id = item.user.id_number[-5:] if item.user.id_number else None
-        phone_safe = f"****{item.user.phone[-4:]}" if item.user.phone else None
+        short_name = f"{name_parts[0]} {name_parts[-1][0]}." if len(name_parts) > 1 else item.user.name
+        doc_hint = item.user.id_number[-5:] if item.user.id_number else None
 
         return cls(
             id=item.id,
+            user_id=item.user.id,  # <--- Importante
             position=item.position,
             status=item.status,
             timestamp=item.timestamp,
             name=short_name,
-            document_id=document_id,
-            id_hint=document_id,
-            phone=phone_safe,
+            document_id=doc_hint,
+            id_hint=doc_hint,
+            phone=item.user.phone,
             birth_date=item.user.birth_date,
             attendance_type=item.attendance_type,
             sla_deadline=item.sla_deadline,
         )
 
 
-# --------------------------
-# Interno/Dev: chamado com call_token e hash
-# --------------------------
 class QueueCalledItem(QueueDetailItem):
-    credential: str
-    credential_verified: bool
-    call_token: str
-    call_token_expires_at: datetime
-    attempted_verification: bool
+    # Campos extras para quando o utilizador é chamado
+    credential: Optional[str] = None
+    credential_verified: bool = False
+    call_token: Optional[str] = None
+    call_token_expires_at: Optional[datetime] = None
+    attempted_verification: bool = False
 
     @classmethod
     def from_orm_item(cls, item):
-        name_parts = item.user.name.split(" ")
-        short_name = (
-            f"{name_parts[0]} {name_parts[-1][0]}."
-            if len(name_parts) > 1
-            else item.user.name
-        )
-        document_id = item.user.id_number[-5:] if item.user.id_number else None
-        phone_safe = f"****{item.user.phone[-4:]}" if item.user.phone else None
+        # Primeiro pegamos os dados base da classe pai
+        base_data = QueueDetailItem.from_orm_item(item).dict()
 
-        return cls(
-            id=item.id,
-            position=item.position,
-            status=item.status,
-            timestamp=item.timestamp,
-            name=short_name,
-            document_id=document_id,
-            id_hint=document_id,
-            phone=phone_safe,
-            birth_date=item.user.birth_date,
-            credential=item.credential,
-            credential_verified=item.credential_verified,
-            call_token=item.call_token,
-            call_token_expires_at=item.call_token_expires_at,
-            attempted_verification=item.attempted_verification,
-
-        )
-
+        # Adicionamos os campos específicos desta classe
+        base_data.update({
+            "credential": item.credential,
+            "credential_verified": item.credential_verified,
+            "call_token": item.call_token,
+            "call_token_expires_at": item.call_token_expires_at,
+            "attempted_verification": item.attempted_verification,
+        })
+        return cls(**base_data)
 
 class UserSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)

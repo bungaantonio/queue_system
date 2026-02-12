@@ -53,8 +53,7 @@ def quick_entry_user(
     attendance_type: AttendanceType.NORMAL,
 ) -> QueueItem:
 
-    hashed_identifier = hash_identifier(identifier)
-    credential = get_by_identifier(db, hashed_identifier)
+    credential = get_by_identifier(db, identifier)
     if not credential:
         raise AppException("credential.not_found")
 

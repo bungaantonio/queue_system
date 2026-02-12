@@ -6,7 +6,7 @@ import { useInput } from "react-admin";
 
 export const BiometricInput = ({
   source,
-  operatorId, // mantido caso queira log ou iniciar SSE
+  operatorId,
 }: {
   source: string;
   operatorId: number;
@@ -24,20 +24,23 @@ export const BiometricInput = ({
     setStatus("waiting");
 
     try {
-      // Cria sessão temporária
-      const session_id = crypto.randomUUID(); // front-end gera session_id temporário
-      // Dispara middleware: no real, o sensor postará {session_id, credential_id}
-      // Aqui simulamos registro inicial vazio (ou você pode usar SSE para disparar)
-      await biometricService.registerCapture({ session_id, credential_id: "" });
+      const { session_id } = await biometricService.requestCapture(operatorId);
 
-      // Polling
+      // delay inicial antes do polling
+      await new Promise((r) => setTimeout(r, 2000));
+
       const interval = setInterval(async () => {
-        const hash = await biometricService.fetchHash(session_id);
-        if (hash) {
-          onChange(hash); // Atualiza o formulário
-          setStatus("success");
-          setLoading(false);
-          clearInterval(interval);
+        try {
+          const hash = await biometricService.fetchHash(session_id);
+          if (hash) {
+            onChange(hash);
+            setStatus("success");
+            setLoading(false);
+            clearInterval(interval);
+          }
+        } catch (err: any) {
+          if (err.status === 404) return; // ainda não chegou, continua polling
+          throw err;
         }
       }, 2000);
 

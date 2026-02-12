@@ -19,64 +19,48 @@ from app.crud.credential_crud import (
 class CredentialAuthService:
 
     @staticmethod
-    def authenticate_user(
-            db: Session,
-            queue_item_id: int,
-            input_credential: str,
-            presented_call_token: str,
-            operator_id: int,
-    ):
-        # 1️⃣ Busca item chamado
+    def authenticate_user(db: Session, queue_item_id: int, input_credential: str, presented_call_token: str,
+                          operator_id: int):
+        # 1. Busca o item da fila
         item = get_called_pending_by_queue_item_id(db, queue_item_id)
         if not item:
             raise AppException("queue.item_not_called")
 
-        # 2️⃣ Valida token
-        if not utils.validate_call_token(presented_call_token, item.call_token, item.call_token_expires_at):
-            raise AppException("queue.invalid_call_token")
+        # 2. Busca a credencial oficial deste usuário no banco
+        user_credential = db.query(UserCredential).filter(
+            UserCredential.user_id == item.user_id,
+            UserCredential.cred_type == "zkteco"
+        ).first()
 
-        # 3️⃣ Verifica se já existe alguém em atendimento
-        if get_active_being_served(db):
-            raise AppException("queue.already_being_served")
+        if not user_credential:
+            raise AppException("credential.not_found")
 
-        # 4️⃣ Verifica credencial
-        hashed_input = utils.compute_server_hash(input_credential)
-        user_credential = (
-            db.query(UserCredential)
-            .filter(UserCredential.user_id == item.user_id, UserCredential.cred_type == "zkteco")
-            .first()
-        )
-
-        if not user_credential or not utils.verify_credential_hash(hashed_input, user_credential.identifier):
-            mark_credential_attempt(db, item)
-            audit_log(
-                db=db,
-                action=AuditAction.CREDENTIAL_FAILED,
-                operator_id=operator_id,
-                user_id=item.user_id,
-                queue_item_id=item.id,
-                credential_id=user_credential.id if user_credential else None,
-            )
-            db.commit()  # garante persistência do attempt
+        # 3. COMPARAÇÃO DE TEXTO SIMPLES
+        # Como o Middleware enviou o template do cache dele, as strings devem ser idênticas.
+        if input_credential != user_credential.identifier:
             raise AppException("credential.mismatch")
 
-        # 5️⃣ Marcação de sucesso
-        try:
-            mark_credential_verified(db, item)
-            set_being_served(db, item)
-            db.commit()
-            db.refresh(item)
-        except:
-            db.rollback()
-            raise
-
-        audit_log(
-            db=db,
-            action=AuditAction.CREDENTIAL_VERIFIED,
-            operator_id=operator_id,
-            user_id=item.user_id,
-            queue_item_id=item.id,
-            credential_id=user_credential.id,
-        )
+        # 4. Sucesso! Marca como em atendimento
+        mark_credential_verified(db, item)
+        set_being_served(db, item)
+        db.commit()
 
         return item
+
+
+
+def get_active_templates(db: Session):
+    credentials = (
+        db.query(UserCredential)
+        .filter(UserCredential.cred_type == "zkteco")
+        .all()
+    )
+
+    return [
+        {
+            "id": c.id,
+            "user_id": c.user_id,
+            "template": c.identifier,  # identifier = template Base64
+        }
+        for c in credentials
+    ]
