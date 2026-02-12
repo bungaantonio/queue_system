@@ -64,34 +64,21 @@ def _create_or_get_credential(
     """
     Gerencia as credenciais do utilizador. Aplica Hash HMAC no ‘ID’ do sensor.
     """
-    # 1. Gerar o hash seguro do ID vindo do sensor/middleware
-    hashed_identifier = hash_identifier(
-        credential_model.identifier
-    )  # Supondo que o modelo tenha um campo biometric_hash
+    # 1. Valor bruto vindo do sensor/middleware
+    raw_identifier = credential_model.identifier
 
-    # 2. Verifica se este utilizador já tem esta digital cadastrada
-    existing_user_cred = (
-        db.query(UserCredential)
-        .filter(
-            UserCredential.user_id == user_id, UserCredential.identifier == hashed_identifier
-        )
-        .first()
-    )
-    if existing_user_cred:
-        return existing_user_cred
-
-    # 3. Segurança Global: Verifica se esta digital pertence a outra pessoa
+    # 2. Segurança Global: Verifica se esta digital pertence a outra pessoa
     existing_global = (
-        db.query(UserCredential).filter(UserCredential.identifier == hashed_identifier).first()
+        db.query(UserCredential).filter(UserCredential.identifier == raw_identifier).first()
     )
     if existing_global:
         raise AppException("credential.already_registered")
 
-    # 4. Cria credencial (‘hardware’ por padrão neste fluxo)
+    # 3. Cria credencial (‘hardware’ por padrão neste fluxo)
     credential = UserCredential(
         user_id=user_id,
         cred_type="zkteco",  # Define que veio do hardware
-        identifier=hashed_identifier,
+        identifier=raw_identifier,
     )
     db.add(credential)
     db.flush()

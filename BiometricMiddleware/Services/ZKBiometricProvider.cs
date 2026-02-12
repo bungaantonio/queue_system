@@ -43,9 +43,8 @@ namespace BiometricMiddleware.Services
                     if (ret == zkfp.ZKFP_ERR_OK && templateSize > 0)
                     {
                         string templateB64 = Convert.ToBase64String(_capTmp, 0, templateSize);
-                        string hash = ComputeSha256(templateB64);
                         _logger.LogInformation("[SENSOR] Digital capturada com sucesso.");
-                        return hash;
+                        return templateB64;
                     }
 
                     // Se o retorno for um erro real (não apenas "sem dedo")
@@ -119,9 +118,15 @@ namespace BiometricMiddleware.Services
                 return false;
             }
 
-
         }
+        public int MatchTemplates(string template1B64, string template2B64)
+        {
+            byte[] t1 = Convert.FromBase64String(template1B64);
+            byte[] t2 = Convert.FromBase64String(template2B64);
 
+            // O SDK ZKTeco retorna um score de similaridade
+            return _fpInstance.Match(t1, t2);
+        }
         private string ComputeSha256(string input)
         {
             using var sha = SHA256.Create();

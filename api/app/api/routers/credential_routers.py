@@ -9,8 +9,8 @@ from app.helpers.queue_notifier import queue_notifier
 from app.helpers.queue_broadcast import broadcast_state_sync
 from app.helpers.response_helpers import success_response, ApiResponse
 from app.schemas.queue_schema.response import QueueDetailItem
-from app.schemas.credential_schemas import CredentialAuthRequest
-from app.services.credential_service import CredentialAuthService
+from app.schemas.credential_schemas import CredentialAuthRequest, ActiveTemplateResponse
+from app.services.credential_service import CredentialAuthService, get_active_templates
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -62,6 +62,7 @@ async def request_capture(operator_id: int):
 @router.post("/register-capture")
 async def receive_capture(payload: dict):
     """Recebe a credencial capturada pelo middleware e armazena temporariamente."""
+    logger.debug(f"Recebe a credencial capturada: {payload}")
     s_id = payload.get("session_id")
     c_id = payload.get("credential_id")
 
@@ -81,3 +82,9 @@ async def fetch_identifier(session_id: str):
         raise AppException("credential.not_found")
 
     return success_response({"identifier": c_id})
+
+
+# Exceção no uso de APIResponse (não sei o porquê)
+@router.get("/active-templates", response_model=list[ActiveTemplateResponse])
+def active_templates(db: Session = Depends(get_db)):
+    return get_active_templates(db)

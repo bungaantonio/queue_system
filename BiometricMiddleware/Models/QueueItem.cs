@@ -7,29 +7,17 @@ namespace BiometricMiddleware.Models
         [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = "";
+        [JsonPropertyName("user_id")] // Agora virá na raiz do JSON
+        public int UserId { get; set; }
 
-        [JsonPropertyName("biometric_hash")]
-        public string? BiometricHash { get; set; }
+        [JsonPropertyName("name")] // Agora virá na raiz do JSON
+        public string Name { get; set; } = "";
 
         [JsonPropertyName("call_token")]
         public string? CallToken { get; set; }
 
         [JsonPropertyName("status")]
         public string Status { get; set; } = "";
-
-        [JsonPropertyName("document_id")]
-        public string? DocumentId { get; set; }
-
-        [JsonPropertyName("id_hint")]
-        public string? IdHint { get; set; }
-
-        [JsonPropertyName("phone")]
-        public string? Phone { get; set; }
-
-        [JsonPropertyName("birth_date")]
-        public string? BirthDate { get; set; }
 
         [JsonPropertyName("position")]
         public int Position { get; set; }
