@@ -1,3 +1,4 @@
+from app.schemas.time_response import TimerSchema
 from pydantic import BaseModel, ConfigDict, computed_field
 from datetime import date
 from datetime import datetime, timezone
@@ -117,7 +118,11 @@ class QueueDetailItem(BaseModel):
     @classmethod
     def from_orm_item(cls, item):
         name_parts = item.user.name.split(" ")
-        short_name = f"{name_parts[0]} {name_parts[-1][0]}." if len(name_parts) > 1 else item.user.name
+        short_name = (
+            f"{name_parts[0]} {name_parts[-1][0]}."
+            if len(name_parts) > 1
+            else item.user.name
+        )
         doc_hint = item.user.id_number[-5:] if item.user.id_number else None
 
         return cls(
@@ -150,14 +155,17 @@ class QueueCalledItem(QueueDetailItem):
         base_data = QueueDetailItem.from_orm_item(item).dict()
 
         # Adicionamos os campos específicos desta classe
-        base_data.update({
-            "credential": item.credential,
-            "credential_verified": item.credential_verified,
-            "call_token": item.call_token,
-            "call_token_expires_at": item.call_token_expires_at,
-            "attempted_verification": item.attempted_verification,
-        })
+        base_data.update(
+            {
+                "credential": item.credential,
+                "credential_verified": item.credential_verified,
+                "call_token": item.call_token,
+                "call_token_expires_at": item.call_token_expires_at,
+                "attempted_verification": item.attempted_verification,
+            }
+        )
         return cls(**base_data)
+
 
 class UserSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -199,3 +207,4 @@ class QueueStateSchema(BaseModel):
     current: Optional[QueueItemSchema] = None
     called: Optional[QueueItemSchema] = None
     queue: List[QueueItemSchema] = []
+    timer: Optional[TimerSchema]

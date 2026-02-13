@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import time
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from sqlalchemy.orm import Session
 
 from app.db.database import SessionLocal
@@ -34,15 +34,47 @@ def build_queue_state(db: Session) -> dict:
     called_orm = consult.get_called_user(db)
     waiting_list_orm = consult.list_waiting_users(db)
 
+    timer_state = build_timer_state(db)
+
     # Criamos o objeto de estado validando contra o Schema
     state = QueueStateSchema(
         current=current_orm,
         called=called_orm,
-        queue=waiting_list_orm
+        queue=waiting_list_orm,
+        timer=timer_state,
     )
 
     # model_dump(mode='json') converte automaticamente datetimes e enums
-    return state.model_dump(mode='json')
+    return state.model_dump(mode="json")
+
+
+def build_timer_state(db: Session):
+    user_item = consult.get_served_user(db)
+    if not user_item:
+        return None
+
+    now = datetime.now(timezone.utc)
+    user_ts = user_item.timestamp
+
+    if user_ts.tzinfo is None:
+        user_ts = user_ts.replace(tzinfo=timezone.utc)
+
+    elapsed = int((now - user_ts).total_seconds())
+
+    sla_seconds = (
+        int((user_item.sla_deadline - user_item.timestamp).total_seconds())
+        if user_item.sla_deadline
+        else 0
+    )
+    status = "Dentro do limite" if elapsed <= sla_seconds * 60 else "Ultrapassado"
+
+    return {
+        "started_at": user_ts,
+        "sla_seconds": sla_seconds,
+        "elapsed_seconds": elapsed,
+        "status": status,
+    }
+
 
 async def broadcast_state():
     """Executa leitura pós-commit e publica estado da fila usando sessão isolada."""

@@ -4,7 +4,7 @@ import useQueueData from "../features/called-user/useQueueData";
 import VideoPlayer from "../components/VideoPlayer";
 import CalledUser from "../features/called-user/CalledUser";
 import NextUsers from "../features/waiting-list/NextUsers";
-import Timer from "../components/Timer";
+import Timer from "../features/timer/Timer";
 import QrCodeBox from "../components/QrCodeBox";
 import Clock from "../components/Clock";
 import MarqueeTicker from "../components/MarqueeTicker";
@@ -26,7 +26,7 @@ export default function Display() {
   return (
     <div className="h-screen w-screen flex flex-col bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans">
       <AudioOnboarding />
-      <CallOverlay user={showOverlay ? calledUser : null} />
+      <CallOverlay />
 
       {/* Grid de Conteúdo Principal */}
       <main className="flex-1 grid grid-cols-12 gap-6 p-6 min-h-0">
@@ -42,7 +42,7 @@ export default function Display() {
 
         {/* Direita: Painel de Informações */}
         <aside className="col-span-4 flex flex-col gap-6 min-h-0">
-          <CalledUser user={calledUser} />
+          <CalledUser />
 
           {/* Container do Meio: Timer */}
           <div className="flex-1 min-h-0 flex flex-col bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 relative overflow-hidden">
@@ -64,13 +64,13 @@ export default function Display() {
             </div>
 
             <div className="flex-1 flex flex-col justify-center min-h-0">
-              <Timer keyProp={currentUser?.id} />
+              <Timer key={currentUser?.id} />
             </div>
           </div>
 
           {/* Próximos na Fila */}
           <div className="flex-none h-[32%]">
-            <NextUsers users={nextUsers} reduced />
+            <NextUsers reduced />
           </div>
         </aside>
       </main>
