@@ -7,7 +7,7 @@ class UserInfo(BaseModel):
     name: str
 
 
-class TimerResponse(BaseModel):
+class TimerSchema(BaseModel):
     current_user: Optional[UserInfo]
     sla_minutes: int
     elapsed_seconds: int
