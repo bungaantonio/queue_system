@@ -5,13 +5,14 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { QueueUser, QueueState } from "../../domain/queue/queue.types";
+import { QueueUser, QueueState, Timer } from "../../domain/queue/queue.types";
 import { QueueStream } from "../../core/stream/sseClient";
 
 interface QueueContextValue {
   currentUser: QueueUser | null;
   calledUser: QueueUser | null;
   nextUsers: QueueUser[];
+  timer: Timer | null;
 }
 
 const QueueContext = createContext<QueueContextValue | undefined>(undefined);
@@ -20,6 +21,7 @@ export function QueueStreamProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<QueueUser | null>(null);
   const [calledUser, setCalledUser] = useState<QueueUser | null>(null);
   const [nextUsers, setNextUsers] = useState<QueueUser[]>([]);
+  const [timer, setTimer] = useState<Timer | null>(null);
 
   useEffect(() => {
     // Usando o IP configurado para a sua rede
@@ -50,7 +52,7 @@ export function QueueStreamProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <QueueContext.Provider value={{ currentUser, calledUser, nextUsers }}>
+    <QueueContext.Provider value={{ currentUser, calledUser, nextUsers, timer }}>
       {children}
     </QueueContext.Provider>
   );

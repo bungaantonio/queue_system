@@ -15,3 +15,10 @@ export interface QueueState {
   called: QueueUser | null;
   queue: QueueUser[];
 }
+
+export interface Timer {
+  current_user: QueueUser | null;
+  sla_seconds: number;
+  elapsed_seconds: number;
+  status: "Pendente" | "Ultrapassado";
+}
