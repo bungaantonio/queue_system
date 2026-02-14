@@ -8,7 +8,7 @@ from app.db.database import SessionLocal, get_db
 from app.models.queue_item import QueueItem
 from time import perf_counter
 
-from app.schemas.time_response import TimerResponse, UserInfo
+from app.schemas.time_response import TimerSchema, UserInfo
 from app.services.queue_service import consult
 
 
@@ -83,7 +83,7 @@ def setup_monitoring_middleware(app):
         return response
 
 
-@monitoring_router.get("/timer", response_model=TimerResponse)
+@monitoring_router.get("/timer", response_model=TimerSchema)
 def timer(db: Session = Depends(get_db)):
     """Retorna dados para alimentar Timer do frontend"""
     user_item = consult.get_served_user(db)  # status=BEING_SERVED
@@ -120,7 +120,7 @@ def timer(db: Session = Depends(get_db)):
     )
     status = "Dentro do limite" if elapsed <= sla_minutes * 60 else "Ultrapassado"
 
-    return TimerResponse(
+    return TimerSchema(
         current_user=(
             UserInfo(id=user_item.id, name=user_item.user.name) if user_item else None
         ),
