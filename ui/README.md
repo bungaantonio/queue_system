@@ -6,7 +6,7 @@ Sistema de exibição de fila em tempo real, desenvolvido com React e Vite. Most
 
 - Exibe o usuário atual sendo atendido
 - Lista os próximos usuários da fila
-- Timer circular para cada atendimento
+- ActiveUserCard circular para cada atendimento
 - Relógio em tempo real
 - QR Code para consulta de posição na fila
 - Vídeos informativos em loop
@@ -48,7 +48,7 @@ npm run build
 
 ```
 src/
-  components/      # Componentes React (Clock, CurrentUser, NextUsers, etc)
+  components/      # Componentes React (Clock, CurrentUser, QueuePreviewCard, etc)
   hooks/           # Hooks customizados (useQueueData)
   pages/           # Páginas principais (Display)
   utils/           # Funções utilitárias (api.js)

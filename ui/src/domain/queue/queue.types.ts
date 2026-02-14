@@ -14,6 +14,7 @@ export interface QueueState {
   current: QueueUser | null;
   called: QueueUser | null;
   queue: QueueUser[];
+  timer: Timer | null;
 }
 
 export interface Timer {

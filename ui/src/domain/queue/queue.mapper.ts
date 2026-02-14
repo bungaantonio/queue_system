@@ -1,3 +1,4 @@
+// src/domain/queue/queue.mapper.ts
 import { QueueUser } from "./queue.types";
 
 export function mapToQueueUser(raw: any): QueueUser {

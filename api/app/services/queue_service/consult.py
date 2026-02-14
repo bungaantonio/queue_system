@@ -29,12 +29,12 @@ def get_called_user(db: Session) -> Optional[QueueItem]:
 
 
 def list_waiting_users(db: Session) -> list[type[QueueItem]]:
-    """Lista todos os usuários em espera (WAITING)."""
+    """Lista todos os utilizadores em espera (WAITING)."""
     return get_all_waiting(db)
 
 
 def get_user_queue_item(db: Session, user_id: int) -> QueueItem:
-    """Retorna item de fila de um usuário ativo (WAITING, CALLED_PENDING, BEING_SERVED)."""
+    """Retorna ‘item’ de fila de um utilizador ativo (WAITING, CALLED_PENDING, BEING_SERVED)."""
     item = get_existing_queue_item(db, user_id)
     if not item:
         raise AppException("user_not_in_queue")

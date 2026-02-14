@@ -1,43 +1,56 @@
 // src/components/CallOverlay.tsx
-import { motion, AnimatePresence } from "motion/react";
+import { useEffect, useState } from "react";
+import { motion as Motion, AnimatePresence } from "motion/react";
 import { useQueueStream } from "../../app/providers/QueueStreamProvider";
+
+const OVERLAY_DURATION = 8000; // 8 segundos em tela
 
 export default function CallOverlay() {
   const { calledUser: user } = useQueueStream();
+  const [activeUserId, setActiveUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      setActiveUserId(user.id);
+      const t = setTimeout(() => setActiveUserId(null), OVERLAY_DURATION);
+      return () => clearTimeout(t);
+    }
+  }, [user?.id]);
+
+  if (!user || activeUserId !== user.id) return null;
 
   return (
     <AnimatePresence>
-      {user && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-sky-900/90 backdrop-blur-2xl"
+      <Motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-600/98 backdrop-blur-2xl"
+      >
+        <Motion.div
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center text-white"
         >
-          <motion.div
-            initial={{ scale: 0.8, y: 50 }}
-            animate={{ scale: 1, y: 0 }}
-            className="text-center text-white"
-          >
-            <motion.div
-              animate={{ rotate: [0, -5, 5, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-              className="mb-8 text-2xl uppercase tracking-[1em] text-sky-300"
-            >
-              Chamada
-            </motion.div>
-            <h1 className="text-9xl font-black mb-4 drop-shadow-2xl">
-              {user.ticket ?? "---"}
-            </h1>
-            <p className="text-5xl font-light text-sky-100">
-              {user.short_name?.toUpperCase() ?? "---"}
-            </p>
-          </motion.div>
-
-          {/* Luz de borda animada */}
-          <div className="absolute inset-0 border-[20px] border-sky-400 opacity-20 animate-pulse" />
-        </motion.div>
-      )}
+          <span className="bg-white text-indigo-600 px-10 py-3 rounded-full text-lg font-black uppercase tracking-[0.4em] mb-10 inline-block shadow-2xl">
+            Sua Vez
+          </span>
+          <h1 className="text-[22rem] font-black leading-none tracking-tighter drop-shadow-2xl">
+            {user.ticket}
+          </h1>
+          <p className="text-8xl font-bold opacity-90 uppercase tracking-tight">
+            {user.short_name}
+          </p>
+          <div className="mt-20 h-3 w-80 bg-white/20 mx-auto rounded-full overflow-hidden">
+            <Motion.div
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 8, ease: "linear" }}
+              className="h-full bg-white shadow-[0_0_20px_rgba(255,255,255,0.5)]"
+            />
+          </div>
+        </Motion.div>
+      </Motion.div>
     </AnimatePresence>
   );
 }
