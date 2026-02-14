@@ -8,7 +8,7 @@ class UserInfo(BaseModel):
 
 
 class TimerSchema(BaseModel):
-    current_user: Optional[UserInfo]
-    sla_minutes: int
+    #current_user: Optional[UserInfo]
+    sla_seconds: int
     elapsed_seconds: int
     status: str
