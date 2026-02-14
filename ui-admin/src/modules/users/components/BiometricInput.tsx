@@ -1,6 +1,17 @@
+// src/modules/users/components/BiometricInput.tsx
 import { useState } from "react";
-import { Button, CircularProgress, Typography } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Typography,
+  Box,
+  Paper,
+  Stack,
+  alpha,
+  Avatar,
+} from "@mui/material";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { biometricService } from "../../../services/biometricService";
 import { useInput } from "react-admin";
 
@@ -22,12 +33,8 @@ export const BiometricInput = ({
   const handleCapture = async () => {
     setLoading(true);
     setStatus("waiting");
-
     try {
       const { session_id } = await biometricService.requestCapture(operatorId);
-
-      // delay inicial antes do polling
-      await new Promise((r) => setTimeout(r, 2000));
 
       const interval = setInterval(async () => {
         try {
@@ -39,15 +46,13 @@ export const BiometricInput = ({
             clearInterval(interval);
           }
         } catch (err: any) {
-          if (err.status === 404) return; // ainda não chegou, continua polling
-          throw err;
+          if (err.status !== 404) throw err;
         }
       }, 2000);
 
-      // Timeout de 1 minuto
       setTimeout(() => {
         clearInterval(interval);
-        if (status === "waiting") setStatus("error");
+        if (loading) setStatus("error");
       }, 60000);
     } catch (e) {
       setStatus("error");
@@ -56,23 +61,75 @@ export const BiometricInput = ({
   };
 
   return (
-    <div style={{ marginBottom: "1em" }}>
-      <Button
-        variant="contained"
-        color={status === "success" ? "success" : "primary"}
-        onClick={handleCapture}
-        disabled={loading}
-        startIcon={
-          loading ? <CircularProgress size={20} /> : <FingerprintIcon />
-        }
-      >
-        {status === "success" ? "Digital Vinculada" : "Capturar Biometria"}
-      </Button>
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 2,
+        borderRadius: 3,
+        bgcolor: status === "success" ? alpha("#10B981", 0.05) : "grey.50",
+        border: "2px dashed",
+        borderColor: status === "success" ? "success.main" : "divider",
+        mb: 3,
+      }}
+    >
+      <Stack direction="row" spacing={2} alignItems="center">
+        <Avatar
+          sx={{
+            bgcolor: status === "success" ? "success.main" : "primary.main",
+            width: 56,
+            height: 56,
+          }}
+        >
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            <FingerprintIcon fontSize="large" />
+          )}
+        </Avatar>
+
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="subtitle2" fontWeight="700">
+            Identificação Biométrica
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block">
+            {status === "success"
+              ? "Digital capturada com sucesso"
+              : "Aguardando captura da impressão digital"}
+          </Typography>
+        </Box>
+
+        <Button
+          variant={status === "success" ? "outlined" : "contained"}
+          color={status === "success" ? "success" : "primary"}
+          onClick={handleCapture}
+          disabled={loading}
+          startIcon={
+            status === "success" ? <CheckCircleIcon /> : <FingerprintIcon />
+          }
+        >
+          {status === "success" ? "Recapturar" : "Capturar"}
+        </Button>
+      </Stack>
+
       {value && (
-        <Typography variant="caption" display="block">
-          Hash: {value.substring(0, 10)}...
-        </Typography>
+        <Box
+          sx={{
+            mt: 2,
+            p: 1,
+            bgcolor: "white",
+            borderRadius: 1,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{ fontFamily: "monospace", color: "text.secondary" }}
+          >
+            ID SESSÃO: {value.substring(0, 16)}...
+          </Typography>
+        </Box>
       )}
-    </div>
+    </Paper>
   );
 };
