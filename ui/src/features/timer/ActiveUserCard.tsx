@@ -1,9 +1,9 @@
-// src/features/timer/Timer.tsx
+// src/features/timer/ActiveUserCard.tsx
 import { useEffect, useState } from "react";
 import useTimer from "./useTimer";
 import { motion as Motion } from "motion/react";
 
-export default function Timer() {
+export default function ActiveUserCard() {
   const { currentUser, slaSeconds, elapsed, status } = useTimer();
   const [localElapsed, setLocalElapsed] = useState(elapsed);
 
@@ -25,20 +25,19 @@ export default function Timer() {
   const secs = displayTime % 60;
 
   return (
-    <div className="flex flex-col w-full h-full justify-center px-2 space-y-4">
-      {/* Linha Superior: Info do Cliente e Status sutil */}
-      <div className="flex items-center justify-between">
+    <div className="flex h-full w-full flex-col justify-center gap-3">
+      <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
         <div className="flex flex-col">
-          <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">
-            Em Atendimento
+          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">
+            Atendimento Atual
           </span>
-          <h3 className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">
+          <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase leading-none">
             {currentUser.short_name}
           </h3>
         </div>
 
         <div
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${
+          className={`flex items-center gap-2 rounded-xl border px-2.5 py-1 ${
             isOverdue
               ? "bg-amber-50 border-amber-100 text-amber-700"
               : "bg-emerald-50 border-emerald-100 text-emerald-700"
@@ -53,47 +52,36 @@ export default function Timer() {
         </div>
       </div>
 
-      {/* Bloco Central: Relógio Compacto e direto */}
-      <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-100">
+      <div className="flex items-end justify-between rounded-2xl border border-slate-100 bg-white px-4 py-3">
         <div className="flex flex-col">
           <span
-            className={`text-4xl font-black tabular-nums tracking-tighter leading-none ${isOverdue ? "text-amber-600" : "text-slate-900"}`}
+            className={`text-[2.2rem] font-black tabular-nums tracking-tighter leading-none ${isOverdue ? "text-amber-600" : "text-slate-900"}`}
           >
             {mins}:{String(secs).padStart(2, "0")}
           </span>
-          <span className="text-[8px] font-bold uppercase text-slate-400 mt-1 tracking-widest">
-            {isOverdue ? "Tempo Estendido" : "Tempo Estimado"}
+          <span className="mt-1 text-[8px] font-bold uppercase tracking-[0.2em] text-slate-400">
+            {isOverdue ? "Tempo Excedido" : "Tempo Restante"}
           </span>
         </div>
-
-        {/* Badge do Guichê repetida de forma sutil para reforçar o local */}
-        <div className="text-right">
-          <span className="text-[8px] font-black text-slate-300 uppercase block mb-1">
-            Posto
-          </span>
-          <span className="text-sm font-black text-slate-400 uppercase tracking-tighter">
-            Guichê 01
-          </span>
-        </div>
+        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-300">
+          SLA
+        </span>
       </div>
 
-      {/* Barra de Progresso: Educativa, não punitiva */}
-      <div className="space-y-1.5">
-        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+      <div className="space-y-1">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
           <Motion.div
             initial={false}
             animate={{
               width: `${isOverdue ? 100 : progress}%`,
-              backgroundColor: isOverdue ? "#d97706" : "#6366f1", // Amber em vez de Red para evitar "raiva"
+              backgroundColor: isOverdue ? "#d97706" : "#6366f1",
             }}
             transition={{ duration: 1, ease: "linear" }}
             className="h-full rounded-full"
           />
         </div>
-        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.1em] text-center">
-          {isOverdue
-            ? "Garantindo a qualidade do atendimento"
-            : "Processo dentro do padrão de eficiência"}
+        <p className="text-center text-[8px] font-bold uppercase tracking-[0.1em] text-slate-400">
+          {isOverdue ? "Atenção ao tempo de atendimento" : "Atendimento dentro do tempo"}
         </p>
       </div>
     </div>

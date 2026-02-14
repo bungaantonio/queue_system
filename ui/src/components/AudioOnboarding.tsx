@@ -18,25 +18,27 @@ export default function AudioOnboarding() {
     <AnimatePresence>
       {visible && (
         <motion.div
-          exit={{ opacity: 0, scale: 1.1 }}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 1.05 }}
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/80 backdrop-blur-2xl"
         >
-          <div className="bg-white p-10 rounded-[40px] shadow-2xl text-center max-w-md">
-            <div className="w-20 h-20 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-3xl">🔊</span>
+          <div className="bg-white p-12 rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.3)] text-center max-w-lg border border-slate-100">
+            <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-8">
+              <span className="text-4xl animate-bounce">🔊</span>
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">
-              Ativar Som?
+            <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tighter">
+              Ativar Alertas Sonoros?
             </h2>
-            <p className="text-slate-500 mb-8">
-              Para uma melhor experiência, ative os alertas sonoros das
-              chamadas.
+            <p className="text-slate-500 text-lg mb-10 leading-relaxed font-medium">
+              Para não perder a sua chamada, o sistema precisa de permissão para
+              reproduzir áudio.
             </p>
             <button
               onClick={handleStart}
-              className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-sky-200"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-6 rounded-[1.5rem] transition-all active:scale-95 shadow-xl shadow-indigo-200 text-xl uppercase tracking-widest"
             >
-              ENTRAR NO SISTEMA
+              Iniciar Painel
             </button>
           </div>
         </motion.div>

@@ -31,6 +31,9 @@ logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 origins = [
     "http://localhost:3001",
     "http://localhost:3002",
+    "http://192.168.18.6:3001",
+    "http://192.168.18.6:3002",
+
     # depois pode adicionar o domínio real (ex: https://painel.fila.ao)
 ]
 

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from app.helpers.queue_notifier import queue_notifier
 from app.schemas.queue_schema.response import QueueStateSchema
+from app.schemas.time_response import UserInfo
 from app.services.queue_service import consult
 
 logger = logging.getLogger(__name__)
@@ -29,14 +30,14 @@ def build_queue_state(db: Session) -> dict:
     """
     Usa a camada Service para obter os dados e o Pydantic para transformar em JSON.
     """
-    # Usando suas funções de service exatamente como você postou
+    # Usando as suas funções de service exatamente como você postou
     current_orm = consult.get_served_user(db)
     called_orm = consult.get_called_user(db)
     waiting_list_orm = consult.list_waiting_users(db)
 
     timer_state = build_timer_state(db)
 
-    # Criamos o objeto de estado validando contra o Schema
+    # Criamos o objeto de estado a validar contra o Schema
     state = QueueStateSchema(
         current=current_orm,
         called=called_orm,
@@ -44,7 +45,7 @@ def build_queue_state(db: Session) -> dict:
         timer=timer_state,
     )
 
-    # model_dump(mode='json') converte automaticamente datetimes e enums
+    # model_dump(mode='json') converte automaticamente datetime e enums
     return state.model_dump(mode="json")
 
 
@@ -54,24 +55,45 @@ def build_timer_state(db: Session):
         return None
 
     now = datetime.now(timezone.utc)
-    user_ts = user_item.timestamp
 
+    # user_ts = Início desta fase (atendimento)
+    user_ts = user_item.timestamp
     if user_ts.tzinfo is None:
         user_ts = user_ts.replace(tzinfo=timezone.utc)
 
+    # Quanto tempo já passou desde que o status mudou para 'being_served'
     elapsed = int((now - user_ts).total_seconds())
 
-    sla_seconds = (
-        int((user_item.sla_deadline - user_item.timestamp).total_seconds())
-        if user_item.sla_deadline
-        else 0
-    )
-    status = "Dentro do limite" if elapsed <= sla_seconds * 60 else "Ultrapassado"
+    # Lógica de SLA para o Display:
+    # Se o ‘item’ tiver um data-limite, calculamos a duração total planeada.
+    # Caso o data-limite já tenha passado relativamente ao início (negativo),
+    # ou não exista, definimos um padrão de 15 minutos (900s) para o gráfico.
+
+    if user_item.sla_deadline:
+        deadline_ts = user_item.sla_deadline
+        if deadline_ts.tzinfo is None:
+            deadline_ts = deadline_ts.replace(tzinfo=timezone.utc)
+
+        # Orçamento total = Prazo Final - Início do Ticket
+        total_budget = int((deadline_ts - user_ts).total_seconds())
+
+        # Se o orçamento for negativo (erro de lógica de datas),
+        # usamos um padrão positivo para o círculo do frontend não quebrar
+        if total_budget <= 0:
+            total_budget = 900  # 15 min padrão
+    else:
+        total_budget = 900  # 15 min padrão
+
+    # O status é 'Ultrapassado' se o tempo atual (now) passou da data-limite
+    # ou se o tempo decorrido (elapsed) passou do orçamento (total_budget)
+    is_overdue = now > user_item.sla_deadline if user_item.sla_deadline else elapsed > total_budget
+    status = "Ultrapassado" if is_overdue else "Dentro do limite"
 
     return {
+        "current_user": UserInfo.from_orm_item(user_item),
         "started_at": user_ts,
-        "sla_seconds": sla_seconds,
-        "elapsed_seconds": elapsed,
+        "sla_seconds": total_budget,  # O frontend usará isso como 100% do círculo
+        "elapsed_seconds": elapsed,  # O frontend usará isso para preencher o círculo
         "status": status,
     }
 

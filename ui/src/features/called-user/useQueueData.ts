@@ -2,6 +2,6 @@
 import { useQueueStream } from "../../app/providers/QueueStreamProvider";
 
 export default function useQueueData() {
-  const { currentUser, calledUser, nextUsers } = useQueueStream();
-  return { currentUser, calledUser, nextUsers };
+  const { currentUser, calledUser, nextUsers, timer } = useQueueStream();
+  return { currentUser, calledUser, nextUsers, timer };
 }
