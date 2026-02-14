@@ -1,5 +1,6 @@
-import { useContext, useState } from "react";
-import { Title, Datagrid, TextField, FunctionField } from "react-admin";
+// src/modules/queue/components/ControlPage.tsx
+import { useContext, useState, useMemo } from "react";
+import { Title } from "react-admin";
 import {
   Card,
   Box,
@@ -7,157 +8,372 @@ import {
   CircularProgress,
   Button,
   Stack,
+  Grid,
+  Chip,
+  Paper,
+  Avatar,
+  IconButton,
+  Alert,
 } from "@mui/material";
 import { AtendimentoContext } from "./AtendimentoProvider";
 
 // Ícones
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import DoneIcon from "@mui/icons-material/Done";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
-import CancelIcon from "@mui/icons-material/Cancel";
-import ReplayIcon from "@mui/icons-material/Replay";
+import GroupIcon from "@mui/icons-material/Group";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const configs: Record<
+    string,
+    { label: string; color: any; variant: "filled" | "outlined" }
+  > = {
+    waiting: { label: "Em espera", color: "warning", variant: "outlined" },
+    called_pending: { label: "Chamado", color: "info", variant: "filled" },
+    being_served: { label: "No Balcão", color: "success", variant: "filled" },
+  };
+  const config = configs[status] || {
+    label: status,
+    color: "default",
+    variant: "outlined",
+  };
+
+  return (
+    <Chip
+      label={config.label.toUpperCase()}
+      color={config.color}
+      variant={config.variant}
+      size="small"
+      sx={{ fontWeight: 700, fontSize: "0.65rem" }}
+    />
+  );
+};
 
 export const ControlPage = () => {
+  // 1. TODOS OS HOOKS NO TOPO
   const context = useContext(AtendimentoContext);
   const [actionLoading, setActionLoading] = useState(false);
 
+  // Memoização calculada antes de qualquer return condicional
+  const stats = useMemo(
+    () => ({
+      total: context?.queue?.length || 0,
+      next: context?.queue?.[0] || null,
+    }),
+    [context?.queue],
+  );
+
+  // 2. VERIFICAÇÃO DE LOADING APÓS OS HOOKS
   if (!context || context.loading) {
     return (
       <Box
         display="flex"
+        flexDirection="column"
         justifyContent="center"
         alignItems="center"
-        minHeight="200px"
+        minHeight="60vh"
       >
-        <CircularProgress />
-        <Typography sx={{ ml: 2 }}>Sincronizando fila...</Typography>
+        <CircularProgress size={50} />
+        <Typography sx={{ mt: 2, color: "text.secondary", fontWeight: 500 }}>
+          Sincronizando fila em tempo real...
+        </Typography>
       </Box>
     );
   }
 
-  const { queue, called, current, callNext, finish, skip, cancel, requeue } =
-    context;
-
-  // --- LÓGICA DE UNIFICAÇÃO SEM DUPLICATAS ---
-  const buildUniqueList = () => {
-    // 1. Criamos um array bruto com a hierarquia: atual > chamado > fila
-    const rawList = [
-      ...(current ? [current] : []),
-      ...(Array.isArray(called) ? called : called ? [called] : []),
-      ...(queue || []),
-    ];
-
-    // 2. Filtramos para garantir que cada ID apareça apenas uma vez
-    // (Prioriza a primeira aparição, que pela ordem acima é o status mais avançado)
-    const uniqueList = rawList.filter(
-      (item, index, self) => index === self.findIndex((t) => t.id === item.id),
-    );
-
-    return uniqueList;
-  };
-
-  const allUsers = buildUniqueList();
+  // 3. DESESTRUTURAÇÃO DO CONTEXTO
+  const { queue, called, current, callNext, finish, skip, cancel } = context;
 
   const handleAction = async (actionFn: () => Promise<any>) => {
     setActionLoading(true);
     try {
       await actionFn();
     } catch (e) {
-      console.error("Erro na ação:", e);
+      console.error("Erro na operação:", e);
     } finally {
       setActionLoading(false);
     }
   };
 
   return (
-    <Box>
-      <Title title="Painel de Atendimento" />
+    <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: "1600px", margin: "0 auto" }}>
+      <Title title="Gestão de Fila" />
 
-      {/* Barra de Ações */}
-      <Card
-        sx={{
-          p: 2,
-          mb: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          backgroundColor: "#f5f5f5",
-        }}
-      >
-        <Stack direction="row" spacing={2}>
-          <Button
-            variant="contained"
-            onClick={() => handleAction(callNext)}
-            disabled={actionLoading || queue.length === 0 || !!called}
-          >
-            Chamar Próximo
-          </Button>
+      <Grid container spacing={3}>
+        {/* --- LADO ESQUERDO: OPERACIONAL --- */}
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <Stack spacing={3}>
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 4,
+                border: "1px solid",
+                borderColor: "divider",
+                overflow: "hidden",
+                bgcolor: "background.paper",
+              }}
+            >
+              <Box
+                sx={{
+                  p: 3,
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  bgcolor: "grey.50",
+                }}
+              >
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <RecordVoiceOverIcon color="primary" />
+                  <Typography variant="h6" fontWeight="700">
+                    Painel de Atendimento
+                  </Typography>
+                </Stack>
+                {actionLoading && <CircularProgress size={20} />}
+              </Box>
 
-          <Button
-            variant="contained"
-            color="success"
-            onClick={() => handleAction(finish)}
-            disabled={actionLoading || !current}
-          >
-            Finalizar
-          </Button>
+              <Box sx={{ p: { xs: 4, md: 8 }, textAlign: "center" }}>
+                {!current && !called ? (
+                  <Box py={2}>
+                    <Avatar
+                      sx={{
+                        width: 80,
+                        height: 80,
+                        bgcolor: "primary.50",
+                        color: "primary.main",
+                        mx: "auto",
+                        mb: 3,
+                      }}
+                    >
+                      <PlayArrowIcon sx={{ fontSize: 40 }} />
+                    </Avatar>
+                    <Typography variant="h4" fontWeight="800" gutterBottom>
+                      Balcão Disponível
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      color="text.secondary"
+                      sx={{ mb: 4 }}
+                    >
+                      Não há ninguém a ser atendido neste momento.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={() => handleAction(callNext)}
+                      disabled={actionLoading || stats.total === 0}
+                      startIcon={<NotificationsActiveIcon />}
+                      sx={{
+                        px: 6,
+                        py: 2,
+                        borderRadius: 3,
+                        textTransform: "none",
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      Chamar Próximo Utente
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box>
+                    <Typography
+                      variant="overline"
+                      color="primary"
+                      sx={{ fontWeight: 800, letterSpacing: 1 }}
+                    >
+                      {current ? "A ATENDER AGORA" : "UTENTE CHAMADO"}
+                    </Typography>
 
-          <Button
-            variant="outlined"
-            color="warning"
-            onClick={() => handleAction(skip)}
-            disabled={actionLoading || !called}
-          >
-            Ausente
-          </Button>
-        </Stack>
-        {actionLoading && <CircularProgress size={24} />}
-      </Card>
+                    <Typography
+                      variant="h1"
+                      sx={{
+                        fontWeight: 900,
+                        fontSize: { xs: "4rem", md: "7rem" },
+                        color: "text.primary",
+                        lineHeight: 1,
+                        my: 2,
+                      }}
+                    >
+                      {current?.position || called?.position}
+                    </Typography>
 
-      {/* Tabela */}
-      <Card sx={{ p: 2 }}>
-        <Datagrid data={allUsers} bulkActionButtons={false} rowClick={false}>
-          <TextField source="position" label="Pos" />
-          <TextField source="name" label="Utente" />
+                    <Typography
+                      variant="h4"
+                      sx={{ mb: 5, color: "text.secondary", fontWeight: 400 }}
+                    >
+                      {current?.name || called?.name}
+                    </Typography>
 
-          <FunctionField
-            label="Status"
-            render={(record: any) => {
-              const colors: any = {
-                waiting: "orange",
-                called_pending: "blue",
-                being_served: "green",
-              };
-              return (
-                <b style={{ color: colors[record.status] }}>
-                  {record.status.toUpperCase()}
-                </b>
-              );
-            }}
-          />
+                    <Stack
+                      direction={{ xs: "column", sm: "row" }}
+                      spacing={2}
+                      justifyContent="center"
+                    >
+                      {called && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="large"
+                          onClick={() => handleAction(callNext)}
+                          sx={{
+                            px: 4,
+                            py: 2,
+                            borderRadius: 2,
+                            fontWeight: 700,
+                          }}
+                          startIcon={<PlayArrowIcon />}
+                        >
+                          Confirmar Presença
+                        </Button>
+                      )}
 
-          <FunctionField
-            label="Ações"
-            render={(record: any) => (
-              <Stack direction="row" spacing={1}>
-                <Button
-                  size="small"
-                  color="error"
-                  onClick={() => handleAction(() => cancel(record.id))}
-                >
-                  Remover
-                </Button>
-              </Stack>
+                      {current && (
+                        <Button
+                          variant="contained"
+                          color="success"
+                          size="large"
+                          onClick={() => handleAction(finish)}
+                          sx={{
+                            px: 4,
+                            py: 2,
+                            borderRadius: 2,
+                            fontWeight: 700,
+                          }}
+                          startIcon={<DoneAllIcon />}
+                        >
+                          Finalizar Atendimento
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="large"
+                        onClick={() => handleAction(skip)}
+                        sx={{ px: 4, py: 2, borderRadius: 2, fontWeight: 700 }}
+                        startIcon={<SkipNextIcon />}
+                      >
+                        Utente Ausente
+                      </Button>
+                    </Stack>
+                  </Box>
+                )}
+              </Box>
+            </Card>
+
+            {stats.total > 10 && (
+              <Alert
+                severity="warning"
+                variant="outlined"
+                sx={{ borderRadius: 3 }}
+              >
+                A fila está com carga elevada: <strong>{stats.total}</strong>{" "}
+                pessoas.
+              </Alert>
             )}
-          />
-        </Datagrid>
+          </Stack>
+        </Grid>
 
-        {allUsers.length === 0 && (
-          <Box p={4} textAlign="center">
-            Sem utentes na fila.
-          </Box>
-        )}
-      </Card>
+        {/* --- LADO DIREITO: FILA --- */}
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <Card
+            elevation={0}
+            sx={{
+              borderRadius: 4,
+              border: "1px solid",
+              borderColor: "divider",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Box
+              sx={{
+                p: 2.5,
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Stack direction="row" spacing={1} alignItems="center">
+                <GroupIcon color="action" />
+                <Typography variant="subtitle1" fontWeight="700">
+                  Fila de Espera
+                </Typography>
+              </Stack>
+              <Chip label={stats.total} size="small" sx={{ fontWeight: 700 }} />
+            </Box>
+
+            <Box
+              sx={{
+                p: 2,
+                flexGrow: 1,
+                overflowY: "auto",
+                bgcolor: "grey.50",
+                maxHeight: "70vh",
+              }}
+            >
+              {queue.length === 0 ? (
+                <Box textAlign="center" py={8}>
+                  <Typography variant="body2" color="text.secondary">
+                    Fila vazia
+                  </Typography>
+                </Box>
+              ) : (
+                <Stack spacing={1.5}>
+                  {queue.map((item, index) => (
+                    <Paper
+                      key={item.id}
+                      elevation={0}
+                      sx={{
+                        p: 2,
+                        borderRadius: 3,
+                        border: "1px solid",
+                        borderColor: index === 0 ? "primary.main" : "divider",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Box>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: 800, lineHeight: 1 }}
+                        >
+                          {item.position}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ fontWeight: 600 }}
+                        >
+                          {item.name}
+                        </Typography>
+                      </Box>
+
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <StatusBadge status={item.status} />
+                        <IconButton
+                          size="small"
+                          onClick={() => handleAction(() => cancel(item.id))}
+                        >
+                          <DeleteOutlineIcon fontSize="small" color="error" />
+                        </IconButton>
+                      </Stack>
+                    </Paper>
+                  ))}
+                </Stack>
+              )}
+            </Box>
+          </Card>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

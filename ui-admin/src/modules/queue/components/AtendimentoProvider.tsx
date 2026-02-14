@@ -1,12 +1,26 @@
-import React, { createContext, useEffect, useState, useCallback } from "react";
+// src/modules/queue/components/AtendimentoProvider.tsx
+import React, {
+  createContext,
+  useEffect,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
 import { atendimentoGateway } from "../atendimentoGateway";
 import { sessionStore } from "../../../core/session/sessionStorage";
 
-// 1. Definição da Interface para o TypeScript não reclamar
+// 1. Definições de Tipos mais rigorosas para evitar 'any'
+interface Utente {
+  id: number;
+  position: string;
+  name: string;
+  status: "waiting" | "called_pending" | "being_served";
+}
+
 interface AtendimentoContextType {
-  queue: any[];
-  called: any | null;
-  current: any | null;
+  queue: Utente[];
+  called: Utente | null;
+  current: Utente | null;
   loading: boolean;
   callNext: () => Promise<void>;
   finish: () => Promise<void>;
@@ -15,72 +29,107 @@ interface AtendimentoContextType {
   skip: () => Promise<void>;
 }
 
-// 2. Criação do contexto ÚNICO
 export const AtendimentoContext = createContext<AtendimentoContextType | null>(
   null,
 );
 
-export const AtendimentoProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const [queue, setQueue] = useState<any[]>([]);
-  const [called, setCalled] = useState<any>(null);
-  const [current, setCurrent] = useState<any>(null);
+export const AtendimentoProvider = ({ children }: { children: ReactNode }) => {
+  const [queue, setQueue] = useState<Utente[]>([]);
+  const [called, setCalled] = useState<Utente | null>(null);
+  const [current, setCurrent] = useState<Utente | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Função para atualizar o estado vindo do servidor
-  const updateState = useCallback((data: any) => {
-    console.log("AtendimentoProvider: Atualizando estado", data);
-    if (data && typeof data === "object" && !Array.isArray(data)) {
-      setQueue(data.queue || []);
-      setCalled(data.called || null);
-      setCurrent(data.current || null);
-    } else if (Array.isArray(data)) {
-      setQueue(data);
+  /**
+   * Função para processar os dados vindos da API ou do SSE.
+   * Notei nos teus logs que o backend envia: { success: true, data: { queue, called, current } }
+   */
+  const updateState = useCallback((response: any) => {
+    console.log("AtendimentoProvider: Processando atualização", response);
+
+    // Extrai o objeto de dados (seja da resposta direta ou do campo 'data')
+    const payload = response?.data || response;
+
+    if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+      setQueue(payload.queue || []);
+      setCalled(payload.called || null);
+      setCurrent(payload.current || null);
+    } else if (Array.isArray(payload)) {
+      setQueue(payload);
     }
+
     setLoading(false);
   }, []);
 
-  // Funções de Ação
+  // Encapsulamento das chamadas ao Gateway
   const callNext = async () => {
-    await atendimentoGateway.callNext();
+    const res = await atendimentoGateway.callNext();
+    updateState(res);
   };
+
   const finish = async () => {
-    await atendimentoGateway.finish();
+    const res = await atendimentoGateway.finish();
+    updateState(res);
   };
+
   const skip = async () => {
-    await atendimentoGateway.skip();
+    const res = await atendimentoGateway.skip();
+    updateState(res);
   };
+
   const cancel = async (id: number) => {
-    await atendimentoGateway.cancel(id);
+    const res = await atendimentoGateway.cancel(id);
+    updateState(res);
   };
+
   const requeue = async (id: number, type: string) => {
-    await atendimentoGateway.requeue(id, type);
+    const res = await atendimentoGateway.requeue(id, type);
+    updateState(res);
   };
 
   useEffect(() => {
-    // Carga inicial HTTP
+    let isMounted = true;
+
+    // 1. Carga inicial via HTTP
     atendimentoGateway
       .listWaitingAndCalled()
-      .then(updateState)
-      .catch(() => setLoading(false));
+      .then((res) => {
+        if (isMounted) updateState(res);
+      })
+      .catch((err) => {
+        console.error("Erro na carga inicial da fila:", err);
+        if (isMounted) setLoading(false);
+      });
 
-    // Tempo real SSE (inclui token como query param para autenticação)
+    // 2. Configuração do SSE para tempo real
     const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     const token = sessionStore.getAccessToken();
     const sseUrl = `${baseUrl}/api/v1/sse/stream${token ? `?token=${token}` : ""}`;
+
     const eventSource = new EventSource(sseUrl);
 
-    eventSource.onopen = () => console.log("SSE connected", sseUrl);
-    eventSource.onerror = (err) => console.error("SSE error", err);
+    eventSource.onopen = () => console.log("✅ SSE conectado:", sseUrl);
 
+    eventSource.onerror = (err) => {
+      console.error("❌ SSE erro:", err);
+      // O navegador tenta reconectar automaticamente
+    };
+
+    // Escuta o evento específico definido no teu backend
     eventSource.addEventListener("queue_sync", (e: any) => {
-      updateState(JSON.parse(e.data));
+      try {
+        const parsedData = JSON.parse(e.data);
+        if (isMounted) updateState(parsedData);
+      } catch (err) {
+        console.error("Erro ao processar mensagem SSE:", err);
+      }
     });
 
-    return () => eventSource.close();
+    // Cleanup: Fecha a conexão SSE e marca como desmontado para evitar fugas de memória
+    return () => {
+      isMounted = false;
+      eventSource.close();
+      console.log("🔌 SSE desconectado");
+    };
   }, [updateState]);
 
   return (

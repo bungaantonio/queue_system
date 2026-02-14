@@ -41,13 +41,14 @@ export const App = () => (
       authProvider={adminAuthProvider}
       dataProvider={adminDataProvider}
       dashboard={DashboardPage}
+      disableTelemetry
     >
       {/* Painel de Atendimento */}
       <Resource
         name="atendimento"
         list={ControlPage}
         icon={QueueIcon}
-        options={{ label: "Painel de Atendimento" }}
+        options={{ label: "Atendimento" }}
       />
 
       {/* Operadores */}
