@@ -31,6 +31,9 @@ logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 origins = [
     "http://localhost:3001",
     "http://localhost:3002",
+    "http://192.168.18.6:3001",
+    "http://192.168.18.6:3002",
+
     # depois pode adicionar o domínio real (ex: https://painel.fila.ao)
 ]
 
@@ -70,7 +73,7 @@ app.include_router(auth_router.router, prefix="/auth", tags=["Auth"])
 app.include_router(operators_router.router, prefix="/api/v1/operators", tags=["Operadores"])
 app.include_router(audit_router.router, prefix="/api/v1/audits", tags=["Audits"])
 app.include_router(utentes.router, prefix="/api/v1", tags=["Utentes"])
-app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Dedicated"])
+app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Ticket"])
 
 register_exception_handlers(app)
 

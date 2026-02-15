@@ -1,8 +1,16 @@
 // src/utils/audioPermission.ts
 let audioUnlocked = false;
+const AUDIO_PERMISSION_KEY = "queue.audio.unlocked";
 
-export function requestAudioPermission(): void {
-  if (audioUnlocked) return;
+export async function requestAudioPermission(): Promise<boolean> {
+  if (audioUnlocked) return true;
+
+  // Não bloqueia o fluxo da UI: considera desbloqueado após gesto do utilizador.
+  audioUnlocked = true;
+  try {
+    sessionStorage.setItem(AUDIO_PERMISSION_KEY, "1");
+  } catch {}
+
   try {
     speechSynthesis.getVoices();
     const utter = new SpeechSynthesisUtterance("Áudio ativado");
@@ -10,9 +18,17 @@ export function requestAudioPermission(): void {
     speechSynthesis.speak(utter);
     const a = new Audio();
     a.volume = 0.0;
-    a.play().catch(() => { });
-  } catch { }
-  audioUnlocked = true;
+    await a.play().catch(() => undefined);
+  } catch {}
+
+  return true;
+}
+
+export function resetAudioPermission(): void {
+  audioUnlocked = false;
+  try {
+    sessionStorage.removeItem(AUDIO_PERMISSION_KEY);
+  } catch {}
 }
 
 export function isAudioAllowed(): boolean {

@@ -57,7 +57,18 @@ git rebase origin/main   # Certifique-se de que a sua branch esteja alinhada com
 git push                # Enviar quaisquer mudanças finais para o remoto
 ```
 
-### Limpeza após merge
+### Criar Pull Request
+
+* Ir ao GitHub/GitLab
+* Criar Pull Request
+* `base`: main
+* `compare`: feature/descricao-curta
+* Revisar as alterações (diff)
+* Submeter para review
+
+_(Alternativamente, via CLI da plataforma.)_
+
+### Após merge
 
 ```bash
 git checkout main       # Voltar para a branch principal

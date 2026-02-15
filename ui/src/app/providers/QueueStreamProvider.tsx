@@ -1,3 +1,5 @@
+// app/providers/QueueStreamProvider.tsx
+import { CONFIG } from "../config";
 import {
   createContext,
   useContext,
@@ -24,9 +26,9 @@ export function QueueStreamProvider({ children }: { children: ReactNode }) {
   const [timer, setTimer] = useState<Timer | null>(null);
 
   useEffect(() => {
-    // Usando o IP configurado para a sua rede
+    // URL centralizada do CONFIG
     const stream = new QueueStream(
-      "http://localhost:8000/api/v1/sse/stream",
+      CONFIG.SSE_STREAM_URL,
       (data: QueueState) => {
         // 1. Defesa: Se os dados forem nulos ou malformados, ignoramos para não quebrar o estado
         if (!data) return;
@@ -34,6 +36,7 @@ export function QueueStreamProvider({ children }: { children: ReactNode }) {
         // 2. Atualização dos estados principais
         setCurrentUser(data.current ?? null);
         setCalledUser(data.called ?? null);
+        setTimer(data.timer ?? null);
 
         // 3. Filtro inteligente da fila de espera
         // - Garantimos que 'queue' é um array antes de filtrar
@@ -43,8 +46,9 @@ export function QueueStreamProvider({ children }: { children: ReactNode }) {
           (u) => u.id !== data.called?.id && u.id !== data.current?.id,
         );
 
-        // 4. Pegamos apenas os 3 primeiros para o display
-        setNextUsers(filteredQueue.slice(0, 3));
+        // 4. Mantemos a fila completa no estado global.
+        // A limitação visual (ex.: top 3) é responsabilidade do componente.
+        setNextUsers(filteredQueue);
       },
     );
 
@@ -52,7 +56,9 @@ export function QueueStreamProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <QueueContext.Provider value={{ currentUser, calledUser, nextUsers, timer }}>
+    <QueueContext.Provider
+      value={{ currentUser, calledUser, nextUsers, timer }}
+    >
       {children}
     </QueueContext.Provider>
   );
