@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
@@ -20,14 +20,14 @@ router = APIRouter()
 
 @router.get("/", response_model=ApiResponse[List[AuditVerificationDetail]])
 def list_audits(
-    skip: int = Query(0),
-    limit: int = Query(100),
-    user_id: Optional[int] = Query(None),
-    action: Optional[str] = Query(None),
-    start: Optional[datetime] = Query(None),
-    end: Optional[datetime] = Query(None),
-    db: Session = Depends(get_db),
-    current_user=Depends(require_roles(OperatorRole.AUDITOR)),
+        skip: int = Query(0),
+        limit: int = Query(100),
+        user_id: Optional[int] = Query(None),
+        action: Optional[str] = Query(None),
+        start: Optional[datetime] = Query(None),
+        end: Optional[datetime] = Query(None),
+        db: Session = Depends(get_db),
+        current_user=Depends(require_roles(OperatorRole.AUDITOR)),
 ):
     audits = AuditService.generate_audit_report(
         db=db,
@@ -43,8 +43,9 @@ def list_audits(
 
 @router.get("/verify-summary", response_model=ApiResponse[AuditChainSummary])
 def verify_audit_chain_summary(
-    db: Session = Depends(get_db),
-    current_user=Depends(require_roles(OperatorRole.AUDITOR)),
+        request: Request,
+        db: Session = Depends(get_db),
+        current_user=Depends(require_roles(OperatorRole.AUDITOR)),
 ):
     print("Headers recebidos:", request.headers)
     records = AuditService.verify_chain(db)

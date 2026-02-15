@@ -1,4 +1,5 @@
 import { sessionStore } from "../core/session/sessionStorage";
+import { CONFIG } from "../core/config/config";
 import {
   LoginData,
   LoginResponseData,
@@ -8,11 +9,9 @@ import {
   ApiResponse,
 } from "./auth.types.ts";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
 export const adminAuthProvider = {
   login: async ({ username, password }: LoginData) => {
-    const res = await fetch(`${BASE_URL}/auth/login`, {
+    const res = await fetch(`${CONFIG.AUTH_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -40,7 +39,7 @@ export const adminAuthProvider = {
   logout: async () => {
     const refreshToken = sessionStore.getRefreshToken();
     if (refreshToken) {
-      await fetch(`${BASE_URL}/auth/logout`, {
+      await fetch(`${CONFIG.AUTH_URL}/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -80,7 +79,7 @@ export const adminAuthProvider = {
     const refreshToken = sessionStore.getRefreshToken();
     if (!refreshToken) throw new Error("No refresh token");
 
-    const res = await fetch(`${BASE_URL}/auth/refresh`, {
+    const res = await fetch(`${CONFIG.AUTH_URL}/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       // O backend FastAPI corrigido espera o JSON body

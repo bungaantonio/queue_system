@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
-export type AlertPriority = 'high' | 'medium' | 'low';
-export type AlertType = 'warning' | 'error' | 'success' | 'info';
+export type AlertPriority = "high" | "medium" | "low";
+export type AlertType = "warning" | "error" | "success" | "info";
 
 export interface AlertData {
   id: number;

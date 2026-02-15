@@ -8,7 +8,7 @@ import { OperatorsList } from "./modules/operators/components/OperatorsList";
 import { OperatorsCreate } from "./modules/operators/components/OperatorsCreate";
 import { OperatorsEdit } from "./modules/operators/components/OperatorsEdit";
 
-import { ControlPage } from "./modules/queue/components/ControlPage";
+import { CounterConsole } from "./modules/queue/components/CounterConsole.tsx";
 
 import { DashboardPage } from "./modules/dashboard/DashboardPage.tsx";
 
@@ -23,8 +23,8 @@ import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvi
 
 import { withRole } from "./modules/shared/utils/withRole";
 
-import { theme } from "./ui/theme.ts";
-import { MyAppBar } from "./ui/layout/MyAppBar.tsx";
+import { theme } from "./ui/theme";
+import { MyLayout } from "./ui/layout/MyLayout";
 
 // Ícones realistas
 import QueueIcon from "@mui/icons-material/Queue";
@@ -37,7 +37,7 @@ export const App = () => (
   <AtendimentoProvider>
     <Admin
       theme={theme}
-      layout={MyAppBar}
+      layout={MyLayout}
       authProvider={adminAuthProvider}
       dataProvider={adminDataProvider}
       dashboard={DashboardPage}
@@ -46,7 +46,7 @@ export const App = () => (
       {/* Painel de Atendimento */}
       <Resource
         name="atendimento"
-        list={ControlPage}
+        list={CounterConsole}
         icon={QueueIcon}
         options={{ label: "Atendimento" }}
       />

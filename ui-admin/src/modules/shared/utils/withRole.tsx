@@ -2,8 +2,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { sessionStore } from "../../../core/session/sessionStorage";
 
-export const withRole = (Component: React.FC<any>, requiredRole?: any[]) => {
-  return (props: any) => {
+type UserRole = "admin" | "attendant" | "auditor" | string;
+
+export const withRole = <P extends object>(
+  Component: React.ComponentType<P>,
+  requiredRole?: UserRole[],
+) => {
+  const WrappedComponent = (props: P) => {
     const navigate = useNavigate();
     const user = sessionStore.getUser();
 
@@ -17,4 +22,9 @@ export const withRole = (Component: React.FC<any>, requiredRole?: any[]) => {
       return null;
     return <Component {...props} />;
   };
+
+  const componentName = Component.displayName || Component.name || "Component";
+  WrappedComponent.displayName = `withRole(${componentName})`;
+
+  return WrappedComponent;
 };

@@ -1,19 +1,23 @@
 // activityIcons.tsx
-import { ReactElement } from 'react';
-import { CheckCircle, XCircle, Clock } from 'lucide-react';
-import { ActivityStatus, ActivityAction } from './types';
+import { ReactElement } from "react";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { ActivityStatus, ActivityAction } from "./types";
 
 // Status colors: agora tipado como literal do MUI palette
-export const STATUS_COLORS: Record<ActivityStatus, 'success' | 'error' | 'info' | 'warning'> = {
-  success: 'success',
-  error: 'error',
-  info: 'info',
-  warning: 'warning',
+export const STATUS_COLORS: Record<
+  ActivityStatus,
+  "success" | "error" | "info" | "warning"
+> = {
+  success: "success",
+  error: "error",
+  info: "info",
+  warning: "warning",
 };
 
 // Retorna a chave do theme.palette
-export const getStatusColor = (status: ActivityStatus): 'success' | 'error' | 'info' | 'warning' =>
-  STATUS_COLORS[status];
+export const getStatusColor = (
+  status: ActivityStatus,
+): "success" | "error" | "info" | "warning" => STATUS_COLORS[status];
 
 // Ações → ícones
 export const ACTION_ICONS: Record<ActivityAction, ReactElement> = {
