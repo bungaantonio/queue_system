@@ -14,6 +14,10 @@ class AnnouncementService {
   private queue: TicketItem[] = [];
   private busy = false;
 
+  clearQueue() {
+    this.queue = [];
+  }
+
   enqueue(item: TicketItem) {
     this.queue.push(item);
     if (!this.busy) this.processQueue();

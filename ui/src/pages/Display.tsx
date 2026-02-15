@@ -29,19 +29,17 @@ export default function Display() {
             <MarqueeTicker />
           </div>
         </section>
-
-        {/* Direita: Painel de Informações */}
-        <aside className="col-span-4 flex min-h-0 flex-col gap-4">
-          <PendingValidationCard />
-
-          <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white p-5 shadow-xl">
-            <div className="flex min-h-0 flex-1 flex-col justify-center">
-              <ActiveUserCard />
-            </div>
+        <aside className="col-span-4 grid min-h-0 h-full grid-rows-[minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,1.1fr)] gap-4">
+          <div className="min-h-0 overflow-hidden">
+            <PendingValidationCard />
           </div>
 
-          <div className="h-[30%] min-h-[150px] flex-none">
-            <QueuePreviewCard reduced />
+          <div className="min-h-0 overflow-hidden bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-xl">
+            <ActiveUserCard />
+          </div>
+
+          <div className="min-h-0 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+            <QueuePreviewCard />
           </div>
         </aside>
       </main>
