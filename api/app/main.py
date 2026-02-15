@@ -73,7 +73,7 @@ app.include_router(auth_router.router, prefix="/auth", tags=["Auth"])
 app.include_router(operators_router.router, prefix="/api/v1/operators", tags=["Operadores"])
 app.include_router(audit_router.router, prefix="/api/v1/audits", tags=["Audits"])
 app.include_router(utentes.router, prefix="/api/v1", tags=["Utentes"])
-app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Dedicated"])
+app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Ticket"])
 
 register_exception_handlers(app)
 

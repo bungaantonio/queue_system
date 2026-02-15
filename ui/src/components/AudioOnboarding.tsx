@@ -6,12 +6,16 @@ import {
   requestAudioPermission,
 } from "../utils/audioPermission";
 
+import { beepManager } from "../services/beepManager";
+
 export default function AudioOnboarding() {
   const [visible, setVisible] = useState(!isAudioAllowed());
 
-  const handleStart = () => {
-    requestAudioPermission();
+  const handleStart = async () => {
     setVisible(false);
+    beepManager.initBeep();
+    await beepManager.warmup().catch(() => undefined);
+    await requestAudioPermission();
   };
 
   return (
@@ -28,17 +32,17 @@ export default function AudioOnboarding() {
               <span className="text-4xl animate-bounce">🔊</span>
             </div>
             <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tighter">
-              Ativar Alertas Sonoros?
+              Ativar Saída de Áudio
             </h2>
             <p className="text-slate-500 text-lg mb-10 leading-relaxed font-medium">
-              Para não perder a sua chamada, o sistema precisa de permissão para
-              reproduzir áudio.
+              O terminal requer permissão de áudio para emitir os alertas de
+              chamada. Certifique-se de que as colunas de som estão ligadas.
             </p>
             <button
               onClick={handleStart}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-6 rounded-[1.5rem] transition-all active:scale-95 shadow-xl shadow-indigo-200 text-xl uppercase tracking-widest"
             >
-              Iniciar Painel
+              Habilitar Áudio Operacional
             </button>
           </div>
         </motion.div>

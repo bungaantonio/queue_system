@@ -1,30 +1,17 @@
 // src/pages/Display.tsx
-import { useEffect } from "react";
-import useQueueData from "../features/called-user/useQueueData";
 import VideoPlayer from "../components/VideoPlayer";
-import PendingValidationCard from "../features/called-user/PendingValidationCard.tsx";
-import QueuePreviewCard from "../features/waiting-list/QueuePreviewCard.tsx";
-import ActiveUserCard from "../features/timer/ActiveUserCard.tsx";
 import QrCodeBox from "../components/QrCodeBox";
 import Clock from "../components/Clock";
-import MarqueeTicker from "../components/MarqueeTicker";
-import CallOverlay from "../features/called-user/CallOverlay";
 import AudioOnboarding from "../components/AudioOnboarding";
+import MarqueeTicker from "../components/MarqueeTicker";
+import PendingValidationCard from "../features/called-user/PendingValidationCard.tsx";
+import useQueueData from "../features/called-user/useQueueData";
+import QueuePreviewCard from "../features/waiting-list/QueuePreviewCard.tsx";
+import ActiveUserCard from "../features/timer/ActiveUserCard.tsx";
+import CallOverlay from "../features/called-user/CallOverlay";
 
 export default function Display() {
-  const { calledUser } = useQueueData();
-
-  // Gatilho de Áudio ÚNICO
-  useEffect(() => {
-    if (calledUser?.id) {
-      const mensagem = new SpeechSynthesisUtterance(
-        `Senha ${calledUser.ticket}. ${calledUser.short_name}. Guichê 1.`,
-      );
-      mensagem.lang = "pt-PT";
-      mensagem.rate = 0.9;
-      window.speechSynthesis.speak(mensagem);
-    }
-  }, [calledUser?.id]);
+  useQueueData();
 
   return (
     <div className="h-screen w-screen flex flex-col bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans">

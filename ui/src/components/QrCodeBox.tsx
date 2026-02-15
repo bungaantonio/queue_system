@@ -51,7 +51,7 @@ export default function QrCodeBox({ reduced = false }: { reduced?: boolean }) {
 
       <div className="text-center relative">
         <p className="text-sm font-black text-slate-800 uppercase tracking-tighter">
-          {calledUser ? "Sua Senha no Celular" : "Acompanhe a Fila"}
+          {calledUser ? `Seu Ticket ${calledUser.ticket} no Celular` : "Acompanhe a Fila"}
         </p>
         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">
           Escaneie para status live
