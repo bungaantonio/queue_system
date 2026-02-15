@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [react()],
   server: {
     host: true,
-    port: 3002,
+    port: 3102,
     proxy: {
       "/auth": {
         target: "http://localhost:8000",

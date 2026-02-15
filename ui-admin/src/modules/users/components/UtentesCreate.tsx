@@ -28,7 +28,7 @@ export const UtentesCreate = () => (
       user: {
         name: data.name,
         birth_date: data.birth_date,
-        is_pregnant: !!data.is_pregnant,
+        is_pregnant: data.is_pregnant,
         pregnant_until: data.pregnant_until || null,
         is_disabled_temp: !!data.is_disabled_temp,
         disabled_until: data.disabled_until || null,

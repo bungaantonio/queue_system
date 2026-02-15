@@ -1,8 +1,7 @@
 // src/modules/auditor/auditorGateway.ts
 import { httpClient } from "../../core/http/apiClient";
+import { CONFIG } from "../../core/config/config.ts";
 import type { AuditVerificationDetail, AuditChainSummary } from "./types";
-
-const BASE = "/audits";
 
 export const auditorGateway = {
   getList: async (params?: {
@@ -16,17 +15,19 @@ export const auditorGateway = {
   }): Promise<AuditVerificationDetail[]> => {
     const query = buildQuery(params);
     const res = await httpClient.get<AuditVerificationDetail[]>(
-      `${BASE}${query}`,
+      `${CONFIG.AUDITS_URL}${query}`,
     );
     return Array.isArray(res) ? res : [];
   },
 
   getSummary: async (): Promise<AuditChainSummary> => {
-    return httpClient.get<AuditChainSummary>(`${BASE}/verify-summary`);
+    return httpClient.get<AuditChainSummary>(
+      `${CONFIG.AUDITS_URL}/verify-summary`,
+    );
   },
   getOne: async (id: number): Promise<AuditVerificationDetail> => {
     const res = await httpClient.get<AuditVerificationDetail>(
-      `${BASE}/verify/${id}`,
+      `${CONFIG.AUDITS_URL}/verify/${id}`,
     );
     return { ...res, id: res.ad };
   },

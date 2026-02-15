@@ -29,8 +29,8 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 origins = [
-    "http://localhost:3001",
-    "http://localhost:3002",
+    "http://localhost:3101",
+    "http://localhost:3102",
     "http://192.168.18.6:3101",
     "http://192.168.18.6:3102",
 
