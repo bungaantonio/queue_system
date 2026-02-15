@@ -23,8 +23,8 @@ import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvi
 
 import { withRole } from "./modules/shared/utils/withRole";
 
-import { premiumTheme } from "./ui/theme.ts";
-import { AdminLayout } from "./ui/layout/AdminLayout";
+import { theme } from "./ui/theme.ts";
+import { MyAppBar } from "./ui/layout/MyAppBar.tsx";
 
 // Ícones realistas
 import QueueIcon from "@mui/icons-material/Queue";
@@ -36,8 +36,8 @@ import { AuditShow } from "./modules/auditor/components/AuditShow";
 export const App = () => (
   <AtendimentoProvider>
     <Admin
-      theme={premiumTheme}
-      layout={AdminLayout}
+      theme={theme}
+      layout={MyAppBar}
       authProvider={adminAuthProvider}
       dataProvider={adminDataProvider}
       dashboard={DashboardPage}

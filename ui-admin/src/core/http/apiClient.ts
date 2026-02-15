@@ -1,11 +1,9 @@
 import { sessionStore } from "../session/sessionStorage";
-
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-const API_PREFIX = "/api/v1";
+import { CONFIG } from "../config/config";
 
 const request = async (method: string, path: string, body?: unknown) => {
   let token = sessionStore.getAccessToken();
-  const url = `${BASE_URL}${API_PREFIX}${path}`;
+  const url = `${CONFIG.API_BASE_URL}${path}`;
 
   const fetchWithToken = async (tok: string) =>
     fetch(url, {
@@ -27,7 +25,7 @@ const request = async (method: string, path: string, body?: unknown) => {
       throw { status: 401, message: "Sessão expirada" };
     }
 
-    const refreshRes = await fetch(`${BASE_URL}/auth/refresh`, {
+    const refreshRes = await fetch(`${CONFIG.AUTH_URL}/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),

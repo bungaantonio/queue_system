@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile.ui.dev
     container_name: ui
     ports:
-      - "3101:3001"
+      - "3101:3101"
     volumes:
       - ./ui:/app:cached
       - /app/node_modules
@@ -36,7 +36,7 @@ services:
       dockerfile: Dockerfile.ui-admin.dev
     container_name: ui-admin
     ports:
-      - "3102:3002"
+      - "3102:3102"
     volumes:
       - ./ui-admin:/app:cached
       - /app/node_modules

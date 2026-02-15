@@ -1,7 +1,7 @@
 // src/application/useAuth.ts
 import { useState } from "react";
 import { sessionStore } from "../core/session/sessionStorage";
-import { adminAuthProvider } from "../application/adminAuthProvider";
+import { adminAuthProvider } from "./adminAuthProvider";
 
 export const useAuth = () => {
   const [user, setUser] = useState(sessionStore.getUser());
