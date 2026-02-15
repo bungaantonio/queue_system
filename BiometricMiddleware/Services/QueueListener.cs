@@ -22,6 +22,8 @@ namespace BiometricMiddleware.Services
         private readonly SemaphoreSlim _sensorLock = new SemaphoreSlim(1, 1);
         private volatile bool _priorityCaptureActive = false;
         private List<CredentialCacheItem> _cachedCredentials = new();
+        private DateTime _lastCacheRefreshUtc = DateTime.MinValue;
+        private static readonly TimeSpan CacheRefreshInterval = TimeSpan.FromSeconds(10);
 
         private CancellationTokenSource? _loopCts;
 
@@ -73,12 +75,16 @@ namespace BiometricMiddleware.Services
                     if (e.Message.Name == "command_capture")
                     {
                         var command = JsonSerializer.Deserialize<BiometricCommand>(e.Message.Data);
+                        if (command == null || string.IsNullOrWhiteSpace(command.TempSessionId))
                         {
-                            // IMPORTANTE: Cancelamos a leitura atual do loop para dar prioridade ao cadastro
-                            _logger.LogInformation("[SSE] COMANDO DE CADASTRO RECEBIDO. SESSÃO: {Id}", command.TempSessionId);
-                            _loopCts?.Cancel();
-                            _ = Task.Run(() => HandleRegistrationCapture(command.TempSessionId));
+                            _logger.LogWarning("[SSE] COMANDO DE CADASTRO inválido: payload sem temp_session_id.");
+                            return;
                         }
+
+                        // IMPORTANTE: Cancelamos a leitura atual do loop para dar prioridade ao cadastro
+                        _logger.LogInformation("[SSE] COMANDO DE CADASTRO RECEBIDO. SESSÃO: {Id}", command.TempSessionId);
+                        _loopCts?.Cancel();
+                        _ = Task.Run(() => HandleRegistrationCapture(command.TempSessionId));
                     }
                 }
                 catch (Exception ex) { _logger.LogError("[SSE ERRO] Falha ao processar evento: {Error}", ex.Message); }
@@ -110,6 +116,9 @@ namespace BiometricMiddleware.Services
 
                     string capturedTemplate = await _biometricProvider.CaptureIdentifierAsync(_loopCts.Token);
                     if (string.IsNullOrEmpty(capturedTemplate)) continue;
+
+                    // Mantém o cache sincronizado sem sobrecarregar o backend.
+                    await RefreshCredentialsCacheIfNeeded();
 
                     CredentialCacheItem? matchedUser = null;
                     int highestScore = 0;
@@ -166,8 +175,6 @@ namespace BiometricMiddleware.Services
 
                     // Delay maior em caso de erro/negação para o usuário ter tempo de ler/reagir
                     await Task.Delay(2000, externalToken);
-
-                    ProcessMatch(capturedTemplate);
                 }
                 catch (OperationCanceledException)
                 {
@@ -204,10 +211,14 @@ namespace BiometricMiddleware.Services
                 if (!string.IsNullOrEmpty(finalTemplate))
                 {
                     _logger.LogInformation("[CADASTRO] Sucesso! Enviando template para o servidor...");
-                    await PostJson("/api/v1/credential/register-capture", new { session_id = sessionId, credential_id = finalTemplate });
+                    var captureAccepted = await PostJson("/api/v1/credential/register-capture", new { session_id = sessionId, credential_id = finalTemplate });
 
-                    _logger.LogInformation("[CADASTRO] Finalizado. Atualizando cache local...");
-                    await RefreshCredentialsCache();
+                    if (captureAccepted)
+                    {
+                        // A credencial pode ser persistida alguns segundos depois (fluxo frontend).
+                        _logger.LogInformation("[CADASTRO] Finalizado. Atualizando cache local com retry...");
+                        await RefreshCredentialsCacheWithRetry();
+                    }
                 }
             }
             catch (Exception ex)
@@ -222,56 +233,6 @@ namespace BiometricMiddleware.Services
             }
         }
 
-        // Método auxiliar para não repetir código
-        private async void ProcessMatch(string capturedTemplate)
-        {
-            CredentialCacheItem? matchedUser = null;
-            int highestScore = 0;
-
-            foreach (var cred in _cachedCredentials)
-            {
-                int score = ((ZKBiometricProvider)_biometricProvider).MatchTemplates(capturedTemplate, cred.Template);
-                if (score > highestScore) { matchedUser = cred; highestScore = score; }
-            }
-
-            if (_currentCalledUser?.User != null)
-            {
-                if (matchedUser != null && matchedUser.UserId == _currentCalledUser.User.Id && highestScore > 75)
-                {
-                    _logger.LogInformation("[CHAMADA] Sucesso! Digital de {Name} confirmada.", _currentCalledUser.User.Name);
-                    await PostJson("/api/v1/credential/authenticate", new
-                    {
-                        queue_item_id = _currentCalledUser.Id,
-                        credential = matchedUser.Template,
-                        call_token = _currentCalledUser.CallToken ?? "token-mw",
-                        operator_id = _operatorId
-                    });
-                    _currentCalledUser = null;
-                }
-                else
-                {
-                    _logger.LogWarning("[CHAMADA NEGADA] Dedo não pertence a {Esperado}.", _currentCalledUser.User.Name);
-                }
-            }
-            else if (matchedUser != null && highestScore > 75)
-            {
-                _logger.LogInformation("[QUICK ENTRY] Usuário {Id} identificado.", matchedUser.UserId);
-                await PostJson("/api/v1/queue/quick-entry", new { identifier = matchedUser.Template });
-            }
-        }
-
-        private async Task<string> CaptureWithRetriesAsync(int count)
-        {
-            string last = "";
-            for (int i = 0; i < count; i++)
-            {
-                _logger.LogInformation("[CADASTRO] Leitura {I}/{Count}", i + 1, count);
-                last = await _biometricProvider.CaptureIdentifierAsync();
-                await Task.Delay(800);
-            }
-            return last;
-        }
-
         private async Task RefreshCredentialsCache()
         {
             try
@@ -281,13 +242,44 @@ namespace BiometricMiddleware.Services
                 {
                     var json = await response.Content.ReadAsStringAsync();
                     _cachedCredentials = JsonSerializer.Deserialize<List<CredentialCacheItem>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                    _lastCacheRefreshUtc = DateTime.UtcNow;
                     _logger.LogInformation("[CACHE] {Count} templates carregados.", _cachedCredentials.Count);
                 }
             }
             catch (Exception ex) { _logger.LogError("[CACHE ERRO] {Error}", ex.Message); }
         }
 
-        private async Task PostJson(string endpoint, object data)
+        private async Task RefreshCredentialsCacheIfNeeded()
+        {
+            if ((DateTime.UtcNow - _lastCacheRefreshUtc) < CacheRefreshInterval) return;
+            await RefreshCredentialsCache();
+        }
+
+        private async Task RefreshCredentialsCacheWithRetry(int attempts = 5, int delayMs = 2000)
+        {
+            int initialCount = _cachedCredentials.Count;
+
+            for (int i = 1; i <= attempts; i++)
+            {
+                await RefreshCredentialsCache();
+
+                if (_cachedCredentials.Count > initialCount)
+                {
+                    _logger.LogInformation("[CACHE] Novo template detectado após cadastro (tentativa {Attempt}/{Attempts}).", i, attempts);
+                    return;
+                }
+
+                if (i < attempts)
+                {
+                    _logger.LogInformation("[CACHE] Nenhuma alteração após cadastro (tentativa {Attempt}/{Attempts}). Aguardando...", i, attempts);
+                    await Task.Delay(delayMs);
+                }
+            }
+
+            _logger.LogWarning("[CACHE] Cadastro recebido, mas nenhum novo template foi encontrado no período de espera.");
+        }
+
+        private async Task<bool> PostJson(string endpoint, object data)
         {
             try
             {
@@ -297,6 +289,16 @@ namespace BiometricMiddleware.Services
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("[HTTP] Sucesso: {Endpoint}", endpoint);
+                    if (endpoint == "/api/v1/credential/register-capture")
+                    {
+                        var payload = await response.Content.ReadAsStringAsync();
+                        if (payload.Contains("\"status\":\"error\"", StringComparison.OrdinalIgnoreCase))
+                        {
+                            _logger.LogError("[HTTP ERRO] {Endpoint} respondeu status=error no corpo.", endpoint);
+                            return false;
+                        }
+                    }
+                    return true;
                 }
                 else if (response.StatusCode == System.Net.HttpStatusCode.Conflict) // Erro 409
                 {
@@ -312,6 +314,8 @@ namespace BiometricMiddleware.Services
             {
                 _logger.LogError("[HTTP EXCEÇÃO] Erro ao conectar em {Endpoint}: {Error}", endpoint, ex.Message);
             }
+
+            return false;
         }
 
         public class BiometricCommand
