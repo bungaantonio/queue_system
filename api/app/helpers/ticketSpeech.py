@@ -1,4 +1,4 @@
-# app/helpers/senhaSpeech.py
+# app/helpers/ticketSpeech.py
 NUMEROS_PT = {
     "0": "zero",
     "1": "um",
@@ -16,7 +16,7 @@ def format_ticket_for_speech(ticket: str) -> str:
     """
     Recebe string de ticket e retorna texto pronto para TTS.
     Letras viram maiúsculas, números em português, separado por vírgula.
-    Exemplo: L A 0 1 8 → "Senha L, A, zero, um, oito"
+    Exemplo: L A 0 1 8 → "Ticket L, A, zero, um, oito"
     """
     if not ticket:
         return ""

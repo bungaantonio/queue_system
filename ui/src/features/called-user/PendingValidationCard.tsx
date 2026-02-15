@@ -50,7 +50,7 @@ export default function PendingValidationCard() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
-                      Senha Chamada
+                      Ticket Chamado
                     </span>
                   </div>
                   <h2 className="text-2xl font-black tracking-tighter text-white uppercase leading-none">

@@ -2,12 +2,20 @@
 import { useEffect, useState } from "react";
 import { motion as Motion, AnimatePresence } from "motion/react";
 import { useQueueStream } from "../../app/providers/QueueStreamProvider";
+import { useAnnounce } from "../../hooks/useAnnounce";
 
 const OVERLAY_DURATION = 8000; // 8 segundos em tela
+const ANNOUNCE_REPETITIONS = 1;
+const ANNOUNCE_INTERVAL = 3500;
 
 export default function CallOverlay() {
   const { calledUser: user } = useQueueStream();
   const [activeUserId, setActiveUserId] = useState<number | null>(null);
+  useAnnounce(user, {
+    repetitions: ANNOUNCE_REPETITIONS,
+    interval: ANNOUNCE_INTERVAL,
+    deskLabel: "Guichê 1",
+  });
 
   useEffect(() => {
     if (user?.id) {
