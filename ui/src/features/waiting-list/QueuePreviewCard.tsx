@@ -2,55 +2,41 @@
 import { motion as Motion, AnimatePresence } from "motion/react";
 import { useQueueStream } from "../../app/providers/QueueStreamProvider";
 
-export default function QueuePreviewCard({ reduced = false }: { reduced?: boolean }) {
+// src/features/waiting-list/QueuePreviewCard.tsx
+export default function QueuePreviewCard() {
   const { nextUsers } = useQueueStream();
-  const usersToShow = reduced ? 2 : 4;
+  const visibleUsers = (nextUsers || []).slice(0, 6);
 
   return (
-    <div
-      className={`flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-sm ${reduced ? "p-4" : "p-5"}`}
-    >
-      <div className={`flex items-center justify-between ${reduced ? "mb-2" : "mb-3"}`}>
-        <span className="text-[9px] uppercase tracking-[0.2em] font-black text-slate-400">
-          Próximos
+    <div className="h-full min-h-0 flex flex-col p-5">
+      <div className="flex items-center justify-between mb-3 shrink-0">
+        <span className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-400">
+          Próximos na Fila
         </span>
-        <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
+        <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-2 py-0.5 rounded-full">
+          {nextUsers?.length || 0} na fila
+        </span>
       </div>
 
-      <div className={reduced ? "space-y-1.5" : "space-y-2"}>
-        <AnimatePresence initial={false} mode="popLayout">
-          {nextUsers?.slice(0, usersToShow).map(
-            (
-              user,
-              idx,
-            ) => (
-              <Motion.div
-                key={user.id}
-                layout
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`flex items-center rounded-2xl border border-slate-100 bg-slate-50 ${reduced ? "gap-2.5 p-2.5" : "gap-3 p-3"}`}
-              >
-                <div
-                  className={`flex items-center justify-center rounded-lg border border-slate-200 bg-white font-black text-slate-400 ${reduced ? "h-7 w-7 text-[9px]" : "h-8 w-8 text-[10px]"}`}
-                >
-                  {idx + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p
-                    className={`font-black leading-none text-slate-900 ${reduced ? "text-[13px]" : "text-sm"}`}
-                  >
-                    {user.ticket}
-                  </p>
-                  <p
-                    className={`truncate font-bold uppercase text-slate-400 ${reduced ? "text-[8px]" : "text-[9px]"}`}
-                  >
-                    {user.short_name}
-                  </p>
-                </div>
-              </Motion.div>
-            ),
-          )}
+      <div className="flex-1 min-h-0 space-y-2 overflow-hidden">
+        <AnimatePresence mode="popLayout">
+          {visibleUsers.map((user, idx) => (
+            <Motion.div
+              key={user.id}
+              layout
+              className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 min-h-0"
+            >
+              <span className="text-[10px] font-black text-slate-300 w-4 shrink-0">
+                {idx + 1}
+              </span>
+              <span className="text-xl font-black text-slate-900 tabular-nums w-20 shrink-0 leading-none">
+                {user.ticket}
+              </span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase truncate min-w-0">
+                {user.short_name}
+              </span>
+            </Motion.div>
+          ))}
         </AnimatePresence>
       </div>
     </div>

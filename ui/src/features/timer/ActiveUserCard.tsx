@@ -1,88 +1,95 @@
 // src/features/timer/ActiveUserCard.tsx
 import { useEffect, useState } from "react";
+import { useQueueStream } from "../../app/providers/QueueStreamProvider";
 import useTimer from "./useTimer";
 import { motion as Motion } from "motion/react";
 
 export default function ActiveUserCard() {
-  const { currentUser, slaSeconds, elapsed, status } = useTimer();
+  const { currentUser: user } = useQueueStream();
+  const { slaSeconds, elapsed } = useTimer();
   const [localElapsed, setLocalElapsed] = useState(elapsed);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!user) return;
     setLocalElapsed(elapsed);
     const interval = setInterval(() => setLocalElapsed((p) => p + 1), 1000);
     return () => clearInterval(interval);
-  }, [currentUser?.id, elapsed]);
+  }, [user?.id, elapsed]);
 
-  const remaining = Math.max(slaSeconds - localElapsed, 0);
-  const isOverdue = status === "Ultrapassado" || localElapsed >= slaSeconds;
+  if (!user) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-200">
+          Guichê Disponível
+        </span>
+      </div>
+    );
+  }
+
+  const isOverdue = localElapsed >= slaSeconds;
   const progress = Math.min((localElapsed / slaSeconds) * 100, 100);
-
-  if (!currentUser) return null;
-
-  const displayTime = isOverdue ? localElapsed - slaSeconds : remaining;
-  const mins = Math.floor(displayTime / 60);
-  const secs = displayTime % 60;
+  const remaining = Math.max(slaSeconds - localElapsed, 0);
+  const clockSeconds = remaining;
+  const minutes = Math.floor(clockSeconds / 60);
+  const seconds = String(clockSeconds % 60).padStart(2, "0");
 
   return (
-    <div className="flex h-full w-full flex-col justify-center gap-3">
-      <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-        <div className="flex flex-col">
-          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">
+    <div className="h-full min-h-0 flex flex-col justify-between gap-4 overflow-hidden">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <span className="text-[clamp(9px,0.8vw,11px)] font-black uppercase tracking-[0.2em] text-indigo-500">
             Atendimento Atual
           </span>
-          <h3 className="text-lg font-black text-slate-900 tracking-tighter uppercase leading-none">
-            {currentUser.short_name}
+          <h3 className="truncate text-[clamp(22px,1.8vw,34px)] font-black text-slate-900 uppercase tracking-tighter leading-none">
+            {user.short_name}
           </h3>
         </div>
-
-        <div
-          className={`flex items-center gap-2 rounded-xl border px-2.5 py-1 ${
-            isOverdue
-              ? "bg-amber-50 border-amber-100 text-amber-700"
-              : "bg-emerald-50 border-emerald-100 text-emerald-700"
-          }`}
-        >
-          <div
-            className={`h-1.5 w-1.5 rounded-full ${isOverdue ? "bg-amber-500" : "bg-emerald-500"} animate-pulse`}
-          />
-          <span className="text-[9px] font-black uppercase tracking-wider">
-            {isOverdue ? "Finalizando" : "No Tempo"}
-          </span>
+        <div className="text-right shrink-0">
+          {isOverdue ? (
+            <>
+              <span className="text-[clamp(14px,1.05vw,18px)] font-black uppercase tracking-[0.12em] text-amber-600 leading-none">
+                Finalizando
+              </span>
+              <span className="text-[clamp(8px,0.75vw,10px)] font-black uppercase tracking-[0.2em] text-slate-400 block mt-1">
+                Aguarde, por favor
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="text-[clamp(26px,2.1vw,42px)] font-black tabular-nums leading-none text-slate-900">
+                {minutes}:{seconds}
+              </span>
+              <span className="text-[clamp(8px,0.75vw,10px)] font-black uppercase tracking-[0.2em] text-slate-400 block mt-1">
+                Tempo Restante
+              </span>
+            </>
+          )}
         </div>
       </div>
 
-      <div className="flex items-end justify-between rounded-2xl border border-slate-100 bg-white px-4 py-3">
-        <div className="flex flex-col">
-          <span
-            className={`text-[2.2rem] font-black tabular-nums tracking-tighter leading-none ${isOverdue ? "text-amber-600" : "text-slate-900"}`}
-          >
-            {mins}:{String(secs).padStart(2, "0")}
-          </span>
-          <span className="mt-1 text-[8px] font-bold uppercase tracking-[0.2em] text-slate-400">
-            {isOverdue ? "Tempo Excedido" : "Tempo Restante"}
-          </span>
-        </div>
-        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-300">
-          SLA
+      <div className="bg-indigo-50 rounded-[2rem] py-4 px-5 xl:px-6 flex items-center gap-3 border border-indigo-100/50">
+        <span className="text-[clamp(9px,0.85vw,12px)] font-black text-indigo-300 uppercase tracking-[0.25em] shrink-0">
+          Ticket
+        </span>
+        <span className="ml-auto block text-right text-[clamp(30px,2.7vw,56px)] font-black text-indigo-600 tracking-tighter tabular-nums leading-none">
+          {user.ticket}
         </span>
       </div>
 
-      <div className="space-y-1">
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="space-y-2">
+        <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
           <Motion.div
-            initial={false}
             animate={{
-              width: `${isOverdue ? 100 : progress}%`,
-              backgroundColor: isOverdue ? "#d97706" : "#6366f1",
+              width: `${progress}%`,
+              backgroundColor: isOverdue ? "#f59e0b" : "#4f46e5",
             }}
-            transition={{ duration: 1, ease: "linear" }}
-            className="h-full rounded-full"
+            className="h-full rounded-full shadow-[4px_0_12px_rgba(79,70,229,0.4)]"
           />
         </div>
-        <p className="text-center text-[8px] font-bold uppercase tracking-[0.1em] text-slate-400">
-          {isOverdue ? "Atenção ao tempo de atendimento" : "Atendimento dentro do tempo"}
-        </p>
+        <div className="flex justify-between text-[clamp(8px,0.75vw,10px)] font-black uppercase text-slate-400 tracking-[0.2em] px-1">
+          <span>{isOverdue ? "Atendimento em curso" : "Status do SLA"}</span>
+          <span>{isOverdue ? "Aguarde" : `${Math.round(progress)}%`}</span>
+        </div>
       </div>
     </div>
   );

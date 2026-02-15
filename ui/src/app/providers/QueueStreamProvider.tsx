@@ -46,8 +46,9 @@ export function QueueStreamProvider({ children }: { children: ReactNode }) {
           (u) => u.id !== data.called?.id && u.id !== data.current?.id,
         );
 
-        // 4. Pegamos apenas os 3 primeiros para o display
-        setNextUsers(filteredQueue.slice(0, 3));
+        // 4. Mantemos a fila completa no estado global.
+        // A limitação visual (ex.: top 3) é responsabilidade do componente.
+        setNextUsers(filteredQueue);
       },
     );
 

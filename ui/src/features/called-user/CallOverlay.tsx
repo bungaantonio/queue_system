@@ -5,16 +5,19 @@ import { useQueueStream } from "../../app/providers/QueueStreamProvider";
 import { useAnnounce } from "../../hooks/useAnnounce";
 
 const OVERLAY_DURATION = 8000; // 8 segundos em tela
-const ANNOUNCE_REPETITIONS = 1;
-const ANNOUNCE_INTERVAL = 3500;
+const POST_OVERLAY_GAP = 300;
+const POST_CALL_INTERVAL = 2000;
 
 export default function CallOverlay() {
   const { calledUser: user } = useQueueStream();
   const [activeUserId, setActiveUserId] = useState<number | null>(null);
   useAnnounce(user, {
-    repetitions: ANNOUNCE_REPETITIONS,
-    interval: ANNOUNCE_INTERVAL,
     deskLabel: "Guichê 1",
+    scheduleMs: [
+      0,
+      OVERLAY_DURATION + POST_OVERLAY_GAP,
+      OVERLAY_DURATION + POST_OVERLAY_GAP + POST_CALL_INTERVAL,
+    ],
   });
 
   useEffect(() => {
