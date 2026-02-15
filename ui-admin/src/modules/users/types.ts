@@ -1,4 +1,1 @@
-export interface Utentes {
-  id: number;
-  name: string;
-}
+export type { Utente } from "./utentes.types";
