@@ -1,39 +1,50 @@
 // src/services/announcementService.ts
 import { beepManager } from "./beepManager";
 import { playAudioFile } from "./audioPlayer";
+import { speechService } from "./speechService";
 
-interface QueueItem {
-    audioUrl: string;
-    delayAfterBeep: number;
+interface TicketItem {
+  type: "FILE" | "SPEECH";
+  content: string;
+  fallbackText?: string;
+  delayAfterBeep?: number;
 }
 
 class AnnouncementService {
-    private queue: QueueItem[] = [];
-    private busy = false;
+  private queue: TicketItem[] = [];
+  private busy = false;
 
-    enqueue(item: QueueItem) {
-        console.log("[AnnouncementService] Adicionando à fila:", item.audioUrl);
-        this.queue.push(item);
-        if (!this.busy) this.processQueue();
-    }
+  clearQueue() {
+    this.queue = [];
+  }
 
-    private async processQueue() {
-        this.busy = true;
+  enqueue(item: TicketItem) {
+    this.queue.push(item);
+    if (!this.busy) this.processQueue();
+  }
 
-        while (this.queue.length) {
-            const item = this.queue.shift()!;
-            await beepManager.playBeep();
-            await new Promise(res => setTimeout(res, item.delayAfterBeep));
-            await playAudioFile(item.audioUrl);
+  private async processQueue() {
+    this.busy = true;
+
+    while (this.queue.length) {
+      const item = this.queue.shift()!;
+
+      await beepManager.playBeep();
+      if (item.delayAfterBeep)
+        await new Promise((res) => setTimeout(res, item.delayAfterBeep));
+
+      if (item.type === "FILE") {
+        const success = await playAudioFile(item.content);
+        if (!success && item.fallbackText) {
+          await speechService.speak(item.fallbackText);
         }
-
-        this.busy = false;
+      } else {
+        await speechService.speak(item.content);
+      }
     }
+
+    this.busy = false;
+  }
 }
 
 export const announcementService = new AnnouncementService();
-
-// utilitário para hooks
-export function announceSequence(audioUrl: string, delayAfterBeep = 800) {
-    announcementService.enqueue({ audioUrl, delayAfterBeep });
-}

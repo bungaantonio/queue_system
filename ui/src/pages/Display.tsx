@@ -1,27 +1,17 @@
 // src/pages/Display.tsx
-import { useState, useEffect } from "react";
-import useQueueData from "../features/called-user/useQueueData";
 import VideoPlayer from "../components/VideoPlayer";
-import CalledUser from "../features/called-user/CalledUser";
-import NextUsers from "../features/waiting-list/NextUsers";
-import Timer from "../features/timer/Timer";
 import QrCodeBox from "../components/QrCodeBox";
 import Clock from "../components/Clock";
-import MarqueeTicker from "../components/MarqueeTicker";
-import CallOverlay from "../features/called-user/CallOverlay";
 import AudioOnboarding from "../components/AudioOnboarding";
+import MarqueeTicker from "../components/MarqueeTicker";
+import PendingValidationCard from "../features/called-user/PendingValidationCard.tsx";
+import useQueueData from "../features/called-user/useQueueData";
+import QueuePreviewCard from "../features/waiting-list/QueuePreviewCard.tsx";
+import ActiveUserCard from "../features/timer/ActiveUserCard.tsx";
+import CallOverlay from "../features/called-user/CallOverlay";
 
 export default function Display() {
-  const { currentUser, calledUser, nextUsers } = useQueueData();
-  const [showOverlay, setShowOverlay] = useState(false);
-
-  useEffect(() => {
-    if (calledUser?.id) {
-      setShowOverlay(true);
-      const timer = setTimeout(() => setShowOverlay(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [calledUser?.id]);
+  useQueueData();
 
   return (
     <div className="h-screen w-screen flex flex-col bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans">
@@ -29,7 +19,7 @@ export default function Display() {
       <CallOverlay />
 
       {/* Grid de Conteúdo Principal */}
-      <main className="flex-1 grid grid-cols-12 gap-6 p-6 min-h-0">
+      <main className="flex-1 grid min-h-0 grid-cols-12 gap-4 p-4">
         {/* Esquerda: Vídeo + Notícias */}
         <section className="col-span-8 flex flex-col rounded-[2.5rem] bg-black shadow-2xl overflow-hidden border border-slate-200">
           <div className="flex-1 relative min-h-0">
@@ -39,79 +29,92 @@ export default function Display() {
             <MarqueeTicker />
           </div>
         </section>
-
-        {/* Direita: Painel de Informações */}
-        <aside className="col-span-4 flex flex-col gap-6 min-h-0">
-          <CalledUser />
-
-          {/* Container do Meio: Timer */}
-          <div className="flex-1 min-h-0 flex flex-col bg-white rounded-[2.5rem] p-8 shadow-xl border border-slate-100 relative overflow-hidden">
-            <div className="flex justify-between items-center mb-6 flex-none">
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase tracking-[0.3em] font-black text-slate-400 mb-1">
-                  Status
-                </span>
-                <h4 className="text-lg font-black text-slate-800 tracking-tighter uppercase leading-none">
-                  Em Atendimento
-                </h4>
-              </div>
-              <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-black text-emerald-600 uppercase">
-                  Live
-                </span>
-              </div>
-            </div>
-
-            <div className="flex-1 flex flex-col justify-center min-h-0">
-              <Timer key={currentUser?.id} />
-            </div>
+        <aside className="col-span-4 grid min-h-0 h-full grid-rows-[minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,1.1fr)] gap-4">
+          <div className="min-h-0 overflow-hidden">
+            <PendingValidationCard />
           </div>
 
-          {/* Próximos na Fila */}
-          <div className="flex-none h-[32%]">
-            <NextUsers reduced />
+          <div className="min-h-0 overflow-hidden bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-xl">
+            <ActiveUserCard />
+          </div>
+
+          <div className="min-h-0 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+            <QueuePreviewCard />
           </div>
         </aside>
       </main>
 
-      {/* Rodapé Corporativo Integrado */}
-      <footer className="h-24 bg-white border-t border-slate-200 px-12 flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+      {/* Rodapé Corporativo de Alta Visibilidade */}
+      <footer className="h-32 bg-white border-t-4 border-slate-100 px-12 flex items-center justify-between shadow-[0_-10px_50px_rgba(0,0,0,0.05)]">
         <div className="flex items-center gap-12">
-          {/* Relógio */}
+          {/* Bloco do Terminal - Foco Total na Identificação */}
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-black mb-2 leading-none">
-              Horário Local
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-indigo-600 mb-2">
+              Local
             </span>
-            <div className="bg-slate-900 px-5 py-2.5 rounded-2xl shadow-lg border border-slate-700">
-              <Clock reduced />
+            <div className="flex items-center gap-5 bg-indigo-600 px-8 py-4 rounded-[2rem] shadow-lg shadow-indigo-200">
+              <svg
+                className="w-8 h-8 text-indigo-100"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={3}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
+              </svg>
+              <p className="text-4xl font-black text-white tracking-tighter uppercase">
+                Guichê 01
+              </p>
             </div>
           </div>
 
-          <div className="h-10 w-px bg-slate-200" />
+          {/* Divisor vertical robusto */}
+          <div className="h-16 w-1 bg-slate-100 rounded-full" />
 
-          {/* Identificação do Terminal */}
+          {/* Bloco do Relógio - Otimizado para leitura rápida */}
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-black mb-1 leading-none">
-              Terminal Atual
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
+              Horário Local
             </span>
-            <p className="text-2xl font-black text-slate-800 tracking-tighter uppercase leading-none">
-              Guichê 01
-            </p>
+            <div className="flex items-center bg-slate-900 px-8 py-4 rounded-[2rem] shadow-xl border-b-4 border-indigo-500">
+              {/* O componente Clock deve ter o tamanho text-5xl aqui dentro */}
+              <div className="text-5xl font-black text-white tabular-nums tracking-tighter">
+                <Clock />
+              </div>
+              <div className="ml-4 flex flex-col border-l border-white/20 pl-4">
+                <span className="text-xs font-black text-indigo-400 uppercase">
+                  Fev
+                </span>
+                <span className="text-xl font-black text-white leading-none">
+                  14
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* CHAMADA PARA O QR CODE (Integrado Perfeitamente) */}
-        <div className="flex items-center gap-6 bg-amber-50/50 p-3 pr-6 rounded-[2rem] border border-amber-100/80 shadow-sm">
-          <QrCodeBox reduced />
+        {/* Bloco de Acompanhamento (QR Code) - Coeso com o resto */}
+        <div className="flex items-center gap-8 bg-slate-50 p-4 pr-10 rounded-[2.5rem] border-2 border-slate-100">
+          <div className="relative">
+            <QrCodeBox reduced />
+            {/* Decoração estática, sem pisco-pisco */}
+            <div className="absolute -bottom-2 -right-2 bg-indigo-600 text-white p-1.5 rounded-lg shadow-lg">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5z" />
+              </svg>
+            </div>
+          </div>
+
           <div className="flex flex-col">
-            {/* O texto aqui pode ser amber-900 para manter a cor quente, 
-        mas o QR Code sendo Slate-900 traz a seriedade técnica necessária */}
-            <p className="text-amber-900 font-black text-xs uppercase leading-none mb-1.5">
-              Acompanhe pelo celular
+            <p className="text-slate-900 font-black text-xl uppercase tracking-tighter leading-none mb-1">
+              Acompanhe a fila
             </p>
-            <p className="text-amber-800/60 text-[9px] font-bold uppercase tracking-widest leading-none">
-              Acesso rápido via QR Code
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+              No seu smartphone
             </p>
           </div>
         </div>

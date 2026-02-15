@@ -1,6 +1,7 @@
+// src/components/Clock.tsx
 import { useEffect, useState } from "react";
 
-export default function Clock({ reduced = false }) {
+export default function Clock() {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -9,15 +10,12 @@ export default function Clock({ reduced = false }) {
   }, []);
 
   return (
-    <div
-      className={`font-semibold tracking-[0.3em] text-slate-200/90 ${
-        reduced ? "text-xl" : "text-3xl"
-      }`}
-    >
+    <span className="tabular-nums">
       {time.toLocaleTimeString("pt-PT", {
         hour: "2-digit",
         minute: "2-digit",
+        second: "2-digit", // Adicionei segundos para dar sensação de "Live" no rodapé
       })}
-    </div>
+    </span>
   );
 }

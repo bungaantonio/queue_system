@@ -8,26 +8,16 @@ export default function MarqueeTicker() {
   ];
 
   return (
-    <div className="bg-slate-900/90 backdrop-blur-md text-white py-2 overflow-hidden whitespace-nowrap border-t border-white/10">
-      <div className="inline-block animate-marquee whitespace-nowrap">
-        {news.map((item, i) => (
-          <span
-            key={i}
-            className="mx-10 text-sm font-medium uppercase tracking-widest"
-          >
-            • {item}
-          </span>
-        ))}
-      </div>
-      {/* Duplicado para loop infinito */}
-      <div className="inline-block animate-marquee whitespace-nowrap">
-        {news.map((item, i) => (
-          <span
-            key={i}
-            className="mx-10 text-sm font-medium uppercase tracking-widest"
-          >
-            • {item}
-          </span>
+    <div className="flex items-center w-full h-full bg-slate-900 border-t border-white/5 overflow-hidden">
+      <div className="flex animate-marquee whitespace-nowrap items-center">
+        {/* Renderizamos 3 vezes para garantir que o loop seja invisível em telas ultra-wide */}
+        {[...news, ...news, ...news].map((item, i) => (
+          <div key={i} className="flex items-center">
+            <span className="mx-8 text-sm font-black uppercase tracking-[0.2em] text-white/90">
+              {item}
+            </span>
+            <span className="h-2 w-2 bg-indigo-500 rounded-full shadow-[0_0_8px_#6366f1]" />
+          </div>
         ))}
       </div>
     </div>

@@ -63,7 +63,8 @@ def mark_credential_verified(db: Session, item: QueueItem) -> None:
 
 def set_being_served(db: Session, item: QueueItem) -> None:
     item.status = QueueStatus.BEING_SERVED
-    item.timestamp = datetime.now(timezone.utc)
+    item.timestamp = datetime.now(timezone.utc) # O tempo "0" passa a ser o início do atendimento
+    item.set_sla_deadline(minutes=10) # Define 10 minutos para este atendimento
     db.flush()
 
 
