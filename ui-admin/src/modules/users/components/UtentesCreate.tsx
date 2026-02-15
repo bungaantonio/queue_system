@@ -8,128 +8,159 @@ import {
   SelectInput,
   Title,
 } from "react-admin";
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  Divider,
-  Stack,
-} from "@mui/material";
-import { BiometricInput } from "./BiometricInput";
-import PersonIcon from "@mui/icons-material/Person";
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
+import { Box, Typography, Grid, Card, Stack, alpha } from "@mui/material";
+import { User, Activity, HeartPulse, type LucideIcon } from "lucide-react";
+import { BiometricCapture } from "./BiometricCapture";
+
+interface FormSectionHeaderProps {
+  icon: LucideIcon;
+  title: string;
+  subtitle: string;
+}
+
+const FormSectionHeader = ({
+  icon: Icon,
+  title,
+  subtitle,
+}: FormSectionHeaderProps) => (
+  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+    <Box
+      sx={{
+        p: 1,
+        bgcolor: alpha("#4f46e5", 0.1),
+        color: "primary.main",
+        borderRadius: 2,
+      }}
+    >
+      <Icon size={20} />
+    </Box>
+    <Box>
+      <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+        {title}
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        {subtitle}
+      </Typography>
+    </Box>
+  </Stack>
+);
 
 export const UtentesCreate = () => (
   <Create
     mutationMode="pessimistic"
     redirect="list"
-    transform={(data: any) => ({
-      user: {
-        name: data.name,
-        birth_date: data.birth_date,
-        is_pregnant: data.is_pregnant,
-        pregnant_until: data.pregnant_until || null,
-        is_disabled_temp: !!data.is_disabled_temp,
-        disabled_until: data.disabled_until || null,
-        document_id: data.document_id,
-        phone: data.phone,
-      },
-      credential: { identifier: data.biometric_id },
-      attendance_type: data.attendance_type || "normal",
-    })}
+    sx={{ "& .RaCreate-main": { boxShadow: "none" } }}
   >
-    <SimpleForm toolbar={undefined} sx={{ p: 0 }}>
-      <Box p={{ xs: 1, md: 3 }} maxWidth="1000px">
-        <Title title="Registar Novo Utente" />
+    <SimpleForm sx={{ p: 0 }}>
+      <Box sx={{ maxWidth: 1000, p: 4 }}>
+        <Title title="Admissão de Utente" />
 
-        <Stack spacing={4}>
-          {/* SECÇÃO 1: DADOS PESSOAIS */}
-          <Box>
-            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-              <PersonIcon color="primary" />
-              <Typography variant="h6">Informação do Utente</Typography>
-            </Stack>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 8 }}>
-                <TextInput
-                  source="name"
-                  label="Nome Completo"
-                  fullWidth
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextInput
-                  source="document_id"
-                  label="Documento (ID/BI)"
-                  fullWidth
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextInput source="phone" label="Telemóvel" fullWidth />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <DateInput
-                  source="birth_date"
-                  label="Data de Nascimento"
-                  fullWidth
-                />
-              </Grid>
-            </Grid>
-          </Box>
-
-          <Divider />
-
-          {/* SECÇÃO 2: BIOMETRIA */}
-          <BiometricInput source="biometric_id" operatorId={42} />
-
-          <Divider />
-
-          {/* SECÇÃO 3: PRIORIDADES E SAÚDE */}
-          <Box>
-            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
-              <MedicalServicesIcon color="secondary" />
-              <Typography variant="h6">Prioridade e Saúde</Typography>
-            </Stack>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Card sx={{ p: 2, bgcolor: "grey.50" }} elevation={0}>
-                  <BooleanInput source="is_pregnant" label="Gestante?" />
-                  <DateInput
-                    source="pregnant_until"
-                    label="Previsão Parto"
+        <Grid container spacing={4}>
+          {/* Coluna Principal: Identidade */}
+          <Grid size={{ xs: 12, lg: 7 }}>
+            <Card sx={{ p: 4, mb: 4 }}>
+              <FormSectionHeader
+                icon={User}
+                title="Identificação Civil"
+                subtitle="Dados base do documento de identidade"
+              />
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12 }}>
+                  <TextInput source="name" label="Nome Completo" fullWidth />
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <TextInput
+                    source="document_id"
+                    label="Nº Documento"
                     fullWidth
                   />
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Card sx={{ p: 2, bgcolor: "grey.50" }} elevation={0}>
-                  <BooleanInput
-                    source="is_disabled_temp"
-                    label="Deficiência Temporária?"
-                  />
-                  <DateInput
-                    source="disabled_until"
-                    label="Válido até"
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <TextInput
+                    source="phone"
+                    label="Contacto Telefónico"
                     fullWidth
                   />
-                </Card>
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <DateInput
+                    source="birth_date"
+                    label="Data de Nascimento"
+                    fullWidth
+                  />
+                </Grid>
               </Grid>
-              <Grid size={{ xs: 12 }}>
+            </Card>
+
+            <BiometricCapture source="credential" operatorId={42} />
+          </Grid>
+
+          {/* Coluna Lateral: Triagem e Prioridade */}
+          <Grid size={{ xs: 12, lg: 5 }}>
+            <Stack spacing={4}>
+              <Card
+                sx={{
+                  p: 4,
+                  borderLeft: "4px solid",
+                  borderColor: "secondary.main",
+                }}
+              >
+                <FormSectionHeader
+                  icon={HeartPulse}
+                  title="Triagem de Saúde"
+                  subtitle="Condições especiais de atendimento"
+                />
+                <Stack spacing={2}>
+                  <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 3 }}>
+                    <BooleanInput
+                      source="is_pregnant"
+                      label="Utente Gestante"
+                    />
+                    <DateInput
+                      source="pregnant_until"
+                      label="Data prevista parto"
+                      fullWidth
+                      sx={{ mt: 1 }}
+                    />
+                  </Box>
+                  <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 3 }}>
+                    <BooleanInput
+                      source="is_disabled_temp"
+                      label="Mobilidade Reduzida"
+                    />
+                    <DateInput
+                      source="disabled_until"
+                      label="Validade do atestado"
+                      fullWidth
+                      sx={{ mt: 1 }}
+                    />
+                  </Box>
+                </Stack>
+              </Card>
+
+              <Card sx={{ p: 4, bgcolor: "primary.main", color: "white" }}>
+                <FormSectionHeader
+                  icon={Activity}
+                  title="Nível de Acesso"
+                  subtitle="Definição da fila de espera"
+                />
                 <SelectInput
                   source="attendance_type"
-                  label="Tipo de Triagem Inicial"
+                  label="Tipo de Atendimento"
                   fullWidth
                   choices={[
-                    { id: "normal", name: "Atendimento Normal" },
-                    { id: "urgent", name: "Atendimento Prioritário" },
+                    { id: "normal", name: "Normal (Geral)" },
+                    { id: "urgent", name: "Prioritário (Saúde/Idade)" },
                   ]}
+                  sx={{
+                    "& .MuiFilledInput-root": { bgcolor: "white" },
+                    "& .MuiInputLabel-root": { color: "primary.main" },
+                  }}
                 />
-              </Grid>
-            </Grid>
-          </Box>
-        </Stack>
+              </Card>
+            </Stack>
+          </Grid>
+        </Grid>
       </Box>
     </SimpleForm>
   </Create>

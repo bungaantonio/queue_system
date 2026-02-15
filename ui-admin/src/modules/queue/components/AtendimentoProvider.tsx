@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { atendimentoGateway } from "../atendimentoGateway";
 import { sessionStore } from "../../../core/session/sessionStorage";
+import { CONFIG } from "../../../core/config/config";
 
 // 1. Definições de Tipos mais rigorosas para evitar 'any'
 interface Utente {
@@ -101,9 +102,8 @@ export const AtendimentoProvider = ({ children }: { children: ReactNode }) => {
       });
 
     // 2. Configuração do SSE para tempo real
-    const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
     const token = sessionStore.getAccessToken();
-    const sseUrl = `${baseUrl}/api/v1/sse/stream${token ? `?token=${token}` : ""}`;
+    const sseUrl = `${CONFIG.SSE_STREAM_URL}${token ? `?token=${token}` : ""}`;
 
     const eventSource = new EventSource(sseUrl);
 

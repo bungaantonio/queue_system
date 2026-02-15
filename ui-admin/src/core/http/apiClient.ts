@@ -2,7 +2,7 @@ import { sessionStore } from "../session/sessionStorage";
 import { CONFIG } from "../config/config";
 
 const request = async (method: string, path: string, body?: unknown) => {
-  let token = sessionStore.getAccessToken();
+  const token = sessionStore.getAccessToken();
   const url = `${CONFIG.API_BASE_URL}${path}`;
 
   const fetchWithToken = async (tok: string) =>
@@ -25,7 +25,7 @@ const request = async (method: string, path: string, body?: unknown) => {
       throw { status: 401, message: "Sessão expirada" };
     }
 
-    const refreshRes = await fetch(`${CONFIG.AUTH_URL}/auth/refresh`, {
+    const refreshRes = await fetch(`${CONFIG.AUTH_URL}/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),

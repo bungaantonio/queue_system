@@ -15,6 +15,11 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { biometricService } from "../../../services/biometricService";
 import { useInput } from "react-admin";
 
+type HttpLikeError = { status?: number };
+
+const hasStatus = (err: unknown): err is HttpLikeError =>
+  typeof err === "object" && err !== null && "status" in err;
+
 export const BiometricInput = ({
   source,
   operatorId,
@@ -45,8 +50,8 @@ export const BiometricInput = ({
             setLoading(false);
             clearInterval(interval);
           }
-        } catch (err: any) {
-          if (err.status !== 404) throw err;
+        } catch (err: unknown) {
+          if (!hasStatus(err) || err.status !== 404) throw err;
         }
       }, 2000);
 
@@ -54,7 +59,7 @@ export const BiometricInput = ({
         clearInterval(interval);
         if (loading) setStatus("error");
       }, 60000);
-    } catch (e) {
+    } catch {
       setStatus("error");
       setLoading(false);
     }

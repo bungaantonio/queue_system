@@ -1,7 +1,7 @@
 // src/modules/shared/components/NotAuthorizedPage.tsx
 import React from "react";
 import { Box, Typography, Button, useTheme } from "@mui/material";
-import { useRedirect } from 'react-admin';
+import { useRedirect } from "react-admin";
 import { Link } from "react-router-dom";
 
 export const NotAuthorizedPage: React.FC = () => {
@@ -54,16 +54,15 @@ export const NotAuthorizedPage: React.FC = () => {
 
         {/* Texto explicativo */}
         <Typography variant="body1">
-          Não tem acesso a esta área da aplicação.
-          Pode voltar à{' '}
+          Não tem acesso a esta área da aplicação. Pode voltar à{" "}
           <Button
-            component={Link} 
-            to="/"           
+            component={Link}
+            to="/"
             variant="text"
             sx={{
-              textTransform: 'none',
+              textTransform: "none",
               fontWeight: 700,
-              color: '#1177bd',
+              color: "#1177bd",
               p: 0,
               ml: 0.5,
             }}

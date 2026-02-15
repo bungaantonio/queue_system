@@ -5,34 +5,33 @@ import { VolumeData } from "./types";
 import { VOLUME_CHART_LABELS as L } from "./labels";
 
 interface Props {
-    data: VolumeData;
+  data: VolumeData;
 }
 
 export const VolumeChart = ({ data }: Props) => {
-    return (
-        <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
+  return (
+    <Card sx={{ borderRadius: 3 }}>
+      <CardContent>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+          {L.title}
+        </Typography>
 
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                    {L.title}
-                </Typography>
+        <VolumeSummary data={data} />
 
-                <VolumeSummary data={data} />
-
-                {/* Gráfico */}
-                <Box
-                    sx={{
-                        display: "flex",
-                        gap: 2,
-                        justifyContent: "space-between",
-                        mt: 3,
-                    }}
-                >
-                    {data.days.map((d) => (
-                        <VolumeBar key={d.day} item={d} />
-                    ))}
-                </Box>
-            </CardContent>
-        </Card>
-    );
+        {/* Gráfico */}
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            justifyContent: "space-between",
+            mt: 3,
+          }}
+        >
+          {data.days.map((d) => (
+            <VolumeBar key={d.day} item={d} />
+          ))}
+        </Box>
+      </CardContent>
+    </Card>
+  );
 };
