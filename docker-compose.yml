@@ -21,7 +21,7 @@ services:
     depends_on:
       - app
     ports:
-      - "3000:80"
+      - "3002:80"
 
   # UI
   ui:
