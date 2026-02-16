@@ -38,8 +38,8 @@ router = APIRouter()
 @router.post("/register", response_model=ApiResponse[QueueConsult])
 def register_user(
     request: QueueRegister,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = None,
     current_operator=Depends(get_current_user),  # exige ‘login’ humano
 ):
     db_user, db_bio, queue_item = create_user_with_credential_and_queue(
@@ -57,9 +57,9 @@ def register_user(
 @router.post("/quick-entry", response_model=ApiResponse[QuickEntryResponse])
 def entry(
     request: QuickEntryRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     operator_id: int = Depends(get_operator_id_with_system_fallback),
-    background_tasks: BackgroundTasks = None,
 ):
     result = consult.quick_entry_user(
         db=db,
@@ -86,9 +86,9 @@ def list_queue(db: Session = Depends(get_db)):
 # 🔹 Chamar próximo usuário (pode ser SYSTEM)
 @router.post("/call-next", response_model=ApiResponse[QueueCalledItem])
 def call_next(
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_operator=Depends(resolve_operator_with_system_fallback),  # humano ou SYSTEM
-    background_tasks: BackgroundTasks = None,
 ):
     next_user_item = management.call_next_user(db, operator_id=current_operator.id)
     if not next_user_item:
@@ -119,8 +119,8 @@ def get_current_served_user(db: Session = Depends(get_db)):
 # 🔹 Finalizar atendimento (exige humano)
 @router.post("/finish", response_model=ApiResponse[QueueDetailItem])
 def finish_current_user(
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = None,
     current_operator=Depends(get_current_user),
 ):
 
@@ -140,8 +140,8 @@ def finish_current_user(
 @router.post("/cancel", response_model=ApiResponse[QueueDetailItem])
 def cancel_active_user(
     request: QueueCancel,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = None,
     current_operator=Depends(get_current_user),
 ):
     cancelled_item = management.cancel_active_user(
@@ -160,9 +160,9 @@ def cancel_active_user(
 @router.post("/requeue", response_model=ApiResponse[QueueConsult])
 def requeue_user_endpoint(
     request: QueueRequeue,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_operator=Depends(resolve_operator_with_system_fallback),  # humano ou SYSTEM
-    background_tasks: BackgroundTasks = None,
 ):
     result = management.requeue_user_service(
         db, request, operator_id=current_operator.id
@@ -179,8 +179,8 @@ def requeue_user_endpoint(
 # 🔹 Pular usuário chamado (pode ser SYSTEM)
 @router.post("/skip", response_model=ApiResponse[QueueDetailItem])
 def skip_current_called_user(
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = None,
     current_operator=Depends(resolve_operator_with_system_fallback),  # humano ou SYSTEM
 ):
     updated_item = management.skip_called_user(

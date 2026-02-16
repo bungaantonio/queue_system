@@ -1,13 +1,32 @@
 import { sessionStore } from "../core/session/sessionStorage";
 import { CONFIG } from "../core/config/config";
+import { ApiError } from "../core/http/ApiError";
 import {
   LoginData,
   LoginResponseData,
   RefreshTokenData,
   RefreshResponseData,
   UserData,
-  ApiResponse,
+  getApiPayload,
 } from "./auth.types.ts";
+
+const parseJSON = async (res: Response): Promise<unknown> => {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+};
+
+const getErrorMessage = (payload: unknown, fallback: string) => {
+  if (!payload || typeof payload !== "object") return fallback;
+  const body = payload as Record<string, unknown>;
+  const error = body.error as Record<string, unknown> | undefined;
+  if (typeof error?.message === "string") return error.message;
+  if (typeof body.detail === "string") return body.detail;
+  if (typeof body.message === "string") return body.message;
+  return fallback;
+};
 
 export const adminAuthProvider = {
   login: async ({ username, password }: LoginData) => {
@@ -17,21 +36,23 @@ export const adminAuthProvider = {
       body: JSON.stringify({ username, password }),
     });
 
-    const responseData: ApiResponse<LoginResponseData> = await res.json();
+    const payload = await parseJSON(res);
 
     if (!res.ok) {
-      throw new Error(responseData?.error?.message || "Credenciais inválidas");
+      throw new ApiError(
+        res.status,
+        payload,
+        getErrorMessage(payload, "Credenciais inválidas"),
+      );
     }
 
-    // Acessando .data.access_token por causa do seu ApiResponse no backend
-    const { access_token, refresh_token } = responseData.data;
+    const data = getApiPayload<LoginResponseData>(payload);
+    if (!data?.access_token || !data?.refresh_token) {
+      throw new ApiError(500, payload, "Resposta de login inválida");
+    }
 
-    sessionStore.setAccessToken(access_token);
-    sessionStore.setRefreshToken(refresh_token);
-
-    // Salva info básica para manter estado após F5
-    const user = sessionStore.getUser();
-    if (user) sessionStore.setUserInfo(user.username, user.role);
+    sessionStore.setAccessToken(data.access_token);
+    sessionStore.setRefreshToken(data.refresh_token);
 
     return Promise.resolve();
   },
@@ -55,63 +76,63 @@ export const adminAuthProvider = {
     const token = sessionStore.getAccessToken();
     const refreshToken = sessionStore.getRefreshToken();
 
-    // Se tem token em memória, está autenticado
     if (token) return Promise.resolve();
 
-    // Se não tem token em memória mas tem Refresh Token (caso de F5)
-    // Tentamos recuperar o access_token automaticamente
     if (refreshToken) {
       try {
-        // Chamamos a função de refresh interna para tentar recuperar a sessão
         await adminAuthProvider.refresh();
         return Promise.resolve();
-      } catch (e) {
+      } catch {
         sessionStore.clear();
-        return Promise.reject();
+        return Promise.reject(new ApiError(401, { detail: "Sessão expirada" }));
       }
     }
 
-    return Promise.reject();
+    return Promise.reject(new ApiError(401, { detail: "Não autenticado" }));
   },
 
-  // Função auxiliar para renovar o token
   refresh: async () => {
     const refreshToken = sessionStore.getRefreshToken();
-    if (!refreshToken) throw new Error("No refresh token");
+    if (!refreshToken) {
+      throw new ApiError(401, { detail: "Sessão expirada" });
+    }
 
     const res = await fetch(`${CONFIG.AUTH_URL}/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      // O backend FastAPI corrigido espera o JSON body
       body: JSON.stringify({ refresh_token: refreshToken } as RefreshTokenData),
     });
 
-    const responseData: ApiResponse<RefreshResponseData> = await res.json();
+    const payload = await parseJSON(res);
 
     if (!res.ok) {
       sessionStore.clear();
-      throw new Error("Sessão expirada");
+      throw new ApiError(res.status, payload, "Sessão expirada");
     }
 
-    // Acessando data.data.access_token
-    sessionStore.setAccessToken(responseData.data.access_token);
-    return responseData.data.access_token;
+    const data = getApiPayload<RefreshResponseData>(payload);
+    if (!data?.access_token) {
+      sessionStore.clear();
+      throw new ApiError(500, payload, "Resposta de refresh inválida");
+    }
+
+    sessionStore.setAccessToken(data.access_token);
+    return data.access_token;
   },
 
   checkError: async (error: { status: number }) => {
-    // Se o erro for 401 (Não autorizado), tentamos o refresh
     if (error.status === 401) {
       try {
         await adminAuthProvider.refresh();
-        return Promise.resolve(); // Tenta a requisição original novamente
+        return Promise.resolve();
       } catch {
         sessionStore.clear();
-        return Promise.reject();
+        return Promise.reject(new ApiError(401, { detail: "Sessão expirada" }));
       }
     }
 
     if (error.status === 403) {
-      return Promise.reject(new Error("Não autorizado"));
+      return Promise.reject(new ApiError(403, { detail: "Não autorizado" }));
     }
 
     return Promise.resolve();

@@ -61,7 +61,11 @@ def verify_audit_chain_summary(
 
 
 @router.get("/verify/{audit_id}", response_model=ApiResponse[AuditVerificationDetail])
-def verify_single(audit_id: int, db: Session = Depends(get_db)):
+def verify_single(
+        audit_id: int,
+        db: Session = Depends(get_db),
+        current_user=Depends(require_roles(OperatorRole.AUDITOR)),
+):
     result = AuditService.verify_single_audit(db, audit_id)
     if not result:
         raise AppException("audit.not_found")
@@ -69,7 +73,10 @@ def verify_single(audit_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/verify", response_model=ApiResponse[AuditChainValidationResult])
-def verify_audit_chain(db: Session = Depends(get_db)):
+def verify_audit_chain(
+        db: Session = Depends(get_db),
+        current_user=Depends(require_roles(OperatorRole.AUDITOR)),
+):
     """
     Verifica toda a cadeia de auditoria.
     Retorna um resumo com validade de cada registro.

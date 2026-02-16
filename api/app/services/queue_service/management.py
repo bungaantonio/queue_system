@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import Any, Optional, cast
 
 from app.core.exceptions import AppException
 from app.models.enums import AuditAction, QueueStatus
@@ -16,21 +16,23 @@ from app.crud.queue.update import (
 )
 from app.crud.queue.read import (
     get_pending_verification_item,
-    get_existing_queue_item,
+    get_queue_item_by_id,
     has_active_service,
     get_next_waiting_item,
     get_active_service_item, get_next_position,
 )
-from app.helpers.audit_helpers import audit_queue_action, get_last_verification_credential_for_queue_item, \
-    build_audit_details
+from app.helpers.audit_helpers import (
+    audit_queue_action,
+    get_last_verification_credential_for_queue_item,
+    build_audit_details,
+    audit_queue_requeued,
+)
 from app.models.queue_item import QueueItem
 
 from app.schemas.queue_schema.request import QueueRequeue
 
-from app.services.audit_service import AuditService
 
-
-def call_next_user(db: Session, operator_id: Optional[int] = None):
+def call_next_user(db: Session, operator_id: Optional[int] = None) -> QueueItem:
     """ Chama o próximo da fila (gera call_token). """
     if has_active_service(db):
         raise AppException("queue.pending_verification_exists")
@@ -46,19 +48,24 @@ def call_next_user(db: Session, operator_id: Optional[int] = None):
         action=AuditAction.USER_CALLED,
         item=updated_item,
         operator_id=operator_id,
-        details={"msg": "Usuário chamado para o guichê"},
+        details=build_audit_details(
+            action=AuditAction.USER_CALLED,
+            msg="Usuário chamado para o guichê",
+        ),
     )
 
     db.commit()
     return updated_item
 
 
-def complete_active_user_service(db: Session, operator_id: int):
+def complete_active_user_service(db: Session, operator_id: int) -> QueueItem:
     current_item = get_active_service_item(db)
     if not current_item:
         raise AppException("queue.no_active_service")
 
-    bio_id = get_last_verification_credential_for_queue_item(db, current_item.id)
+    bio_id = get_last_verification_credential_for_queue_item(
+        db, cast(int, current_item.id)
+    )
 
     done_item = mark_as_done(db, current_item)
 
@@ -67,14 +74,19 @@ def complete_active_user_service(db: Session, operator_id: int):
         action=AuditAction.QUEUE_PROCESSED,
         item=done_item,
         operator_id=operator_id,
-        details={"final_status": "DONE"},
+        credential_id=bio_id,
+        details=build_audit_details(
+            action=AuditAction.QUEUE_PROCESSED,
+            msg="Atendimento concluído",
+            extra={"final_status": "DONE"},
+        ),
     )
 
     db.commit()
     return done_item
 
 
-def skip_called_user(db: Session, current_operator_id: int):
+def skip_called_user(db: Session, current_operator_id: int) -> QueueItem:
     """
     Pula o utilizador chamado (pendente de verificação), movendo-o algumas posições abaixo.
     A lógica de reposicionamento está em 'mark_as_skipped'.
@@ -84,7 +96,7 @@ def skip_called_user(db: Session, current_operator_id: int):
     if not current_item:
         raise AppException("queue.item_not_called")
 
-    if current_item.attempted_verification:
+    if cast(bool, current_item.attempted_verification):
         raise AppException("queue.user_attempted_verification")
 
     updated_item = mark_as_skipped(db, current_item)
@@ -94,7 +106,11 @@ def skip_called_user(db: Session, current_operator_id: int):
         action=AuditAction.USER_SKIPPED,
         item=updated_item,
         operator_id=current_operator_id,
-        details={"reason": "Usuário não compareceu/biometria falhou"},
+        details=build_audit_details(
+            action=AuditAction.USER_SKIPPED,
+            msg="Usuário ignorado",
+            extra={"reason": "Usuário não compareceu/biometria falhou"},
+        ),
     )
 
     db.commit()
@@ -105,14 +121,17 @@ def skip_called_user(db: Session, current_operator_id: int):
 def mark_user_verification_attempted(db: Session, user_id: int) -> None:
     """Marca que o utilizador tentou verificação biométrica."""
     queue_item = get_pending_verification_item(db)
-    if queue_item:
+    if not queue_item:
+        return
+
+    if cast(int, queue_item.user_id) == user_id:
         mark_attempted_verification(db, queue_item)
         db.commit()
 
 
-def cancel_active_user(db: Session, item_id: int, operator_id):
+def cancel_active_user(db: Session, item_id: int, operator_id: int) -> QueueItem:
     """Cancela o atendimento do utilizador ativo."""
-    queue_item = get_existing_queue_item(db, item_id)
+    queue_item = get_queue_item_by_id(db, item_id)
     if not queue_item:
         raise AppException("queue.no_active_user")
 
@@ -123,14 +142,20 @@ def cancel_active_user(db: Session, item_id: int, operator_id):
         action=AuditAction.USER_CANCELLED,
         item=cancelled_item,
         operator_id=operator_id,
-        details={"item_id_cancelado": item_id},
+        details=build_audit_details(
+            action=AuditAction.USER_CANCELLED,
+            msg="Atendimento cancelado",
+            extra={"item_id_cancelado": item_id},
+        ),
     )
 
     db.commit()
     return cancelled_item
 
 
-def requeue_user_service(db, request: QueueRequeue, operator_id: int):
+def requeue_user_service(
+    db: Session, request: QueueRequeue, operator_id: int
+) -> QueueItem:
     """
     Reagenda o atendimento de um utilizador, reinserindo-o na fila com base
     nas políticas de prioridade e SLA.
@@ -151,14 +176,13 @@ def requeue_user_service(db, request: QueueRequeue, operator_id: int):
         attendance_type=request.attendance_type,
     )
 
-    db.commit()
-
-    AuditService.log_action(
+    audit_queue_requeued(
         db,
-        user_id=operator_id,
-        action=AuditAction.QUEUE_UPDATED,
-        details={"queue_item_id": queue_item.id, "user_id": user.id},
+        operator_id=operator_id,
+        item=queue_item,
+        attendance_type=request.attendance_type,
     )
+    db.commit()
 
     return queue_item
 
@@ -209,7 +233,7 @@ def demote_priority(db: Session, item: QueueItem, decrement: int = 1, operator_i
 
 
 def reinsert_at_position(db: Session, item: QueueItem, position: int, operator_id: int | None = None) -> QueueItem:
-    old_position = item.position
+    old_position = cast(int, item.position)
     max_position = get_next_position(db) - 1
     position = max(1, min(position, max_position))
 
@@ -231,7 +255,7 @@ def reinsert_at_position(db: Session, item: QueueItem, position: int, operator_i
             QueueItem.status.in_(active_statuses),
         ).update({QueueItem.position: QueueItem.position - 1}, synchronize_session="fetch")
 
-    item.position = position
+    cast(Any, item).position = position
 
     audit_queue_action(
         db,

@@ -46,6 +46,10 @@ class Audit(Base):
         return value.strip()
 
     def finalize_record(self):
+        self.hashed_record = self.compute_record_hash()
+        return self.hashed_record
+
+    def compute_record_hash(self) -> str:
         payload = {
             "timestamp": str(self.timestamp or ""),
             "action": str(self.action or ""),
@@ -57,5 +61,4 @@ class Audit(Base):
             "hashed_previous": str(self.hashed_previous or ""),
         }
         concatenated = "|".join(f"{k}:{v}" for k, v in sorted(payload.items()))
-        self.hashed_record = hashlib.sha256(concatenated.encode("utf-8")).hexdigest()
-        return self.hashed_record
+        return hashlib.sha256(concatenated.encode("utf-8")).hexdigest()

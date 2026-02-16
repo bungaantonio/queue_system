@@ -17,9 +17,8 @@ export const useAuth = () => {
   };
 
   const refresh = async () => {
-    // tenta refresh token se existir
     try {
-      await adminAuthProvider.checkError({ status: 401 });
+      await adminAuthProvider.refresh();
       setUser(sessionStore.getUser());
     } catch {
       setUser(null);
