@@ -9,10 +9,11 @@ import {
   minLength,
   type SaveHandler,
 } from "react-admin";
-import { Stack, Typography, Alert, Box } from "@mui/material";
+import { Alert, Box } from "@mui/material";
 import { BiometricInput } from "./BiometricInput";
 import { utentesGateway } from "../utentesGateway";
 import type { UtenteCreatePayload } from "../utentes.types";
+import { PageHeader } from "../../shared/components/PageHeader";
 
 interface UtentesCreateFormValues {
   name: string;
@@ -69,14 +70,11 @@ export const UtentesCreate = () => {
         defaultValues={{ attendance_type: "normal" }}
         onSubmit={onSubmit}
       >
-        <Stack spacing={1.25} sx={{ mb: 1 }}>
-          <Typography variant="h5" sx={{ fontWeight: 900 }}>
-            Novo Utente
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Registe identificação, biometria e prioridade de atendimento.
-          </Typography>
-        </Stack>
+        <PageHeader
+          title="Novo Utente"
+          description="Registe identificação, biometria e prioridade de atendimento."
+          mb={1}
+        />
 
         <Alert severity="info" sx={{ mb: 2 }}>
           A biometria é obrigatória para vincular o utente ao fluxo de fila.

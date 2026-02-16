@@ -28,6 +28,8 @@ import { StatCard } from "./components/StatCard";
 import { AtendimentoContext } from "../queue/components/AtendimentoProvider";
 import { useGetHeader } from "../auditor/hooks/useAuditSummary";
 import type { Operator } from "../operators/types";
+import { PageHeader } from "../shared/components/PageHeader";
+import { StatusChip } from "../shared/components/StatusChip";
 
 export const DashboardPage = () => {
   const atendimento = useContext(AtendimentoContext);
@@ -56,42 +58,41 @@ export const DashboardPage = () => {
       <Title title="Dashboard de Controle" />
 
       <Stack spacing={2.5}>
-        <Stack
-          direction={{ xs: "column", lg: "row" }}
-          justifyContent="space-between"
-          alignItems={{ xs: "flex-start", lg: "center" }}
-          gap={1.25}
-        >
-          <Box>
-            <Typography variant="h4">Centro de Comando</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Priorize ações por estado: fluxo, vigilância e integridade.
-            </Typography>
-          </Box>
-
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Chip
-              size="small"
-              icon={<UserCog size={12} />}
-              label={`${attendantsOnline} ATENDENTES ONLINE`}
-              sx={{
-                fontSize: "0.62rem",
-                bgcolor: (theme) => alpha(theme.palette.success.main, 0.12),
-                color: "success.dark",
-                border: "1px solid",
-                borderColor: (theme) => alpha(theme.palette.success.main, 0.28),
-              }}
-            />
-            <Button
-              component={Link}
-              to="/atendimento"
-              variant="contained"
-              endIcon={<ArrowRight size={16} />}
+        <PageHeader
+          title="Centro de Comando"
+          description="Priorize ações por estado: fluxo, vigilância e integridade."
+          actions={
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              alignItems={{ xs: "stretch", sm: "center" }}
+              sx={{ width: { xs: "100%", lg: "auto" } }}
             >
-              Abrir Atendimento
-            </Button>
-          </Stack>
-        </Stack>
+              <StatusChip
+                icon={<UserCog size={12} />}
+                label={`${attendantsOnline} ATENDENTES ONLINE`}
+                sx={{
+                  fontSize: "0.62rem",
+                  bgcolor: (theme) => alpha(theme.palette.success.main, 0.12),
+                  color: "success.dark",
+                  border: "1px solid",
+                  borderColor: (theme) =>
+                    alpha(theme.palette.success.main, 0.28),
+                }}
+              />
+              <Button
+                component={Link}
+                to="/atendimento"
+                variant="contained"
+                endIcon={<ArrowRight size={16} />}
+                sx={{ width: { xs: "100%", sm: "auto" } }}
+              >
+                Abrir Atendimento
+              </Button>
+            </Stack>
+          }
+          mb={0}
+        />
 
         {(called || current) && (
           <Paper
@@ -108,13 +109,17 @@ export const DashboardPage = () => {
               justifyContent="space-between"
               alignItems={{ xs: "flex-start", md: "center" }}
             >
-              <Stack direction="row" spacing={1} alignItems="center">
-                <BellRing size={16} color="#4f46e5" />
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1}
+                alignItems={{ xs: "flex-start", sm: "center" }}
+                sx={{ width: "100%" }}
+              >
+                <BellRing size={16} />
                 <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
                   CHAMADA EM CURSO
                 </Typography>
-                <Chip
-                  size="small"
+                <StatusChip
                   label={called ? "AGUARDANDO CONFIRMAÇÃO" : "EM ATENDIMENTO"}
                   sx={{
                     height: 20,
@@ -126,7 +131,11 @@ export const DashboardPage = () => {
                   }}
                 />
               </Stack>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ width: "100%" }}
+              >
                 {called?.name || current?.name}{" "}
                 <strong>{called?.position || current?.position}</strong>
               </Typography>
@@ -303,10 +312,11 @@ const PriorityRow = ({
         color={tone}
         label={detail}
         sx={{
-          maxWidth: "100%",
+          width: { xs: "100%", md: "auto" },
           "& .MuiChip-label": {
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+            whiteSpace: "normal",
+            lineHeight: 1.3,
+            py: 0.25,
             fontSize: "0.68rem",
           },
         }}
@@ -337,9 +347,10 @@ const RiskTag = ({
 
   return (
     <Stack
-      direction="row"
-      alignItems="center"
+      direction={{ xs: "column", sm: "row" }}
+      alignItems={{ xs: "flex-start", sm: "center" }}
       justifyContent="space-between"
+      spacing={0.75}
       sx={{
         p: 1,
         borderRadius: 2,
@@ -351,7 +362,14 @@ const RiskTag = ({
         <Icon size={16} />
         <Typography variant="body2">{label}</Typography>
       </Stack>
-      <Typography variant="caption" sx={{ color, fontWeight: 900 }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color,
+          fontWeight: 900,
+          alignSelf: { xs: "flex-start", sm: "auto" },
+        }}
+      >
         {value.toUpperCase()}
       </Typography>
     </Stack>

@@ -7,55 +7,41 @@ import {
   SearchInput,
   useListContext,
 } from "react-admin";
-import { Box, Typography, Stack, alpha, Card, Chip } from "@mui/material";
+import { Box, Stack, Card, Chip } from "@mui/material";
 import { UserSearch, UserRoundCheck } from "lucide-react";
 import type { Utente } from "../utentes.types";
+import { PageHeader } from "../../shared/components/PageHeader";
+import {
+  datagridBaseSx,
+  datagridHoverSx,
+  listCardSx,
+  listMainTransparentSx,
+} from "../../shared/styles/listStyles";
 
 export const UtentesList = () => (
   <Box>
-    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
-      <Box
-        sx={{
-          p: 1.25,
-          bgcolor: "primary.main",
-          borderRadius: 2.5,
-          color: "white",
-          display: "grid",
-          placeItems: "center",
-        }}
-      >
-        <UserSearch size={20} />
-      </Box>
-      <Box>
-        <Typography variant="h4">Utentes</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Base operacional para identificação e atendimento.
-        </Typography>
-      </Box>
-    </Stack>
+    <PageHeader
+      title="Utentes"
+      description="Base operacional para identificação e atendimento."
+      icon={<UserSearch size={20} />}
+    />
 
     <List
       filters={[<SearchInput key="q-filter" source="q" alwaysOn />]}
       perPage={25}
-      sx={{ "& .RaList-main": { boxShadow: "none", bgcolor: "transparent" } }}
+      sx={listMainTransparentSx}
     >
       <UtentesOverview />
 
-      <Card
-        sx={{
-          borderRadius: 4,
-          border: "1px solid",
-          borderColor: "divider",
-          overflow: "hidden",
-        }}
-      >
+      <Card sx={listCardSx}>
         <Datagrid
           rowClick="edit"
           bulkActionButtons={false}
           sx={{
-            "& .MuiTableCell-head": { bgcolor: "background.default" },
-            "& .MuiTableRow-root:hover": {
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.03),
+            ...datagridBaseSx,
+            ...datagridHoverSx,
+            "& .column-id": {
+              display: { xs: "none", sm: "table-cell" },
             },
           }}
         >

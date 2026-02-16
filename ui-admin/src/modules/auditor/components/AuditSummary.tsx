@@ -7,6 +7,7 @@ import {
   Stack,
   alpha,
   LinearProgress,
+  useTheme,
 } from "@mui/material";
 import {
   Database,
@@ -78,6 +79,7 @@ export const AuditSummary = ({
 }: {
   summary: AuditChainSummary | null;
 }) => {
+  const theme = useTheme();
   if (!summary) return null;
 
   const integrityPct =
@@ -93,7 +95,7 @@ export const AuditSummary = ({
             title="Total Logs"
             value={summary.total_records}
             icon={Database}
-            color="#4f46e5"
+            color={theme.palette.primary.main}
             helper="Base analisada"
           />
         </Grid>
@@ -102,7 +104,7 @@ export const AuditSummary = ({
             title="Válidos"
             value={summary.valid_records}
             icon={CheckCircle2}
-            color="#10b981"
+            color={theme.palette.success.main}
             helper="Sem inconsistência"
           />
         </Grid>
@@ -111,7 +113,7 @@ export const AuditSummary = ({
             title="Inválidos"
             value={summary.invalid_records}
             icon={AlertTriangle}
-            color="#e11d48"
+            color={theme.palette.error.main}
             helper="Exigem revisão"
           />
         </Grid>
@@ -120,7 +122,11 @@ export const AuditSummary = ({
             title="Integridade"
             value={`${integrityPct}%`}
             icon={ShieldCheck}
-            color={summary.all_valid ? "#10b981" : "#e11d48"}
+            color={
+              summary.all_valid
+                ? theme.palette.success.main
+                : theme.palette.error.main
+            }
             helper={
               summary.all_valid ? "Cadeia consistente" : "Risco detectado"
             }
@@ -143,9 +149,10 @@ export const AuditSummary = ({
       >
         <Stack spacing={1}>
           <Stack
-            direction="row"
+            direction={{ xs: "column", sm: "row" }}
             justifyContent="space-between"
-            alignItems="center"
+            alignItems={{ xs: "flex-start", sm: "center" }}
+            spacing={0.75}
           >
             <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
               SAÚDE DA CADEIA DE AUDITORIA

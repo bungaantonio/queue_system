@@ -7,20 +7,18 @@ import {
   Title,
   FunctionField,
 } from "react-admin";
-import {
-  Box,
-  Card,
-  Typography,
-  Stack,
-  Chip,
-  Skeleton,
-  Alert,
-  alpha,
-} from "@mui/material";
+import { Box, Card, Skeleton, Alert } from "@mui/material";
 import { AuditSummary } from "./AuditSummary";
 import { AuditIntegrityBadge } from "./AuditIntegrityBadge";
 import { useGetHeader } from "../hooks/useAuditSummary";
 import type { AuditVerificationDetail } from "../types";
+import { PageHeader } from "../../shared/components/PageHeader";
+import { StatusChip } from "../../shared/components/StatusChip";
+import {
+  datagridBaseSx,
+  listCardSx,
+  listMainTransparentSx,
+} from "../../shared/styles/listStyles";
 
 export const AuditList = () => {
   const { summary, loading, error } = useGetHeader();
@@ -29,14 +27,10 @@ export const AuditList = () => {
     <Box>
       <Title title="Auditoria e Histórico" />
 
-      <Stack spacing={1.5} sx={{ mb: 2 }}>
-        <Typography variant="h5" sx={{ fontWeight: 900 }}>
-          Integridade Operacional
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Priorize eventos inválidos e confirme concatenação criptográfica.
-        </Typography>
-      </Stack>
+      <PageHeader
+        title="Integridade Operacional"
+        description="Priorize eventos inválidos e confirme concatenação criptográfica."
+      />
 
       {loading ? (
         <Skeleton variant="rounded" height={152} sx={{ mb: 2.5 }} />
@@ -55,26 +49,22 @@ export const AuditList = () => {
         </Alert>
       ) : null}
 
-      <List
-        sx={{ "& .RaList-main": { boxShadow: "none", bgcolor: "transparent" } }}
-      >
-        <Card
-          sx={{
-            borderRadius: 5,
-            border: "1px solid",
-            borderColor: "divider",
-            overflow: "hidden",
-          }}
-        >
+      <List sx={listMainTransparentSx}>
+        <Card sx={{ ...listCardSx, borderRadius: 5 }}>
           <Datagrid
             rowClick="show"
             bulkActionButtons={false}
             rowSx={(record: AuditVerificationDetail) => ({
-              bgcolor: record.valid ? "transparent" : alpha("#e11d48", 0.04),
+              bgcolor: record.valid
+                ? "transparent"
+                : "rgba(var(--mui-palette-error-mainChannel) / 0.04)",
             })}
             sx={{
-              "& .MuiTableCell-head": { bgcolor: "background.default" },
+              ...datagridBaseSx,
               "& .MuiTableCell-root": { py: 1.15 },
+              "& .column-operator_id, & .column-user_id": {
+                display: { xs: "none", md: "table-cell" },
+              },
             }}
           >
             <TextField
@@ -90,19 +80,10 @@ export const AuditList = () => {
             <FunctionField
               label="Evento"
               render={(record: AuditVerificationDetail) => (
-                <Chip
-                  size="small"
+                <StatusChip
                   label={String(record.action || "N/A").toUpperCase()}
                   color={record.valid ? "primary" : "error"}
                   variant={record.valid ? "outlined" : "filled"}
-                  sx={{
-                    height: 22,
-                    "& .MuiChip-label": {
-                      px: 1,
-                      fontSize: "0.62rem",
-                      fontWeight: 900,
-                    },
-                  }}
                 />
               )}
             />

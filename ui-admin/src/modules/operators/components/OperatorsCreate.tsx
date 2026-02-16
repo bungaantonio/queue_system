@@ -6,7 +6,8 @@ import {
   required,
   minLength,
 } from "react-admin";
-import { Box, Typography, Stack, Alert } from "@mui/material";
+import { Box, Alert } from "@mui/material";
+import { PageHeader } from "../../shared/components/PageHeader";
 
 const roleChoices = [
   { id: "admin", name: "Administrador" },
@@ -18,14 +19,11 @@ const roleChoices = [
 export const OperatorsCreate = () => (
   <Create redirect="list">
     <SimpleForm defaultValues={{ role: "attendant" }}>
-      <Stack spacing={1.25} sx={{ mb: 1 }}>
-        <Typography variant="h5" sx={{ fontWeight: 900 }}>
-          Novo Operador
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Crie acesso apenas para perfis humanos. Conta de sistema é reservada.
-        </Typography>
-      </Stack>
+      <PageHeader
+        title="Novo Operador"
+        description="Crie acesso apenas para perfis humanos. Conta de sistema é reservada."
+        mb={1}
+      />
 
       <Alert severity="info" sx={{ mb: 2 }}>
         Após criar o operador, valide o papel correto antes do primeiro login.

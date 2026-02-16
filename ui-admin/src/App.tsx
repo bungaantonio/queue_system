@@ -1,38 +1,38 @@
 // src/app/App.tsx
 import { Admin, Resource, CustomRoutes } from "react-admin";
 import { Route } from "react-router-dom";
+
 import { adminDataProvider } from "./application/adminDataProvider";
 import { adminAuthProvider } from "./application/adminAuthProvider";
+
+import { DashboardPage } from "./modules/dashboard/DashboardPage.tsx";
 
 import { OperatorsList } from "./modules/operators/components/OperatorsList";
 import { OperatorsCreate } from "./modules/operators/components/OperatorsCreate";
 import { OperatorsEdit } from "./modules/operators/components/OperatorsEdit";
 
+import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvider";
 import { AtendimentoPanel } from "./modules/queue/components/AtendimentoPanel.tsx";
-
-import { DashboardPage } from "./modules/dashboard/DashboardPage.tsx";
 
 import { UtentesCreate } from "./modules/users/components/UtentesCreate";
 import { UtentesList } from "./modules/users/components/UtentesList";
 import { UtentesEdit } from "./modules/users/components/UtentesEdit";
 
+import { AuditList } from "./modules/auditor/components/AuditList";
+import { AuditShow } from "./modules/auditor/components/AuditShow";
+
 import { SessionExpiredPage } from "./modules/shared/components/SessionExpiredPage";
 import { NotAuthorizedPage } from "./modules/shared/components/NotAuthorizedPage";
-
-import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvider";
 
 import { withRole } from "./modules/shared/utils/withRole";
 
 import { theme } from "./ui/theme";
 import { MyLayout } from "./ui/layout/MyLayout";
 
-// Ícones de navegação (estilo técnico unificado)
 import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import ManageAccountsRoundedIcon from "@mui/icons-material/ManageAccountsRounded";
 import RecentActorsRoundedIcon from "@mui/icons-material/RecentActorsRounded";
 import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
-import { AuditList } from "./modules/auditor/components/AuditList";
-import { AuditShow } from "./modules/auditor/components/AuditShow";
 
 export const App = () => (
   <AtendimentoProvider>

@@ -15,6 +15,7 @@ import { Play, CheckCircle2, UserX } from "lucide-react";
 import { AtendimentoContext } from "./AtendimentoProvider";
 import { StatusHero } from "./StatusHero";
 import { QueueSidebar } from "./QueueSidebar";
+import { StatusChip } from "../../shared/components/StatusChip";
 
 export const AtendimentoPanel = () => {
   const context = useContext(AtendimentoContext);
@@ -47,7 +48,7 @@ export const AtendimentoPanel = () => {
         : "stable";
 
   return (
-    <Box sx={{ minHeight: { xs: 480, md: 540 } }}>
+    <Box sx={{ minHeight: { md: 540 } }}>
       <Title title="Painel de Atendimento" />
 
       <Grid container spacing={{ xs: 1.5, md: 2 }}>
@@ -55,7 +56,7 @@ export const AtendimentoPanel = () => {
           <Paper
             elevation={0}
             sx={{
-              minHeight: { xs: 360, md: 440 },
+              minHeight: { xs: 320, md: 440 },
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
@@ -98,15 +99,17 @@ export const AtendimentoPanel = () => {
               >
                 {mode}
               </Typography>
-              <Stack direction="row" spacing={0.75}>
-                <Chip
-                  size="small"
+              <Stack
+                direction="row"
+                spacing={0.75}
+                sx={{ flexWrap: "wrap", rowGap: 0.75 }}
+              >
+                <StatusChip
                   label={`${queue.length} em espera`}
                   color={queue.length > 5 ? "warning" : "success"}
                   sx={{ height: 22, fontWeight: 800 }}
                 />
-                <Chip
-                  size="small"
+                <StatusChip
                   label={
                     panelTone === "flow"
                       ? "Fluxo ativo"
@@ -146,9 +149,10 @@ export const AtendimentoPanel = () => {
             <StatusHero user={activeUser} isPending={isPending} />
 
             <Stack
-              direction="row"
+              direction={{ xs: "column", sm: "row" }}
               spacing={2}
               justifyContent="center"
+              alignItems={{ xs: "stretch", sm: "center" }}
               sx={{ mt: 2, flexWrap: "wrap" }}
             >
               {!activeUser ? (
@@ -158,7 +162,12 @@ export const AtendimentoPanel = () => {
                   onClick={callNext}
                   disabled={queue.length === 0}
                   startIcon={<Play size={20} fill="currentColor" />}
-                  sx={{ px: { xs: 4, md: 6 }, py: 1.25, borderRadius: 3 }}
+                  sx={{
+                    px: { xs: 3, md: 6 },
+                    py: 1.25,
+                    borderRadius: 3,
+                    width: { xs: "100%", sm: "auto" },
+                  }}
                 >
                   Chamar Próximo Utente
                 </Button>
@@ -172,8 +181,12 @@ export const AtendimentoPanel = () => {
                       sx={{
                         bgcolor: "white",
                         color: "primary.main",
-                        "&:hover": { bgcolor: alpha("#fff", 0.9) },
+                        "&:hover": {
+                          bgcolor: (theme) =>
+                            alpha(theme.palette.common.white, 0.9),
+                        },
                         px: 3,
+                        width: { xs: "100%", sm: "auto" },
                       }}
                     >
                       Confirmar Presença
@@ -184,7 +197,7 @@ export const AtendimentoPanel = () => {
                       color="success"
                       onClick={finish}
                       startIcon={<CheckCircle2 size={20} />}
-                      sx={{ px: 3 }}
+                      sx={{ px: 3, width: { xs: "100%", sm: "auto" } }}
                     >
                       Finalizar Atendimento
                     </Button>
@@ -198,8 +211,9 @@ export const AtendimentoPanel = () => {
                       px: 3,
                       color: isPending ? "white" : "error.main",
                       borderColor: isPending
-                        ? alpha("#fff", 0.3)
+                        ? (theme) => alpha(theme.palette.common.white, 0.3)
                         : "error.main",
+                      width: { xs: "100%", sm: "auto" },
                     }}
                   >
                     Marcar Ausência
