@@ -8,7 +8,7 @@ import { OperatorsList } from "./modules/operators/components/OperatorsList";
 import { OperatorsCreate } from "./modules/operators/components/OperatorsCreate";
 import { OperatorsEdit } from "./modules/operators/components/OperatorsEdit";
 
-import { CounterConsole } from "./modules/queue/components/CounterConsole.tsx";
+import { AtendimentoPanel } from "./modules/queue/components/AtendimentoPanel.tsx";
 
 import { DashboardPage } from "./modules/dashboard/DashboardPage.tsx";
 
@@ -26,10 +26,11 @@ import { withRole } from "./modules/shared/utils/withRole";
 import { theme } from "./ui/theme";
 import { MyLayout } from "./ui/layout/MyLayout";
 
-// Ícones realistas
-import QueueIcon from "@mui/icons-material/Queue";
-import BadgeIcon from "@mui/icons-material/Badge";
-import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+// Ícones de navegação (estilo técnico unificado)
+import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
+import ManageAccountsRoundedIcon from "@mui/icons-material/ManageAccountsRounded";
+import RecentActorsRoundedIcon from "@mui/icons-material/RecentActorsRounded";
+import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
 import { AuditList } from "./modules/auditor/components/AuditList";
 import { AuditShow } from "./modules/auditor/components/AuditShow";
 
@@ -46,9 +47,9 @@ export const App = () => (
       {/* Painel de Atendimento */}
       <Resource
         name="atendimento"
-        list={CounterConsole}
-        icon={QueueIcon}
-        options={{ label: "Atendimento" }}
+        list={AtendimentoPanel}
+        icon={SupportAgentRoundedIcon}
+        options={{ label: "Painel de Atendimento" }}
       />
 
       {/* Operadores */}
@@ -57,7 +58,7 @@ export const App = () => (
         list={withRole(OperatorsList, ["admin"])}
         edit={withRole(OperatorsEdit, ["admin"])}
         create={withRole(OperatorsCreate, ["admin"])}
-        icon={BadgeIcon}
+        icon={ManageAccountsRoundedIcon}
         options={{ label: "Operadores" }}
       />
 
@@ -67,7 +68,7 @@ export const App = () => (
         list={withRole(UtentesList, ["admin", "attendant"])}
         edit={withRole(UtentesEdit, ["admin", "attendant"])}
         create={withRole(UtentesCreate, ["admin", "attendant"])}
-        icon={PersonSearchIcon}
+        icon={RecentActorsRoundedIcon}
         options={{ label: "Utentes" }}
       />
 
@@ -76,6 +77,7 @@ export const App = () => (
         name="audits"
         list={withRole(AuditList, ["auditor"])}
         show={withRole(AuditShow, ["auditor"])}
+        icon={FactCheckRoundedIcon}
         options={{ label: "Auditoria" }}
       />
       <CustomRoutes>

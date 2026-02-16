@@ -9,7 +9,7 @@ export interface AuditVerificationDetail {
   previous_hash_matches: boolean;
   valid: boolean;
   timestamp: string; // ISO 8601
-  details?: Record<string, any> | null;
+  details?: Record<string, unknown> | null;
 }
 
 export interface AuditChainSummary {

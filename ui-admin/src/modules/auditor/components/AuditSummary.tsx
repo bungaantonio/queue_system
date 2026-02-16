@@ -6,13 +6,13 @@ import {
   Grid,
   Stack,
   alpha,
-  useTheme,
+  LinearProgress,
 } from "@mui/material";
 import {
-  Fingerprint,
   Database,
   CheckCircle2,
   AlertTriangle,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
 import type { AuditChainSummary } from "../types";
@@ -22,21 +22,28 @@ interface AuditStatCardProps {
   value: string | number;
   icon: LucideIcon;
   color: string;
+  helper?: string;
 }
 
-const StatCard = ({ title, value, icon: Icon, color }: AuditStatCardProps) => (
+const StatCard = ({
+  title,
+  value,
+  icon: Icon,
+  color,
+  helper,
+}: AuditStatCardProps) => (
   <Card
     elevation={0}
     sx={{
       p: 1.5,
-      bgcolor: alpha(color, 0.03),
-      borderColor: alpha(color, 0.1),
       borderRadius: 4,
+      bgcolor: alpha(color, 0.04),
+      borderColor: alpha(color, 0.12),
     }}
   >
-    <Stack direction="row" spacing={2} alignItems="center">
-      <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(color, 0.1), color }}>
-        <Icon size={20} />
+    <Stack direction="row" spacing={1.5} alignItems="center">
+      <Box sx={{ p: 0.9, borderRadius: 2, bgcolor: alpha(color, 0.12), color }}>
+        <Icon size={18} />
       </Box>
       <Box>
         <Typography
@@ -45,7 +52,7 @@ const StatCard = ({ title, value, icon: Icon, color }: AuditStatCardProps) => (
             fontWeight: 800,
             color: "text.secondary",
             display: "block",
-            mb: -0.5,
+            lineHeight: 1.1,
           }}
         >
           {title.toUpperCase()}
@@ -56,6 +63,11 @@ const StatCard = ({ title, value, icon: Icon, color }: AuditStatCardProps) => (
         >
           {value}
         </Typography>
+        {helper ? (
+          <Typography variant="caption" color="text.secondary">
+            {helper}
+          </Typography>
+        ) : null}
       </Box>
     </Stack>
   </Card>
@@ -66,58 +78,96 @@ export const AuditSummary = ({
 }: {
   summary: AuditChainSummary | null;
 }) => {
-  const theme = useTheme();
   if (!summary) return null;
 
+  const integrityPct =
+    summary.total_records > 0
+      ? Math.round((summary.valid_records / summary.total_records) * 100)
+      : 100;
+
   return (
-    <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
-      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <StatCard
-          title="Total Logs"
-          value={summary.total_records}
-          icon={Database}
-          color={theme.palette.primary.main}
-        />
+    <Stack spacing={1.5} sx={{ mb: 2.5 }}>
+      <Grid container spacing={1.5}>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <StatCard
+            title="Total Logs"
+            value={summary.total_records}
+            icon={Database}
+            color="#4f46e5"
+            helper="Base analisada"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <StatCard
+            title="Válidos"
+            value={summary.valid_records}
+            icon={CheckCircle2}
+            color="#10b981"
+            helper="Sem inconsistência"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <StatCard
+            title="Inválidos"
+            value={summary.invalid_records}
+            icon={AlertTriangle}
+            color="#e11d48"
+            helper="Exigem revisão"
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <StatCard
+            title="Integridade"
+            value={`${integrityPct}%`}
+            icon={ShieldCheck}
+            color={summary.all_valid ? "#10b981" : "#e11d48"}
+            helper={
+              summary.all_valid ? "Cadeia consistente" : "Risco detectado"
+            }
+          />
+        </Grid>
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <StatCard
-          title="Válidos"
-          value={summary.valid_records}
-          icon={CheckCircle2}
-          color={theme.palette.success.main}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <StatCard
-          title="Inválidos"
-          value={summary.invalid_records}
-          icon={AlertTriangle}
-          color={theme.palette.error.main}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <Card
-          elevation={0}
-          sx={{
-            p: 2,
-            borderRadius: 4,
-            bgcolor: summary.all_valid
-              ? (theme) => alpha(theme.palette.success.main, 0.9)
-              : (theme) => alpha(theme.palette.error.main, 0.9),
-            color: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Stack alignItems="center">
-            <Fingerprint size={24} />
-            <Typography variant="caption" sx={{ fontWeight: 900, mt: 0.5 }}>
-              {summary.all_valid ? "CADEIA VERIFICADA" : "CADEIA CORROMPIDA"}
+
+      <Card
+        elevation={0}
+        sx={{
+          p: 1.5,
+          borderRadius: 4,
+          borderColor: summary.all_valid
+            ? (theme) => alpha(theme.palette.success.main, 0.25)
+            : (theme) => alpha(theme.palette.error.main, 0.25),
+          bgcolor: summary.all_valid
+            ? (theme) => alpha(theme.palette.success.main, 0.06)
+            : (theme) => alpha(theme.palette.error.main, 0.06),
+        }}
+      >
+        <Stack spacing={1}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+              SAÚDE DA CADEIA DE AUDITORIA
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 900,
+                color: summary.all_valid ? "success.dark" : "error.dark",
+              }}
+            >
+              {summary.all_valid ? "ESTÁVEL" : "ATENÇÃO IMEDIATA"}
             </Typography>
           </Stack>
-        </Card>
-      </Grid>
-    </Grid>
+          <LinearProgress
+            variant="determinate"
+            value={integrityPct}
+            color={summary.all_valid ? "success" : "error"}
+            sx={{ height: 8, borderRadius: 99 }}
+          />
+        </Stack>
+      </Card>
+    </Stack>
   );
 };

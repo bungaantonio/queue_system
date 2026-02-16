@@ -4,12 +4,14 @@ import { useRecordContext } from "react-admin";
 
 export const AuditIntegrityBadge = ({
   source = "valid",
+  value,
 }: {
   source?: string;
+  value?: boolean;
 }) => {
   const theme = useTheme();
   const record = useRecordContext();
-  const valid = Boolean(record?.[source]);
+  const valid = value ?? Boolean(record?.[source]);
   const color = valid ? theme.palette.success.main : theme.palette.error.main;
 
   return (

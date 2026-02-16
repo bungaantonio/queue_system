@@ -6,7 +6,7 @@ interface StatCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  tone: "flow" | "ready" | "watch" | "stable";
+  tone: "flow" | "ready" | "watch" | "stable" | "rigor";
   trend?: string;
 }
 
@@ -23,9 +23,11 @@ export const StatCard = ({
       ? theme.palette.success.main
       : tone === "watch"
         ? theme.palette.warning.main
-        : tone === "stable"
-          ? theme.palette.text.secondary
-          : theme.palette.primary.main;
+        : tone === "rigor"
+          ? theme.palette.error.main
+          : tone === "stable"
+            ? theme.palette.text.secondary
+            : theme.palette.primary.main;
 
   return (
     <Card

@@ -12,16 +12,28 @@ export const MyLayout = (props: LayoutProps) => (
     appBar={MyAppBar}
     menu={MyMenu}
     sx={{
+      "& .RaLayout-appFrame": {
+        backgroundColor: "background.default",
+      },
+      "& .RaSidebar-drawerPaper": {
+        mt: "56px",
+        height: "calc(100dvh - 56px)",
+        borderRight: "1px solid",
+        borderColor: "divider",
+        backgroundColor: "background.paper",
+      },
       "& .RaLayout-contentWithSidebar": {
-        minHeight: "calc(100dvh - 62px)",
+        minHeight: "calc(100dvh - 56px)",
       },
       "& .RaLayout-content": {
         width: "100%",
-        maxWidth: "1460px",
+        maxWidth: "1480px",
         marginInline: "auto",
-        paddingInline: { xs: 12, md: 16, xl: 24 },
-        paddingBlock: { xs: 12, md: 16 },
-        backgroundColor: "background.default",
+        marginTop: "0 !important",
+        paddingInline: { xs: 10, md: 14, xl: 20 },
+        paddingTop: { xs: 4, md: 6 },
+        paddingBottom: { xs: 12, md: 16 },
+        backgroundColor: "transparent",
         boxSizing: "border-box",
       },
     }}
