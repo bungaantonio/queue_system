@@ -1,29 +1,68 @@
 // src/modules/atendimento/atendimentoGateway.ts
-
 import { httpClient } from "../../core/http/apiClient";
-import type { QueueUser } from "./atendimento.types";
-
-const BASE = "/queue";
+import { normalizeQueueSnapshot } from "./atendimento.types";
+import type { QueueSnapshot } from "./atendimento.types";
 
 export const atendimentoGateway = {
-  listWaitingAndCalled: async (): Promise<{
-    queue: QueueUser[];
-    called: QueueUser[];
-    current: QueueUser | null;
-  }> => httpClient.get(`${BASE}/waiting-and-called`),
+  listWaitingAndCalled: async (): Promise<QueueSnapshot> => {
+    const payload = await httpClient.get<unknown>("/queue/waiting-and-called");
+    const snapshot = normalizeQueueSnapshot(payload);
+    if (!snapshot) {
+      throw new Error("Resposta inválida de /queue/waiting-and-called");
+    }
+    return snapshot;
+  },
 
-  callNext: async (): Promise<void> => httpClient.post(`${BASE}/call-next`),
+  callNext: async (): Promise<QueueSnapshot> => {
+    const payload = await httpClient.post<unknown>("/queue/call-next");
+    const snapshot = normalizeQueueSnapshot(payload);
+    if (!snapshot) {
+      throw new Error("Resposta inválida de /queue/call-next");
+    }
+    return snapshot;
+  },
 
-  finish: async (): Promise<void> => httpClient.post(`${BASE}/finish`),
+  finish: async (): Promise<QueueSnapshot> => {
+    const payload = await httpClient.post<unknown>("/queue/finish");
+    const snapshot = normalizeQueueSnapshot(payload);
+    if (!snapshot) {
+      throw new Error("Resposta inválida de /queue/finish");
+    }
+    return snapshot;
+  },
 
-  skip: async (): Promise<void> => httpClient.post(`${BASE}/skip`),
+  skip: async (): Promise<QueueSnapshot> => {
+    const payload = await httpClient.post<unknown>("/queue/skip");
+    const snapshot = normalizeQueueSnapshot(payload);
+    if (!snapshot) {
+      throw new Error("Resposta inválida de /queue/skip");
+    }
+    return snapshot;
+  },
 
-  cancel: async (item_id: number): Promise<void> =>
-    httpClient.post(`${BASE}/cancel`, { item_id }),
+  cancel: async (item_id: number): Promise<QueueSnapshot> => {
+    const payload = await httpClient.post<unknown>("/queue/cancel", {
+      item_id,
+    });
+    const snapshot = normalizeQueueSnapshot(payload);
+    if (!snapshot) {
+      throw new Error("Resposta inválida de /queue/cancel");
+    }
+    return snapshot;
+  },
 
-  requeue: async (user_id: number, attendance_type: string): Promise<void> =>
-    httpClient.post(`${BASE}/requeue`, {
+  requeue: async (
+    user_id: number,
+    attendance_type: string,
+  ): Promise<QueueSnapshot> => {
+    const payload = await httpClient.post<unknown>("/queue/requeue", {
       user_id,
       attendance_type,
-    }),
+    });
+    const snapshot = normalizeQueueSnapshot(payload);
+    if (!snapshot) {
+      throw new Error("Resposta inválida de /queue/requeue");
+    }
+    return snapshot;
+  },
 };

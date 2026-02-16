@@ -1,26 +1,25 @@
-# Imagem base leve com Python 3.12
+# Base Python 3.12 slim
 FROM python:3.12-slim
 
-# Evita prompts durante instalação de pacotes
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Dependências do sistema necessárias
-RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
+# Dependências do sistema
+RUN apt-get update \
+    && apt-get install -y build-essential libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Diretório de trabalho
 WORKDIR /app
 
-# Copia todos os arquivos .txt das dependências
+# Copia apenas os arquivos de requisitos para aproveitar cache
 COPY requirements/*.txt ./
 
-# Instala dependências de desenvolvimento
 RUN pip install --no-cache-dir -r dev.txt
 
-# Copia o código da aplicação
+# Copia código da app
 COPY ./app ./app
 
-# Expõe porta padrão FastAPI
+# Porta padrão dev
 EXPOSE 8000
 
-# Comando padrão para rodar a app
+# Comando dev
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

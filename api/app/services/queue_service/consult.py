@@ -1,7 +1,6 @@
-from typing import Optional, List
+from typing import Optional
 from app.crud.credential_crud import get_by_identifier
 from app.models.enums import AttendanceType
-from app.utils.credential_utils import hash_identifier
 from sqlalchemy.orm import Session
 
 from app.crud.queue import (
@@ -14,7 +13,7 @@ from app.crud.queue import (
 )
 from app.models.queue_item import QueueItem
 from app.core.exceptions import AppException
-from app.helpers.audit_helpers import audit_log, build_audit_details
+from app.helpers.audit_helpers import audit_quick_entry, audit_queue_token_exposed
 
 
 # 🔹 Consulta simples: cada função tem 1 responsabilidade
@@ -28,7 +27,7 @@ def get_called_user(db: Session) -> Optional[QueueItem]:
     return get_pending_verification_item(db)
 
 
-def list_waiting_users(db: Session) -> list[type[QueueItem]]:
+def list_waiting_users(db: Session) -> list[QueueItem]:
     """Lista todos os utilizadores em espera (WAITING)."""
     return get_all_waiting(db)
 
@@ -50,7 +49,7 @@ def quick_entry_user(
     db: Session,
     identifier: str,
     operator_id: int,
-    attendance_type: AttendanceType.NORMAL,
+    attendance_type: AttendanceType = AttendanceType.NORMAL,
 ) -> QueueItem:
 
     credential = get_by_identifier(db, identifier)
@@ -70,17 +69,11 @@ def quick_entry_user(
         attendance_type=attendance_type,
     )
 
-    audit_log(
-        db,
-        action="quick_entry",
+    audit_quick_entry(
+        db=db,
         operator_id=operator_id,
-        user_id=user.id,
-        queue_item_id=queue_item.id,
-        details=build_audit_details(
-            action="quick_entry",
-            msg="Usuário entrou rapidamente na fila",
-            extra={"attendance_type": attendance_type},
-        ),
+        item=queue_item,
+        attendance_type=attendance_type,
     )
 
     return queue_item
@@ -95,19 +88,9 @@ def get_next_called_with_tokens(
     if not item:
         raise AppException("queue.no_called_user")
 
-    audit_log(
-        db,
-        action="get_next_called_with_tokens",
+    audit_queue_token_exposed(
+        db=db,
         operator_id=operator_id,
-        user_id=item.user_id,
-        queue_item_id=item.id,
-        details=build_audit_details(
-            action="get_next_called_with_tokens",
-            msg="get_next_called_with_tokens",
-            extra={
-                "credential": item.credential_verified,
-                "call_token": item.call_token,
-            },
-        ),
+        item=item,
     )
     return item

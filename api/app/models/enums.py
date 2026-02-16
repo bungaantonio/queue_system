@@ -54,6 +54,7 @@ class AuditAction(str, Enum):
     # Fila / Atendimento
     QUEUE_CREATED = "Fila criada"
     QUEUE_UPDATED = "Fila atualizada"
+    QUEUE_TOKEN_VIEWED = "Token de chamada consultado"
     QUEUE_VERIFIED = "Fila verificada"
     QUEUE_PROCESSED = "Fila processada"
     USER_CALLED = "Usuário chamado"
@@ -75,6 +76,7 @@ class AuditAction(str, Enum):
     # Operador
     OPERATOR_CREATED = "Operador criado"
     OPERATOR_UPDATED = "Operador atualizado"
+    OPERATOR_ACTIVATED = "Operador ativado"
     OPERATOR_DEACTIVATED = "Operador desativado"
 
     # Auditoria / Sistema

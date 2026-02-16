@@ -1,54 +1,46 @@
-// eslint.config.mjs
-import { defineConfig } from "eslint/config";
+import js from "@eslint/js";
 import globals from "globals";
+import reactPlugin from "eslint-plugin-react";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
+import prettierPlugin from "eslint-plugin-prettier";
+import eslintConfigPrettier from "eslint-config-prettier";
+import tseslint from "typescript-eslint";
 
-export default defineConfig({
-  ignores: ["**/node_modules", "**/dist"],
-  languageOptions: {
-    parserOptions: {
+export default tseslint.config(
+  {
+    ignores: ["**/node_modules/**", "**/dist/**"],
+  },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
-      ecmaFeatures: {
-        jsx: true,
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
       },
     },
-    globals: {
-      ...globals.browser,
-      ...globals.node,
+    plugins: {
+      react: reactPlugin,
+      "react-hooks": reactHooksPlugin,
+      prettier: prettierPlugin,
+    },
+    settings: {
+      react: { version: "detect" },
+    },
+    rules: {
+      ...reactPlugin.configs.recommended.rules,
+      ...reactHooksPlugin.configs.recommended.rules,
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
+      "react/react-in-jsx-scope": "off",
+      "prettier/prettier": "error",
     },
   },
-  plugins: {
-    "@typescript-eslint": require("@typescript-eslint/eslint-plugin"),
-    react: require("eslint-plugin-react"),
-    "react-hooks": require("eslint-plugin-react-hooks"),
-    prettier: require("eslint-plugin-prettier"),
-  },
-  rules: {
-    // TypeScript
-    "@typescript-eslint/no-unused-vars": "warn",
-    "@typescript-eslint/no-explicit-any": "off",
-
-    // React
-    "react/react-in-jsx-scope": "off",
-
-    // Prettier
-    "prettier/prettier": "error",
-  },
-  settings: {
-    react: { version: "detect" },
-  },
-  overrides: [
-    {
-      files: ["**/*.ts", "**/*.tsx"],
-      extends: ["plugin:@typescript-eslint/recommended"],
-    },
-    {
-      files: ["**/*.js", "**/*.jsx"],
-      extends: ["eslint:recommended", "plugin:react/recommended"],
-    },
-    {
-      files: ["**/*.{ts,tsx,js,jsx}"],
-      extends: ["plugin:prettier/recommended"],
-    },
-  ],
-});
+  eslintConfigPrettier,
+);
