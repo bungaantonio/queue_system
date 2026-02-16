@@ -14,6 +14,12 @@ export const operatorsGateway = {
   update: async (id: number, data: Partial<Operator>): Promise<Operator> =>
     httpClient.put<Operator>(`/operators/${id}`, data),
 
+  deactivate: async (id: number): Promise<Operator> =>
+    httpClient.patch<Operator>(`/operators/${id}/deactivate`, {}),
+
+  activate: async (id: number): Promise<Operator> =>
+    httpClient.patch<Operator>(`/operators/${id}/activate`, {}),
+
   delete: async (id: number): Promise<void> =>
-    httpClient.delete(`/operators/${id}`),
+    operatorsGateway.deactivate(id).then(() => undefined),
 };

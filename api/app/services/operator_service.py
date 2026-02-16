@@ -4,6 +4,7 @@ from app.helpers.password import get_password_hash
 from app.helpers.audit_helpers import (
     audit_operator_created,
     audit_operator_updated,
+    audit_operator_activated,
     audit_operator_deactivated,
 )
 from app.crud import operator_crud
@@ -82,11 +83,37 @@ class OperatorService:
         db_op = operator_crud.get_operator_by_id(db, operator_id)
         if not db_op:
             return None
+        if not cast(bool, db_op.active):
+            return OperatorResponse.model_validate(db_op)
 
         db_op.active = False
         operator_crud.update_operator_record(db, db_op)
 
         audit_operator_deactivated(
+            db=db,
+            actor_operator_id=acting_operator_id,
+            target_operator_id=cast(int, db_op.id),
+            username=cast(str, db_op.username),
+        )
+
+        db.commit()
+        db.refresh(db_op)
+        return OperatorResponse.model_validate(db_op)
+
+    @staticmethod
+    def activate_operator(
+        db: Session, operator_id: int, acting_operator_id: int
+    ) -> Optional[OperatorResponse]:
+        db_op = operator_crud.get_operator_by_id(db, operator_id)
+        if not db_op:
+            return None
+        if cast(bool, db_op.active):
+            return OperatorResponse.model_validate(db_op)
+
+        db_op.active = True
+        operator_crud.update_operator_record(db, db_op)
+
+        audit_operator_activated(
             db=db,
             actor_operator_id=acting_operator_id,
             target_operator_id=cast(int, db_op.id),

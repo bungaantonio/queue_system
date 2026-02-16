@@ -16,6 +16,32 @@ from app.services.operator_service import OperatorService
 router = APIRouter()
 
 
+def _deactivate_operator_or_404(
+        db: Session,
+        operator_id: int,
+        acting_operator_id: int,
+) -> OperatorResponse:
+    op = OperatorService.deactivate_operator(
+        db, operator_id, acting_operator_id=acting_operator_id
+    )
+    if not op:
+        raise AppException("operator.not_found")
+    return op
+
+
+def _activate_operator_or_404(
+        db: Session,
+        operator_id: int,
+        acting_operator_id: int,
+) -> OperatorResponse:
+    op = OperatorService.activate_operator(
+        db, operator_id, acting_operator_id=acting_operator_id
+    )
+    if not op:
+        raise AppException("operator.not_found")
+    return op
+
+
 @router.post("/", response_model=OperatorResponse)
 def create_operator(
         payload: OperatorCreateRequest,
@@ -53,12 +79,37 @@ def delete_operator(
         db: Session = Depends(get_db),
         current_user=Depends(require_roles(OperatorRole.ADMIN))
 ):
-    op = OperatorService.deactivate_operator(
-        db, operator_id, acting_operator_id=current_user.id
+    return _deactivate_operator_or_404(
+        db=db,
+        operator_id=operator_id,
+        acting_operator_id=current_user.id,
     )
-    if not op:
-        raise AppException("operator.not_found")
-    return op
+
+
+@router.patch("/{operator_id}/deactivate", response_model=OperatorResponse)
+def deactivate_operator(
+        operator_id: int,
+        db: Session = Depends(get_db),
+        current_user=Depends(require_roles(OperatorRole.ADMIN))
+):
+    return _deactivate_operator_or_404(
+        db=db,
+        operator_id=operator_id,
+        acting_operator_id=current_user.id,
+    )
+
+
+@router.patch("/{operator_id}/activate", response_model=OperatorResponse)
+def activate_operator(
+        operator_id: int,
+        db: Session = Depends(get_db),
+        current_user=Depends(require_roles(OperatorRole.ADMIN))
+):
+    return _activate_operator_or_404(
+        db=db,
+        operator_id=operator_id,
+        acting_operator_id=current_user.id,
+    )
 
 
 @router.put("/{operator_id}", response_model=OperatorResponse)

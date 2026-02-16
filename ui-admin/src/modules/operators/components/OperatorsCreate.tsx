@@ -4,7 +4,6 @@ export const OperatorsCreate = () => (
   <Create>
     <SimpleForm>
       <TextInput source="username" label="Username" />
-      <TextInput source="email" label="Email" />
       <TextInput source="password" label="Senha" type="password" />
       <SelectInput
         source="role"
