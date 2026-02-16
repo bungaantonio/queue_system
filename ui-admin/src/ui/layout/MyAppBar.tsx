@@ -6,26 +6,26 @@ import { LayoutDashboard } from "lucide-react"; // Usando Lucide para clareza
 export const MyAppBar = () => (
   <AppBar
     sx={{
-      backgroundColor: alpha("#ffffff", 0.8),
+      backgroundColor: alpha("#ffffff", 0.84),
       backdropFilter: "blur(12px) saturate(180%)",
       color: "text.primary",
       boxShadow: "none",
       borderBottom: "1px solid",
       borderColor: "divider",
-      height: 70,
+      height: 62,
       display: "flex",
       justifyContent: "center",
       zIndex: (theme) => theme.zIndex.drawer + 1,
     }}
     userMenu={<UserMenu />}
   >
-    <Box flex="1" display="flex" alignItems="center" px={2}>
+    <Box flex="1" display="flex" alignItems="center" px={1.5}>
       {/* Branding Técnico: QMS. */}
-      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mr: 4 }}>
+      <Stack direction="row" spacing={1.2} alignItems="center" sx={{ mr: 2.5 }}>
         <Box
           sx={{
-            width: 32,
-            height: 32,
+            width: 28,
+            height: 28,
             bgcolor: "primary.main",
             borderRadius: 2,
             display: "flex",
@@ -41,12 +41,12 @@ export const MyAppBar = () => (
           variant="h6"
           sx={{
             fontWeight: 900,
-            fontSize: "1.2rem",
-            letterSpacing: "-0.05em",
+            fontSize: "1.05rem",
+            letterSpacing: "-0.03em",
             color: "text.primary",
           }}
         >
-          QMS<span style={{ color: "#4f46e5" }}>.</span>
+          QMS<span style={{ color: "var(--fcc-flow)" }}>.</span>
         </Typography>
       </Stack>
 
@@ -55,17 +55,21 @@ export const MyAppBar = () => (
         sx={{
           "& .RaTitle-root": {
             fontWeight: 700,
-            fontSize: "0.9rem",
+            fontSize: "0.75rem",
             textTransform: "uppercase",
-            letterSpacing: "0.1em",
+            letterSpacing: "0.12em",
             color: "text.secondary",
+            px: 1.2,
+            py: 0.5,
+            borderRadius: 2,
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.05),
           },
         }}
       />
 
       <Box flex={1} />
 
-      <Stack direction="row" spacing={2} alignItems="center">
+      <Stack direction="row" spacing={1} alignItems="center">
         <LoadingIndicator
           sx={{
             "& .RaLoadingIndicator-loader": { color: "primary.main" },

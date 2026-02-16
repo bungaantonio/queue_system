@@ -4,17 +4,17 @@ import { Box, Typography, Stack, alpha, Card } from "@mui/material";
 import { UserSearch } from "lucide-react";
 
 export const UtentesList = () => (
-  <Box sx={{ p: 4 }}>
-    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 4 }}>
+  <Box>
+    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2.5 }}>
       <Box
         sx={{
-          p: 1.5,
-          bgcolor: "secondary.main",
-          borderRadius: 3,
+          p: 1.25,
+          bgcolor: "primary.main",
+          borderRadius: 2.5,
           color: "white",
         }}
       >
-        <UserSearch size={24} />
+        <UserSearch size={20} />
       </Box>
       <Box>
         <Typography variant="h4">Base de Utentes</Typography>
@@ -30,7 +30,7 @@ export const UtentesList = () => (
     >
       <Card
         sx={{
-          borderRadius: 6,
+          borderRadius: 4,
           border: "1px solid",
           borderColor: "divider",
           overflow: "hidden",
@@ -40,7 +40,9 @@ export const UtentesList = () => (
           rowClick="edit"
           sx={{
             "& .MuiTableCell-head": { bgcolor: "background.default" },
-            "& .MuiTableRow-root:hover": { bgcolor: alpha("#4f46e5", 0.02) },
+            "& .MuiTableRow-root:hover": {
+              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.03),
+            },
           }}
         >
           <TextField

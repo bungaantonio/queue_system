@@ -1,4 +1,3 @@
-// src/modules/dashboard/DashboardPage.tsx
 import { Box, Typography, Grid, Stack, alpha, Paper } from "@mui/material";
 import { Title } from "react-admin";
 import {
@@ -12,16 +11,21 @@ import {
 import { StatCard } from "./components/StatCard";
 
 export const DashboardPage = () => {
+  const nowLabel = new Intl.DateTimeFormat("pt-PT", {
+    year: "numeric",
+    month: "long",
+    day: "2-digit",
+  }).format(new Date());
+
   return (
-    <Box sx={{ p: 4 }}>
+    <Box>
       <Title title="Painel de Controlo" />
 
-      {/* Header de Boas-vindas Técnico */}
       <Stack
-        direction="row"
+        direction={{ xs: "column", md: "row" }}
         justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 4 }}
+        alignItems={{ xs: "flex-start", md: "center" }}
+        sx={{ mb: 2.5, gap: 1.25 }}
       >
         <Box>
           <Typography variant="h4" sx={{ mb: 0.5 }}>
@@ -29,14 +33,25 @@ export const DashboardPage = () => {
           </Typography>
           <Typography variant="body2" color="text.secondary">
             O sistema está a operar normalmente.{" "}
-            <span style={{ color: "#10b981", fontWeight: 700 }}>● Live</span>
+            <span
+              style={{
+                color: "var(--fcc-ready)",
+                fontWeight: 700,
+                display: "inline-flex",
+                alignItems: "center",
+              }}
+            >
+              <span className="fcc-ready-dot" />
+              Live
+            </span>
           </Typography>
         </Box>
+
         <Box
           sx={{
             px: 2,
             py: 1,
-            bgcolor: "white",
+            bgcolor: "background.paper",
             borderRadius: 3,
             border: "1px solid",
             borderColor: "divider",
@@ -44,33 +59,36 @@ export const DashboardPage = () => {
         >
           <Typography
             variant="caption"
-            sx={{ fontWeight: 800, color: "primary.main" }}
+            sx={{
+              fontWeight: 800,
+              color: "primary.main",
+              textTransform: "uppercase",
+            }}
           >
-            FEVEREIRO 15, 2026
+            {nowLabel}
           </Typography>
         </Box>
       </Stack>
 
-      {/* Linha 1: KPIs Principais */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <Grid container spacing={2} sx={{ mb: 2.5 }}>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <StatCard
             title="Total Hoje"
             value="142"
             icon={Users}
-            color="#4f46e5"
+            tone="flow"
             trend="+12%"
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard title="Em Espera" value="08" icon={Clock} color="#f59e0b" />
+          <StatCard title="Em Espera" value="08" icon={Clock} tone="watch" />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <StatCard
             title="Atendidos"
             value="134"
             icon={CheckCircle2}
-            color="#10b981"
+            tone="ready"
             trend="94%"
           />
         </Grid>
@@ -79,84 +97,93 @@ export const DashboardPage = () => {
             title="Tempo Médio"
             value="14min"
             icon={Activity}
-            color="#0ea5e9"
+            tone="stable"
           />
         </Grid>
       </Grid>
 
-      {/* Linha 2: Monitorização em Tempo Real */}
-      <Grid container spacing={3}>
-        {/* Lado Esquerdo: Estado dos Balcões */}
+      <Grid container spacing={2}>
         <Grid size={{ xs: 12, lg: 8 }}>
-          <Paper sx={{ p: 4, height: "100%" }}>
+          <Paper
+            sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 5, height: "100%" }}
+          >
             <Stack
               direction="row"
               spacing={2}
               alignItems="center"
-              sx={{ mb: 4 }}
+              sx={{ mb: 2.25 }}
             >
-              <Monitor size={20} color="#4f46e5" />
+              <Monitor size={20} color="var(--fcc-flow)" />
               <Typography variant="h6" sx={{ fontWeight: 800 }}>
                 Status dos Balcões
               </Typography>
             </Stack>
 
-            <Grid container spacing={2}>
-              {[1, 2, 3, 4].map((i) => (
-                <Grid size={{ xs: 12, sm: 6 }} key={i}>
-                  <Box
-                    sx={{
-                      p: 3,
-                      borderRadius: 4,
-                      border: "1px solid",
-                      borderColor: "divider",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      bgcolor: i === 1 ? alpha("#10b981", 0.02) : "transparent",
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        variant="caption"
-                        sx={{ fontWeight: 800, color: "text.disabled" }}
-                      >
-                        BALCÃO 0{i}
-                      </Typography>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                        {i === 1 ? "Em Atendimento" : "Indisponível"}
-                      </Typography>
-                    </Box>
+            <Grid container spacing={1.5}>
+              {[1, 2, 3, 4].map((i) => {
+                const active = i === 1;
+                return (
+                  <Grid size={{ xs: 12, sm: 6 }} key={i}>
                     <Box
                       sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: "full",
-                        bgcolor: i === 1 ? "success.main" : "grey.300",
-                        boxShadow:
-                          i === 1
-                            ? `0 0 10px ${alpha("#10b981", 0.5)}`
-                            : "none",
+                        p: 2,
+                        borderRadius: 4,
+                        border: "1px solid",
+                        borderColor: active ? "success.light" : "divider",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        bgcolor: active
+                          ? (theme) => alpha(theme.palette.success.main, 0.04)
+                          : "transparent",
                       }}
-                    />
-                  </Box>
-                </Grid>
-              ))}
+                    >
+                      <Box>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontWeight: 800, color: "text.disabled" }}
+                        >
+                          BALCAO 0{i}
+                        </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: 800 }}
+                        >
+                          {active ? "Em Atendimento" : "Disponível"}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          width: 12,
+                          height: 12,
+                          borderRadius: "50%",
+                          bgcolor: active ? "success.main" : "grey.300",
+                          boxShadow: active
+                            ? (theme) =>
+                                `0 0 10px ${alpha(theme.palette.success.main, 0.45)}`
+                            : "none",
+                        }}
+                      />
+                    </Box>
+                  </Grid>
+                );
+              })}
             </Grid>
           </Paper>
         </Grid>
 
-        {/* Lado Direito: Integridade (Visão Auditor) */}
         <Grid size={{ xs: 12, lg: 4 }}>
           <Paper
             sx={{
-              p: 4,
+              p: { xs: 2, md: 2.5 },
+              borderRadius: 5,
               height: "100%",
-              background: `linear-gradient(135deg, ${alpha("#4f46e5", 0.95)} 0%, #3730a3 100%)`,
+              background: (theme) =>
+                `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.94)} 0%, ${theme.palette.primary.dark} 100%)`,
               color: "white",
             }}
           >
-            <Stack spacing={3}>
+            <Stack spacing={2} sx={{ minHeight: 240 }}>
               <Stack direction="row" spacing={2} alignItems="center">
                 <ShieldCheck size={24} />
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>
@@ -183,13 +210,13 @@ export const DashboardPage = () => {
                 </Typography>
                 <Typography
                   variant="caption"
-                  sx={{ opacity: 0.6, fontFamily: "monospace" }}
+                  sx={{ opacity: 0.72, fontFamily: "monospace" }}
                 >
-                  v7.3.7-stable-2026-02-15
+                  v7.3.7-stable
                 </Typography>
               </Box>
 
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+              <Typography variant="body2" sx={{ opacity: 0.85 }}>
                 Todos os logs de atendimento estão assinados e verificados
                 criptograficamente.
               </Typography>
@@ -198,7 +225,7 @@ export const DashboardPage = () => {
 
               <Typography
                 variant="h2"
-                sx={{ fontWeight: 900, textAlign: "right", opacity: 0.2 }}
+                sx={{ fontWeight: 900, textAlign: "right", opacity: 0.25 }}
               >
                 100%
               </Typography>

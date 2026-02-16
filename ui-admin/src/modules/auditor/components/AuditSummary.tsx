@@ -1,5 +1,13 @@
 // src/modules/auditor/components/AuditSummary.tsx
-import { Box, Card, Typography, Grid, Stack, alpha } from "@mui/material";
+import {
+  Box,
+  Card,
+  Typography,
+  Grid,
+  Stack,
+  alpha,
+  useTheme,
+} from "@mui/material";
 import {
   Fingerprint,
   Database,
@@ -19,7 +27,12 @@ interface AuditStatCardProps {
 const StatCard = ({ title, value, icon: Icon, color }: AuditStatCardProps) => (
   <Card
     elevation={0}
-    sx={{ p: 2, bgcolor: alpha(color, 0.03), borderColor: alpha(color, 0.1) }}
+    sx={{
+      p: 1.5,
+      bgcolor: alpha(color, 0.03),
+      borderColor: alpha(color, 0.1),
+      borderRadius: 4,
+    }}
   >
     <Stack direction="row" spacing={2} alignItems="center">
       <Box sx={{ p: 1, borderRadius: 2, bgcolor: alpha(color, 0.1), color }}>
@@ -53,16 +66,17 @@ export const AuditSummary = ({
 }: {
   summary: AuditChainSummary | null;
 }) => {
+  const theme = useTheme();
   if (!summary) return null;
 
   return (
-    <Grid container spacing={2} sx={{ mb: 4 }}>
+    <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
         <StatCard
           title="Total Logs"
           value={summary.total_records}
           icon={Database}
-          color="#4f46e5"
+          color={theme.palette.primary.main}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
@@ -70,7 +84,7 @@ export const AuditSummary = ({
           title="Válidos"
           value={summary.valid_records}
           icon={CheckCircle2}
-          color="#10b981"
+          color={theme.palette.success.main}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
@@ -78,7 +92,7 @@ export const AuditSummary = ({
           title="Inválidos"
           value={summary.invalid_records}
           icon={AlertTriangle}
-          color="#e11d48"
+          color={theme.palette.error.main}
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
@@ -86,9 +100,10 @@ export const AuditSummary = ({
           elevation={0}
           sx={{
             p: 2,
+            borderRadius: 4,
             bgcolor: summary.all_valid
-              ? alpha("#10b981", 0.9)
-              : alpha("#e11d48", 0.9),
+              ? (theme) => alpha(theme.palette.success.main, 0.9)
+              : (theme) => alpha(theme.palette.error.main, 0.9),
             color: "white",
             display: "flex",
             alignItems: "center",

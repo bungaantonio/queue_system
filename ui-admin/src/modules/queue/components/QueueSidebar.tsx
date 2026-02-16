@@ -16,7 +16,7 @@ export const QueueSidebar = ({ queue, onCancel }: any) => {
         direction="row"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: 3, px: 1 }}
+        sx={{ mb: 1.5, px: 0.5 }}
       >
         <Typography
           variant="subtitle2"
@@ -24,12 +24,12 @@ export const QueueSidebar = ({ queue, onCancel }: any) => {
         >
           PRÓXIMOS NA FILA ({queue.length})
         </Typography>
-        <UserPlus size={16} color="#64748b" />
+        <UserPlus size={16} color="var(--fcc-stable)" />
       </Stack>
 
-      <Stack spacing={1.5} sx={{ overflowY: "auto", flex: 1, pr: 1 }}>
+      <Stack spacing={1} sx={{ overflowY: "auto", flex: 1, pr: 0.5 }}>
         {queue.length === 0 ? (
-          <Box sx={{ py: 10, textAlign: "center", opacity: 0.5 }}>
+          <Box sx={{ py: 6, textAlign: "center", opacity: 0.5 }}>
             <Typography variant="caption" fontWeight={700}>
               FILA VAZIA
             </Typography>
@@ -40,17 +40,23 @@ export const QueueSidebar = ({ queue, onCancel }: any) => {
               key={item.id}
               elevation={0}
               sx={{
-                p: 2,
-                borderRadius: 4,
+                p: 1.5,
+                borderRadius: 3,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
                 border: "1px solid",
                 borderColor: index === 0 ? "primary.light" : "divider",
                 bgcolor:
-                  index === 0 ? alpha("#4f46e5", 0.03) : "background.paper",
-                transition: "transform 0.2s",
-                "&:hover": { transform: "translateX(4px)" },
+                  index === 0
+                    ? (theme) => alpha(theme.palette.primary.main, 0.04)
+                    : "background.paper",
+                transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                "&:hover": {
+                  transform: "translateX(4px)",
+                  boxShadow: (theme) =>
+                    `0 8px 18px ${alpha(theme.palette.primary.main, 0.12)}`,
+                },
               }}
             >
               <Stack direction="row" spacing={2} alignItems="center">
@@ -59,7 +65,7 @@ export const QueueSidebar = ({ queue, onCancel }: any) => {
                   sx={{
                     fontWeight: 900,
                     color: index === 0 ? "primary.main" : "text.disabled",
-                    minWidth: 60,
+                    minWidth: 48,
                   }}
                 >
                   {item.position}

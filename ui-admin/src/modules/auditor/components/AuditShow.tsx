@@ -28,7 +28,7 @@ const TechnicalField = ({ label, value }: { label: string; value: string }) => (
         borderColor: "divider",
         fontFamily: "monospace",
         fontSize: "0.75rem",
-        color: "slate.700",
+        color: "text.secondary",
         wordBreak: "break-all",
       }}
     >
@@ -41,15 +41,15 @@ export const AuditShow = () => (
   <Show
     sx={{ "& .RaShow-main": { boxShadow: "none", bgcolor: "transparent" } }}
   >
-    <Box sx={{ p: 4, maxWidth: 1000 }}>
-      <Typography variant="h4" sx={{ mb: 4 }}>
+    <Box sx={{ maxWidth: 1080 }}>
+      <Typography variant="h4" sx={{ mb: 2.5 }}>
         Detalhes do Evento
       </Typography>
 
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 5 }}>
-          <Paper sx={{ p: 4, borderRadius: 6 }}>
-            <Stack spacing={3}>
+          <Paper sx={{ p: 2.5, borderRadius: 5 }}>
+            <Stack spacing={2}>
               <Box>
                 <Typography
                   variant="caption"
@@ -77,15 +77,19 @@ export const AuditShow = () => (
 
         <Grid size={{ xs: 12, md: 7 }}>
           <Paper
-            sx={{ p: 4, borderRadius: 6, bgcolor: alpha("#0f172a", 0.02) }}
+            sx={{
+              p: 2.5,
+              borderRadius: 5,
+              bgcolor: (theme) => alpha(theme.palette.text.primary, 0.02),
+            }}
           >
             <Stack
               direction="row"
               spacing={1}
               alignItems="center"
-              sx={{ mb: 3 }}
+              sx={{ mb: 2 }}
             >
-              <Terminal size={18} color="#64748b" />
+              <Terminal size={18} color="var(--fcc-stable)" />
               <Typography variant="subtitle2">PROVA CRIPTOGRÁFICA</Typography>
             </Stack>
 
@@ -115,8 +119,8 @@ const AuditRecordContent = () => {
             p: 2,
             borderRadius: 3,
             bgcolor: record.previous_hash_matches
-              ? alpha("#10b981", 0.1)
-              : alpha("#e11d48", 0.1),
+              ? (theme) => alpha(theme.palette.success.main, 0.1)
+              : (theme) => alpha(theme.palette.error.main, 0.1),
           }}
         >
           <Typography

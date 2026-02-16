@@ -1,10 +1,10 @@
 import { defaultTheme } from "react-admin";
 import { createTheme, alpha } from "@mui/material/styles";
 
-// 1. Definição de Cores e Identidade (DNA)
+// 1. Definicao de Cores e Identidade (DNA)
 const palette = {
   primary: {
-    main: "#4f46e5", // Indigo 600
+    main: "#4f46e5", // Indigo 600 (Fluxo)
     light: "#818cf8",
     dark: "#3730a3",
     contrastText: "#ffffff",
@@ -30,12 +30,11 @@ const palette = {
   divider: "#e2e8f0", // Slate 200
 };
 
-// 2. O Tema Customizado
-export const theme = createTheme({
-  ...defaultTheme,
+// 2. Tema customizado
+export const theme = createTheme(defaultTheme, {
   palette,
   shape: {
-    borderRadius: 12, // Border-radius base para UI geral
+    borderRadius: 10,
   },
   typography: {
     fontFamily: '"Inter", "system-ui", "-apple-system", "sans-serif"',
@@ -58,8 +57,37 @@ export const theme = createTheme({
     // Normalização Global: O fim do "Engessado"
     MuiCssBaseline: {
       styleOverrides: {
+        "@keyframes fccFadeInUp": {
+          from: {
+            opacity: 0,
+            transform: "translateY(6px)",
+          },
+          to: {
+            opacity: 1,
+            transform: "translateY(0)",
+          },
+        },
+        "@keyframes fccPulseReady": {
+          "0%, 100%": {
+            opacity: 1,
+            boxShadow: `0 0 0 0 ${alpha(palette.success.main, 0.3)}`,
+          },
+          "50%": {
+            opacity: 0.85,
+            boxShadow: `0 0 0 7px ${alpha(palette.success.main, 0)}`,
+          },
+        },
+        ":root": {
+          "--fcc-flow": palette.primary.main,
+          "--fcc-stable": palette.text.primary,
+          "--fcc-ready": palette.success.main,
+          "--fcc-watch": palette.warning.main,
+          "--fcc-rigor": palette.error.main,
+        },
         body: {
-          backgroundColor: palette.background.default,
+          background:
+            "radial-gradient(circle at 0% 0%, rgba(79,70,229,0.06) 0%, rgba(79,70,229,0) 38%), #f8fafc",
+          color: palette.text.primary,
           // Scrollbar técnica e discreta
           "&::-webkit-scrollbar": { width: 6, height: 6 },
           "&::-webkit-scrollbar-thumb": {
@@ -67,18 +95,32 @@ export const theme = createTheme({
             borderRadius: 10,
           },
           "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
+          scrollBehavior: "smooth",
         },
-        // Correção de espaçamento do React Admin
+        // React Admin layout: manter fluido sem deslocar app frame
         ".RaLayout-content": {
-          padding: "24px !important",
-          margin: "0 auto",
-          maxWidth: "1600px", // Limite para monitores Ultra-wide
-          display: "flex",
-          flexDirection: "column",
-          gap: "24px",
+          boxSizing: "border-box",
         },
-        ".RaLayout-appFrame": {
-          marginTop: "70px", // Espaço para o AppBar Glassmorphism
+        ".RaLayout-content > *": {
+          animation: "fccFadeInUp 220ms ease-out",
+        },
+        ".fcc-ready-dot": {
+          display: "inline-block",
+          width: 9,
+          height: 9,
+          borderRadius: "50%",
+          backgroundColor: palette.success.main,
+          animation: "fccPulseReady 1.8s ease-in-out infinite",
+          marginRight: 6,
+          verticalAlign: "middle",
+        },
+        "@media (prefers-reduced-motion: reduce)": {
+          ".RaLayout-content > *": {
+            animation: "none",
+          },
+          ".fcc-ready-dot": {
+            animation: "none",
+          },
         },
       },
     },
@@ -87,11 +129,27 @@ export const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 24, // DNA da TV: Bordas largas nos containers principais
+          borderRadius: 14,
           border: `1px solid ${palette.divider}`,
           boxShadow:
-            "0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 1px 2px -1px rgba(0, 0, 0, 0.02)",
+            "0 1px 3px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.04)",
           overflow: "hidden",
+          transition: "transform 160ms ease, box-shadow 160ms ease",
+          "&:hover": {
+            boxShadow:
+              "0 2px 6px rgba(15,23,42,0.06), 0 12px 28px rgba(15,23,42,0.08)",
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          border: `1px solid ${palette.divider}`,
+          boxShadow:
+            "0 1px 3px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.04)",
+          backgroundImage: "none",
+          transition: "box-shadow 160ms ease",
         },
       },
     },
@@ -100,7 +158,7 @@ export const theme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         root: {
-          padding: "16px 24px",
+          padding: "12px 14px",
           borderColor: alpha(palette.divider, 0.5),
         },
         head: {
@@ -110,8 +168,8 @@ export const theme = createTheme({
           textTransform: "uppercase",
           fontSize: "0.65rem",
           letterSpacing: "0.1em",
-          paddingTop: 12,
-          paddingBottom: 12,
+          paddingTop: 10,
+          paddingBottom: 10,
         },
       },
     },
@@ -119,8 +177,9 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           "&.MuiTableRow-hover:hover": {
-            backgroundColor: alpha(palette.primary.main, 0.02),
+            backgroundColor: alpha(palette.primary.main, 0.035),
           },
+          transition: "background-color 140ms ease",
           // Números tabulares para IDs e Tickets
           "& td": { fontVariantNumeric: "tabular-nums" },
         },
@@ -145,6 +204,46 @@ export const theme = createTheme({
         },
       },
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: 10,
+          backgroundColor: alpha(palette.text.secondary, 0.03),
+          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: alpha(palette.primary.main, 0.35),
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: palette.primary.main,
+            borderWidth: 2,
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 800,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+          borderRadius: 8,
+          transition: "all 160ms ease",
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          transition: "all 140ms ease",
+          "&:hover": {
+            backgroundColor: alpha(palette.primary.main, 0.08),
+          },
+          "&:active": {
+            transform: "scale(0.97)",
+          },
+        },
+      },
+    },
 
     // Botões de Ação
     MuiButton: {
@@ -152,12 +251,27 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 10, // Equilíbrio entre o Card e o Input
-          padding: "10px 24px",
+          padding: "8px 16px",
           fontWeight: 800,
+          transition:
+            "transform 120ms ease, box-shadow 160ms ease, background-color 160ms ease",
+          "&:active": {
+            transform: "translateY(1px)",
+          },
+          "&.Mui-focusVisible": {
+            boxShadow: `0 0 0 4px ${alpha(palette.primary.main, 0.2)}`,
+          },
         },
-        containedPrimary: {
+        contained: {
           background: `linear-gradient(180deg, ${palette.primary.main} 0%, ${palette.primary.dark} 100%)`,
           boxShadow: `0 4px 12px ${alpha(palette.primary.main, 0.2)}`,
+          "&:hover": {
+            boxShadow: `0 8px 20px ${alpha(palette.primary.main, 0.24)}`,
+          },
+        },
+        containedSuccess: {
+          background: `linear-gradient(180deg, ${palette.success.main} 0%, #0f9f6e 100%)`,
+          boxShadow: `0 4px 12px ${alpha(palette.success.main, 0.24)}`,
         },
       },
     },
