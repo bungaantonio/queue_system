@@ -5,7 +5,6 @@ import {
   TextField,
   FunctionField,
   DateField,
-  Title,
   useListContext,
 } from "react-admin";
 import { Box, Stack, Chip, Card } from "@mui/material";
@@ -23,8 +22,6 @@ import {
 
 export const OperatorsList = () => (
   <Box>
-    <Title title="Operadores" />
-
     <PageHeader
       title="Operadores"
       description="Acesso, função e estado operacional dos utilizadores internos."
@@ -32,6 +29,7 @@ export const OperatorsList = () => (
     />
 
     <List
+      title="Operadores"
       sort={{ field: "username", order: "ASC" }}
       perPage={25}
       sx={listMainTransparentSx}

@@ -8,6 +8,7 @@ import {
   Chip,
   Button,
   alpha,
+  useTheme,
 } from "@mui/material";
 import type { ChipProps } from "@mui/material";
 import { Title, useGetList } from "react-admin";
@@ -30,6 +31,12 @@ import { useGetHeader } from "../auditor/hooks/useAuditSummary";
 import type { Operator } from "../operators/types";
 import { PageHeader } from "../shared/components/PageHeader";
 import { StatusChip } from "../shared/components/StatusChip";
+import {
+  DashboardTone,
+  dashboardPanelSx,
+  getToneChipColor,
+  getToneSurface,
+} from "./dashboardTokens";
 
 export const DashboardPage = () => {
   const atendimento = useContext(AtendimentoContext);
@@ -49,8 +56,8 @@ export const DashboardPage = () => {
     [operators],
   );
 
-  const queueTone: "watch" | "ready" = queue.length > 5 ? "watch" : "ready";
-  const integrityTone: "ready" | "rigor" =
+  const queueTone: DashboardTone = queue.length > 5 ? "watch" : "ready";
+  const integrityTone: DashboardTone =
     summary && !summary.all_valid ? "rigor" : "ready";
 
   return (
@@ -97,8 +104,8 @@ export const DashboardPage = () => {
         {(called || current) && (
           <Paper
             sx={{
+              ...dashboardPanelSx,
               p: 1.5,
-              borderRadius: 4,
               bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
               borderColor: (theme) => alpha(theme.palette.primary.main, 0.26),
             }}
@@ -180,7 +187,7 @@ export const DashboardPage = () => {
 
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, lg: 7 }}>
-            <Paper sx={{ p: 2, borderRadius: 4 }}>
+            <Paper sx={dashboardPanelSx}>
               <Typography
                 variant="subtitle2"
                 sx={{ color: "text.secondary", mb: 1 }}
@@ -220,7 +227,7 @@ export const DashboardPage = () => {
           </Grid>
 
           <Grid size={{ xs: 12, lg: 5 }}>
-            <Paper sx={{ p: 2, borderRadius: 4 }}>
+            <Paper sx={dashboardPanelSx}>
               <Typography
                 variant="subtitle2"
                 sx={{ color: "text.secondary", mb: 1 }}
@@ -276,20 +283,13 @@ const PriorityRow = ({
   label,
   detail,
 }: {
-  state: "flow" | "stable" | "ready" | "watch" | "rigor";
+  state: DashboardTone;
   label: string;
   detail: string;
 }) => {
-  const tone: ChipProps["color"] =
-    state === "ready"
-      ? "success"
-      : state === "watch"
-        ? "warning"
-        : state === "rigor"
-          ? "error"
-          : state === "flow"
-            ? "primary"
-            : "default";
+  const tone: ChipProps["color"] = getToneChipColor(state);
+  const theme = useTheme();
+  const toneSurface = getToneSurface(theme, state);
 
   return (
     <Stack
@@ -301,7 +301,8 @@ const PriorityRow = ({
         p: 1,
         borderRadius: 2,
         border: "1px solid",
-        borderColor: "divider",
+        borderColor: toneSurface.border,
+        bgcolor: toneSurface.bg,
       }}
     >
       <Typography variant="body2" sx={{ fontWeight: 700 }}>
@@ -334,16 +335,10 @@ const RiskTag = ({
   icon: LucideIcon;
   label: string;
   value: string;
-  tone: "flow" | "ready" | "watch" | "rigor";
+  tone: DashboardTone;
 }) => {
-  const color =
-    tone === "ready"
-      ? "success.main"
-      : tone === "watch"
-        ? "warning.main"
-        : tone === "rigor"
-          ? "error.main"
-          : "primary.main";
+  const theme = useTheme();
+  const toneSurface = getToneSurface(theme, tone);
 
   return (
     <Stack
@@ -355,17 +350,18 @@ const RiskTag = ({
         p: 1,
         borderRadius: 2,
         border: "1px solid",
-        borderColor: "divider",
+        borderColor: toneSurface.border,
+        bgcolor: toneSurface.bg,
       }}
     >
       <Stack direction="row" spacing={1} alignItems="center">
-        <Icon size={16} />
+        <Icon size={16} color={toneSurface.color} />
         <Typography variant="body2">{label}</Typography>
       </Stack>
       <Typography
         variant="caption"
         sx={{
-          color,
+          color: toneSurface.color,
           fontWeight: 900,
           alignSelf: { xs: "flex-start", sm: "auto" },
         }}

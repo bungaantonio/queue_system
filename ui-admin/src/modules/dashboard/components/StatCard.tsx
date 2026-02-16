@@ -1,12 +1,13 @@
 // src/modules/dashboard/components/StatCard.tsx
 import { Card, Box, Typography, Stack, alpha, useTheme } from "@mui/material";
 import { LucideIcon } from "lucide-react";
+import { DashboardTone, getToneSurface } from "../dashboardTokens";
 
 interface StatCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  tone: "flow" | "ready" | "watch" | "stable" | "rigor";
+  tone: DashboardTone;
   trend?: string;
 }
 
@@ -18,16 +19,7 @@ export const StatCard = ({
   trend,
 }: StatCardProps) => {
   const theme = useTheme();
-  const toneColor =
-    tone === "ready"
-      ? theme.palette.success.main
-      : tone === "watch"
-        ? theme.palette.warning.main
-        : tone === "rigor"
-          ? theme.palette.error.main
-          : tone === "stable"
-            ? theme.palette.text.secondary
-            : theme.palette.primary.main;
+  const toneSurface = getToneSurface(theme, tone);
 
   return (
     <Card
@@ -37,6 +29,12 @@ export const StatCard = ({
         height: "100%",
         position: "relative",
         overflow: "hidden",
+        border: "1px solid",
+        borderColor: toneSurface.border,
+        background: `linear-gradient(160deg, ${alpha(
+          toneSurface.color,
+          0.07,
+        )} 0%, ${alpha(theme.palette.background.paper, 0.98)} 52%)`,
       }}
     >
       <Box
@@ -44,7 +42,7 @@ export const StatCard = ({
           position: "absolute",
           top: -10,
           right: -10,
-          color: alpha(toneColor, 0.05),
+          color: alpha(toneSurface.color, 0.05),
           transform: "rotate(-15deg)",
         }}
       >
@@ -57,8 +55,8 @@ export const StatCard = ({
             sx={{
               p: 1,
               borderRadius: 2,
-              bgcolor: alpha(toneColor, 0.1),
-              color: toneColor,
+              bgcolor: toneSurface.accent,
+              color: toneSurface.color,
               display: "flex",
             }}
           >

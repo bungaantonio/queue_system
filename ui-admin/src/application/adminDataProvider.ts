@@ -1,6 +1,6 @@
 import type { DataProvider } from "react-admin";
 import { operatorsGateway } from "../modules/operators/operatorsGateway";
-import { utentesGateway } from "../modules/users/utentesGateway";
+import { utentesGateway } from "../modules/utentes/utentesGateway";
 import { auditorGateway } from "../modules/auditor/auditorGateway";
 import { ApiError } from "../core/http/ApiError";
 
