@@ -1,5 +1,5 @@
 // src/modules/operators/components/OperatorsList.tsx
-import { List, Datagrid, TextField, EmailField, Title } from "react-admin";
+import { List, Datagrid, TextField, BooleanField, Title } from "react-admin";
 import { Box, Typography, Stack, alpha } from "@mui/material";
 import { RoleBadge } from "./RoleBadge";
 import { Users } from "lucide-react";
@@ -28,7 +28,7 @@ export const OperatorsList = () => (
     </Stack>
 
     <List
-      sort={{ field: "name", order: "ASC" }}
+      sort={{ field: "username", order: "ASC" }}
       sx={{
         bgcolor: "transparent",
         "& .RaList-main": { boxShadow: "none", border: "none" },
@@ -57,12 +57,12 @@ export const OperatorsList = () => (
           sx={{ fontWeight: 800, color: "text.disabled" }}
         />
         <TextField
-          source="name"
-          label="Nome Completo"
+          source="username"
+          label="Utilizador"
           sx={{ fontWeight: 700 }}
         />
-        <EmailField source="email" label="Endereço de Email" />
         <RoleBadge source="role" />
+        <BooleanField source="active" label="Ativo" />
       </Datagrid>
     </List>
   </Box>
