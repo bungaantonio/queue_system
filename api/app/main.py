@@ -29,10 +29,10 @@ logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 origins = [
-    "http://localhost:3001",
-    "http://localhost:3002",
-    "http://192.168.18.6:3001",
-    "http://192.168.18.6:3002",
+    "http://localhost:3101",
+    "http://localhost:3102",
+    "http://192.168.18.6:3101",
+    "http://192.168.18.6:3102",
 
     # depois pode adicionar o domínio real (ex: https://painel.fila.ao)
 ]
@@ -69,7 +69,7 @@ app.include_router(queue_api.router, prefix="/api/v1/queue", tags=["Queue"])
 app.include_router(queue_stream_router.router, prefix="/api/v1/sse", tags=["Queue Stream"])
 # app.include_router(user_router.router, prefix="/users", tags=["Users"])
 app.include_router(credential_routers.router, prefix="/api/v1/credential", tags=["Credências"])
-app.include_router(auth_router.router, prefix="/auth", tags=["Auth"])
+app.include_router(auth_router.router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(operators_router.router, prefix="/api/v1/operators", tags=["Operadores"])
 app.include_router(audit_router.router, prefix="/api/v1/audits", tags=["Audits"])
 app.include_router(utentes.router, prefix="/api/v1", tags=["Utentes"])

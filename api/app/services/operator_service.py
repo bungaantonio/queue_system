@@ -1,8 +1,12 @@
-from typing import List, Optional
+from typing import List, Optional, cast
 from sqlalchemy.orm import Session
 from app.helpers.password import get_password_hash
-from app.models.enums import AuditAction
-from app.helpers.audit_helpers import audit_log
+from app.helpers.audit_helpers import (
+    audit_operator_created,
+    audit_operator_updated,
+    audit_operator_activated,
+    audit_operator_deactivated,
+)
 from app.crud import operator_crud
 from app.schemas.operator_schemas import (
     OperatorResponse,
@@ -27,12 +31,12 @@ class OperatorService:
         )
 
         # 3. Auditoria (Se for seed, o acting_operator_id pode ser o ID do próprio novo admin)
-        audit_log(
+        audit_operator_created(
             db=db,
-            action=AuditAction.OPERATOR_CREATED,
-            operator_id=acting_operator_id or new_op.id,
-            user_id=None,
-            details={"username": new_op.username, "role": new_op.role},
+            actor_operator_id=acting_operator_id or cast(int, new_op.id),
+            target_operator_id=cast(int, new_op.id),
+            username=cast(str, new_op.username),
+            role=cast(str, new_op.role),
         )
 
         db.commit()
@@ -61,12 +65,11 @@ class OperatorService:
 
         operator_crud.update_operator_record(db, db_op)
 
-        audit_log(
+        audit_operator_updated(
             db=db,
-            action=AuditAction.OPERATOR_UPDATED,
-            operator_id=acting_operator_id,
-            user_id=db_op.id,
-            details={"updated_fields": list(update_data.keys())},
+            actor_operator_id=acting_operator_id,
+            target_operator_id=cast(int, db_op.id),
+            updated_fields=list(update_data.keys()),
         )
 
         db.commit()
@@ -80,19 +83,45 @@ class OperatorService:
         db_op = operator_crud.get_operator_by_id(db, operator_id)
         if not db_op:
             return None
+        if not cast(bool, db_op.active):
+            return OperatorResponse.model_validate(db_op)
 
         db_op.active = False
         operator_crud.update_operator_record(db, db_op)
 
-        audit_log(
+        audit_operator_deactivated(
             db=db,
-            action=AuditAction.OPERATOR_DEACTIVATED,
-            operator_id=acting_operator_id,
-            user_id=db_op.id,
-            details={"username": db_op.username},
+            actor_operator_id=acting_operator_id,
+            target_operator_id=cast(int, db_op.id),
+            username=cast(str, db_op.username),
         )
 
         db.commit()
+        db.refresh(db_op)
+        return OperatorResponse.model_validate(db_op)
+
+    @staticmethod
+    def activate_operator(
+        db: Session, operator_id: int, acting_operator_id: int
+    ) -> Optional[OperatorResponse]:
+        db_op = operator_crud.get_operator_by_id(db, operator_id)
+        if not db_op:
+            return None
+        if cast(bool, db_op.active):
+            return OperatorResponse.model_validate(db_op)
+
+        db_op.active = True
+        operator_crud.update_operator_record(db, db_op)
+
+        audit_operator_activated(
+            db=db,
+            actor_operator_id=acting_operator_id,
+            target_operator_id=cast(int, db_op.id),
+            username=cast(str, db_op.username),
+        )
+
+        db.commit()
+        db.refresh(db_op)
         return OperatorResponse.model_validate(db_op)
 
     @staticmethod

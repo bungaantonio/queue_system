@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional, cast
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import asc, desc, func
 
@@ -36,24 +36,38 @@ def get_existing_queue_item(db: Session, user_id: int) -> Optional[QueueItem]:
     )
 
 
-def get_all_waiting(db: Session) -> list[type[QueueItem]]:
+def get_queue_item_by_id(db: Session, item_id: int) -> Optional[QueueItem]:
+    """Retorna item de fila por ID."""
+    return (
+        db.query(QueueItem)
+        .options(joinedload(QueueItem.user))
+        .filter(QueueItem.id == item_id)
+        .first()
+    )
+
+
+def get_all_waiting(db: Session) -> list[QueueItem]:
     """Retorna todos os itens WAITING, ordenados por prioridade e posição."""
+    priority_score_col = cast(Any, QueueItem.priority_score)
+    position_col = cast(Any, QueueItem.position)
     return (
         db.query(QueueItem)
         .options(joinedload(QueueItem.user))
         .filter(QueueItem.status == QueueStatus.WAITING)
-        .order_by(desc(QueueItem.priority_score), asc(QueueItem.position))
+        .order_by(desc(priority_score_col), asc(position_col))
         .all()
     )
 
 
 def get_next_waiting_item(db: Session) -> Optional[QueueItem]:
     """Retorna o próximo item a ser chamado (WAITING)."""
+    priority_score_col = cast(Any, QueueItem.priority_score)
+    position_col = cast(Any, QueueItem.position)
     return (
         db.query(QueueItem)
         .options(joinedload(QueueItem.user))
         .filter(QueueItem.status == QueueStatus.WAITING)
-        .order_by(desc(QueueItem.priority_score), asc(QueueItem.position))
+        .order_by(desc(priority_score_col), asc(position_col))
         .first()
     )
 

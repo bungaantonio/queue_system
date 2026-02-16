@@ -1,43 +1,44 @@
 // src/app/App.tsx
 import { Admin, Resource, CustomRoutes } from "react-admin";
 import { Route } from "react-router-dom";
+
 import { adminDataProvider } from "./application/adminDataProvider";
 import { adminAuthProvider } from "./application/adminAuthProvider";
+
+import { DashboardPage } from "./modules/dashboard/DashboardPage.tsx";
 
 import { OperatorsList } from "./modules/operators/components/OperatorsList";
 import { OperatorsCreate } from "./modules/operators/components/OperatorsCreate";
 import { OperatorsEdit } from "./modules/operators/components/OperatorsEdit";
 
-import { ControlPage } from "./modules/queue/components/ControlPage";
+import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvider";
+import { AtendimentoPanel } from "./modules/queue/components/AtendimentoPanel.tsx";
 
-import { DashboardPage } from "./modules/dashboard/DashboardPage.tsx";
+import { UtentesCreate } from "./modules/utentes/components/UtentesCreate.tsx";
+import { UtentesList } from "./modules/utentes/components/UtentesList.tsx";
+import { UtentesEdit } from "./modules/utentes/components/UtentesEdit.tsx";
 
-import { UtentesCreate } from "./modules/users/components/UtentesCreate";
-import { UtentesList } from "./modules/users/components/UtentesList";
-import { UtentesEdit } from "./modules/users/components/UtentesEdit";
+import { AuditList } from "./modules/auditor/components/AuditList";
+import { AuditShow } from "./modules/auditor/components/AuditShow";
 
 import { SessionExpiredPage } from "./modules/shared/components/SessionExpiredPage";
 import { NotAuthorizedPage } from "./modules/shared/components/NotAuthorizedPage";
 
-import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvider";
-
 import { withRole } from "./modules/shared/utils/withRole";
 
-import { premiumTheme } from "./ui/theme.ts";
-import { AdminLayout } from "./ui/layout/AdminLayout";
+import { theme } from "./ui/theme";
+import { MyLayout } from "./ui/layout/MyLayout";
 
-// Ícones realistas
-import QueueIcon from "@mui/icons-material/Queue";
-import BadgeIcon from "@mui/icons-material/Badge";
-import PersonSearchIcon from "@mui/icons-material/PersonSearch";
-import { AuditList } from "./modules/auditor/components/AuditList";
-import { AuditShow } from "./modules/auditor/components/AuditShow";
+import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
+import ManageAccountsRoundedIcon from "@mui/icons-material/ManageAccountsRounded";
+import RecentActorsRoundedIcon from "@mui/icons-material/RecentActorsRounded";
+import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
 
 export const App = () => (
   <AtendimentoProvider>
     <Admin
-      theme={premiumTheme}
-      layout={AdminLayout}
+      theme={theme}
+      layout={MyLayout}
       authProvider={adminAuthProvider}
       dataProvider={adminDataProvider}
       dashboard={DashboardPage}
@@ -46,9 +47,9 @@ export const App = () => (
       {/* Painel de Atendimento */}
       <Resource
         name="atendimento"
-        list={ControlPage}
-        icon={QueueIcon}
-        options={{ label: "Atendimento" }}
+        list={AtendimentoPanel}
+        icon={SupportAgentRoundedIcon}
+        options={{ label: "Painel de Atendimento" }}
       />
 
       {/* Operadores */}
@@ -57,7 +58,7 @@ export const App = () => (
         list={withRole(OperatorsList, ["admin"])}
         edit={withRole(OperatorsEdit, ["admin"])}
         create={withRole(OperatorsCreate, ["admin"])}
-        icon={BadgeIcon}
+        icon={ManageAccountsRoundedIcon}
         options={{ label: "Operadores" }}
       />
 
@@ -67,7 +68,7 @@ export const App = () => (
         list={withRole(UtentesList, ["admin", "attendant"])}
         edit={withRole(UtentesEdit, ["admin", "attendant"])}
         create={withRole(UtentesCreate, ["admin", "attendant"])}
-        icon={PersonSearchIcon}
+        icon={RecentActorsRoundedIcon}
         options={{ label: "Utentes" }}
       />
 
@@ -76,6 +77,7 @@ export const App = () => (
         name="audits"
         list={withRole(AuditList, ["auditor"])}
         show={withRole(AuditShow, ["auditor"])}
+        icon={FactCheckRoundedIcon}
         options={{ label: "Auditoria" }}
       />
       <CustomRoutes>

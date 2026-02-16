@@ -1,26 +1,24 @@
 // src/modules/shared/components/SessionExpiredPage.tsx
 import React from "react";
-import { Box, Typography, Button, useTheme } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import { Link } from "react-router-dom";
 
 export const SessionExpiredPage: React.FC = () => {
-  const theme = useTheme();
-
-
   return (
     <Box
       sx={{
-        minHeight: "calc(100vh - 64px)",
+        minHeight: "calc(100dvh - 70px)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: theme.palette.mode === "dark" ? "#121212" : "#f5f5f5",
+        bgcolor: "background.default",
         p: 2,
       }}
     >
       <Box
         sx={{
-          width: { xs: "100%", sm: 400 },
+          width: "100%",
+          maxWidth: 420,
           textAlign: "center",
         }}
       >
@@ -32,7 +30,7 @@ export const SessionExpiredPage: React.FC = () => {
             letterSpacing: "-0.5rem",
             lineHeight: 1,
             mb: 2,
-            "& .highlight": { color: "#ff4c4c" },
+            "& .highlight": { color: "warning.main" },
           }}
         >
           <span>4</span>
@@ -45,7 +43,7 @@ export const SessionExpiredPage: React.FC = () => {
           sx={{
             fontSize: { xs: "1.5rem", sm: "2rem" },
             fontWeight: 700,
-            color: "#1177bd",
+            color: "primary.main",
             mb: 2,
           }}
         >
@@ -56,15 +54,16 @@ export const SessionExpiredPage: React.FC = () => {
         <Typography
           variant="body1"
           sx={{
-            fontSize: { xs: '0.875rem', sm: '1rem' },
-            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
+            fontSize: { xs: "0.875rem", sm: "1rem" },
+            color: "text.secondary",
             mb: 4,
             maxWidth: 350,
-            mx: 'auto',
+            mx: "auto",
             lineHeight: 1.5,
           }}
         >
-          A sua sessão terminou por motivos de segurança. Para continuar, por favor,
+          A sua sessão terminou por motivos de segurança. Para continuar, por
+          favor,
           <Button
             component={Link}
             to="/"
@@ -72,7 +71,7 @@ export const SessionExpiredPage: React.FC = () => {
             sx={{
               textTransform: "none",
               fontWeight: 700,
-              color: "#1177bd",
+              color: "primary.main",
               p: 0,
               ml: 0.5,
             }}
@@ -81,7 +80,6 @@ export const SessionExpiredPage: React.FC = () => {
           </Button>
           .
         </Typography>
-
       </Box>
     </Box>
   );

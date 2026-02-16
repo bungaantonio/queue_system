@@ -2,8 +2,6 @@
 import { httpClient } from "../../core/http/apiClient";
 import type { AuditVerificationDetail, AuditChainSummary } from "./types";
 
-const BASE = "/audits";
-
 export const auditorGateway = {
   getList: async (params?: {
     user_id?: number;
@@ -16,19 +14,19 @@ export const auditorGateway = {
   }): Promise<AuditVerificationDetail[]> => {
     const query = buildQuery(params);
     const res = await httpClient.get<AuditVerificationDetail[]>(
-      `${BASE}${query}`,
+      `/audits${query}`,
     );
     return Array.isArray(res) ? res : [];
   },
 
   getSummary: async (): Promise<AuditChainSummary> => {
-    return httpClient.get<AuditChainSummary>(`${BASE}/verify-summary`);
+    return httpClient.get<AuditChainSummary>("/audits/verify-summary");
   },
   getOne: async (id: number): Promise<AuditVerificationDetail> => {
     const res = await httpClient.get<AuditVerificationDetail>(
-      `${BASE}/verify/${id}`,
+      `/audits/verify/${id}`,
     );
-    return { ...res, id: res.ad };
+    return { ...res, id: res.id };
   },
 };
 
