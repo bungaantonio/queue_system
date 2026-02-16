@@ -6,7 +6,7 @@ import {
   useRecordContext,
 } from "react-admin";
 import { Stack, Typography, Alert } from "@mui/material";
-import { BiometricInput } from "../components/BiometricInput";
+import { BiometricInput } from "./BiometricInput";
 
 const EditHeader = () => {
   const record = useRecordContext();

@@ -1,4 +1,4 @@
-// src/modules/users/components/UtentesList.tsx
+// src/modules/utentes/components/UtentesList.tsx
 import {
   List,
   Datagrid,

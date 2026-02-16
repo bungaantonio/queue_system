@@ -14,9 +14,9 @@ import { OperatorsEdit } from "./modules/operators/components/OperatorsEdit";
 import { AtendimentoProvider } from "./modules/queue/components/AtendimentoProvider";
 import { AtendimentoPanel } from "./modules/queue/components/AtendimentoPanel.tsx";
 
-import { UtentesCreate } from "./modules/users/components/UtentesCreate";
-import { UtentesList } from "./modules/users/components/UtentesList";
-import { UtentesEdit } from "./modules/users/components/UtentesEdit";
+import { UtentesCreate } from "./modules/utentes/components/UtentesCreate.tsx";
+import { UtentesList } from "./modules/utentes/components/UtentesList.tsx";
+import { UtentesEdit } from "./modules/utentes/components/UtentesEdit.tsx";
 
 import { AuditList } from "./modules/auditor/components/AuditList";
 import { AuditShow } from "./modules/auditor/components/AuditShow";

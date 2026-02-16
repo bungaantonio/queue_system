@@ -4,7 +4,6 @@ import {
   Datagrid,
   TextField,
   DateField,
-  Title,
   FunctionField,
 } from "react-admin";
 import { Box, Card, Skeleton, Alert } from "@mui/material";
@@ -25,8 +24,6 @@ export const AuditList = () => {
 
   return (
     <Box>
-      <Title title="Auditoria e Histórico" />
-
       <PageHeader
         title="Integridade Operacional"
         description="Priorize eventos inválidos e confirme concatenação criptográfica."
@@ -49,7 +46,7 @@ export const AuditList = () => {
         </Alert>
       ) : null}
 
-      <List sx={listMainTransparentSx}>
+      <List title="Auditoria e Histórico" sx={listMainTransparentSx}>
         <Card sx={{ ...listCardSx, borderRadius: 5 }}>
           <Datagrid
             rowClick="show"
