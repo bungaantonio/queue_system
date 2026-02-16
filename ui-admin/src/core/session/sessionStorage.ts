@@ -11,6 +11,13 @@ export const sessionStore = {
 
   setAccessToken(token: string) {
     this.accessToken = token;
+
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      this.setUserInfo(decoded.username, decoded.role);
+    } catch {
+      // Se o token vier inválido, não sobrescrevemos dados de usuário persistidos.
+    }
   },
 
   getAccessToken() {
@@ -25,15 +32,12 @@ export const sessionStore = {
     return localStorage.getItem("refresh_token");
   },
 
-  // Útil para persistir o username/role mesmo após F5,
-  // já que o accessToken em memória some.
   setUserInfo(username: string, role: string) {
     localStorage.setItem("user_name", username);
     localStorage.setItem("user_role", role);
   },
 
   getUser() {
-    // Tenta pegar do token em memória
     if (this.accessToken) {
       try {
         const decoded = jwtDecode<JwtPayload>(this.accessToken);
@@ -43,7 +47,6 @@ export const sessionStore = {
       }
     }
 
-    // Fallback para localStorage se a memória estiver vazia (pós-F5)
     const username = localStorage.getItem("user_name");
     const role = localStorage.getItem("user_role");
     if (username && role) return { username, role };

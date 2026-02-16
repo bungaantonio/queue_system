@@ -1,8 +1,62 @@
 import { sessionStore } from "../session/sessionStorage";
 import { CONFIG } from "../config/config";
+import { ApiError } from "./ApiError";
+import { getApiPayload } from "../../application/auth.types";
+import type { HttpPort } from "./http.types";
 
-const request = async (method: string, path: string, body?: unknown) => {
-  const token = sessionStore.getAccessToken();
+const parseJSON = async (res: Response): Promise<unknown> => {
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+};
+
+const parseResponseData = async <T>(res: Response): Promise<T> => {
+  if (res.status === 204) return undefined as T;
+  const payload = await parseJSON(res);
+  return getApiPayload<T>(payload);
+};
+
+const extractAccessToken = (payload: unknown): string | null => {
+  const data = getApiPayload<{ access_token?: string }>(payload);
+  return data?.access_token ?? null;
+};
+
+const refreshAccessToken = async (): Promise<string> => {
+  const refreshToken = sessionStore.getRefreshToken();
+  if (!refreshToken) {
+    sessionStore.clear();
+    throw new ApiError(401, { detail: "Sessão expirada" });
+  }
+
+  const refreshRes = await fetch(`${CONFIG.AUTH_URL}/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+
+  const refreshPayload = await parseJSON(refreshRes);
+  if (!refreshRes.ok) {
+    sessionStore.clear();
+    throw new ApiError(401, refreshPayload, "Sessão expirada");
+  }
+
+  const newAccessToken = extractAccessToken(refreshPayload);
+  if (!newAccessToken) {
+    sessionStore.clear();
+    throw new ApiError(500, refreshPayload, "Resposta de refresh inválida");
+  }
+
+  sessionStore.setAccessToken(newAccessToken);
+  return newAccessToken;
+};
+
+const request = async <T>(
+  method: string,
+  path: string,
+  body?: unknown,
+): Promise<T> => {
   const url = `${CONFIG.API_BASE_URL}${path}`;
 
   const fetchWithToken = async (tok: string) =>
@@ -15,51 +69,33 @@ const request = async (method: string, path: string, body?: unknown) => {
       body: body ? JSON.stringify(body) : undefined,
     });
 
-  let res = await fetchWithToken(token!);
+  let token = sessionStore.getAccessToken();
+  if (!token) {
+    token = await refreshAccessToken();
+  }
+
+  let res = await fetchWithToken(token);
 
   if (res.status === 401) {
-    // Tentar refresh token
-    const refreshToken = sessionStore.getRefreshToken();
-    if (!refreshToken) {
-      sessionStore.clear();
-      throw { status: 401, message: "Sessão expirada" };
-    }
-
-    const refreshRes = await fetch(`${CONFIG.AUTH_URL}/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
-
-    const refreshData = await refreshRes.json();
-    if (!refreshRes.ok) {
-      sessionStore.clear();
-      throw { status: 401, message: "Sessão expirada" };
-    }
-
-    sessionStore.setAccessToken(refreshData.access_token);
-
-    // Repetir request original com novo token
-    res = await fetchWithToken(refreshData.access_token);
+    token = await refreshAccessToken();
+    res = await fetchWithToken(token);
     if (!res.ok) {
-      const errorBody = await res.json().catch(() => ({}));
-      throw { status: res.status, message: errorBody.detail || "Erro na API" };
+      const errorBody = await parseJSON(res);
+      throw new ApiError(res.status, errorBody);
     }
   }
 
   if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({}));
-    throw { status: res.status, message: errorBody.detail || "Erro na API" };
+    const errorBody = await parseJSON(res);
+    throw new ApiError(res.status, errorBody);
   }
 
-  return res.json();
+  return parseResponseData<T>(res);
 };
 
-export const httpClient = {
-  get: <T>(path: string) => request("GET", path) as Promise<T>,
-  post: <T>(path: string, body?: unknown) =>
-    request("POST", path, body) as Promise<T>,
-  put: <T>(path: string, body?: unknown) =>
-    request("PUT", path, body) as Promise<T>,
-  delete: (path: string) => request("DELETE", path) as Promise<void>,
+export const httpClient: HttpPort = {
+  get: <T>(path: string) => request<T>("GET", path),
+  post: <T>(path: string, body?: unknown) => request<T>("POST", path, body),
+  put: <T>(path: string, body?: unknown) => request<T>("PUT", path, body),
+  delete: (path: string) => request<void>("DELETE", path),
 };

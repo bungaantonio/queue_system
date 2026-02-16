@@ -10,8 +10,7 @@ from app.models.enums import AuditAction, QueueStatus
 from app.models.user import User
 from app.models.user_credential import UserCredential
 
-from app.utils.credential_utils import hash_identifier
-from app.helpers.audit_helpers import audit_queue_action
+from app.helpers.audit_helpers import audit_queue_action, build_audit_details
 
 
 
@@ -48,10 +47,14 @@ def create_user_with_credential_and_queue(db, request, operator_id):
         action=AuditAction.QUEUE_CREATED,
         item=queue_item,
         operator_id=operator_id,
-        details={
-            "attendance_type": request.attendance_type,
-            "priority_score": queue_item.priority_score,
-        },
+        details=build_audit_details(
+            action=AuditAction.QUEUE_CREATED,
+            msg="Usuário registado e adicionado na fila",
+            extra={
+                "attendance_type": request.attendance_type,
+                "priority_score": queue_item.priority_score,
+            },
+        ),
     )
 
     db.commit()
