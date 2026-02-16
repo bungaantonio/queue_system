@@ -15,28 +15,34 @@ export const CounterConsole = () => {
   const { queue, called, current, callNext, finish, skip, cancel } = context;
   const activeUser = current || called;
   const isPending = !!called;
+  const isInService = Boolean(current) && !isPending;
 
   return (
-    <Box sx={{ height: "calc(100vh - 140px)", minHeight: 600 }}>
+    <Box sx={{ minHeight: { xs: 480, md: 540 } }}>
       <Title title="Consola Operacional" />
 
-      <Grid container spacing={4} sx={{ height: "100%" }}>
+      <Grid container spacing={{ xs: 1.5, md: 2 }}>
         {/* LADO ESQUERDO: ÁREA DE COMANDO */}
-        <Grid size={{ xs: 12, md: 7, lg: 8 }} sx={{ height: "100%" }}>
+        <Grid size={{ xs: 12, md: 7, lg: 8 }}>
           <Paper
             elevation={0}
             sx={{
-              height: "100%",
+              minHeight: { xs: 360, md: 440 },
               display: "flex",
               flexDirection: "column",
-              p: 6,
-              borderRadius: 8,
+              justifyContent: "space-between",
+              p: { xs: 2, md: 3 },
+              borderRadius: 5,
               position: "relative",
               overflow: "hidden",
               transition: "background-color 0.6s ease",
               bgcolor: isPending ? "primary.main" : "background.paper",
               border: "1px solid",
-              borderColor: isPending ? "primary.dark" : "divider",
+              borderColor: isPending
+                ? "primary.dark"
+                : isInService
+                  ? "success.light"
+                  : "divider",
             }}
           >
             <StatusHero user={activeUser} isPending={isPending} />
@@ -46,7 +52,7 @@ export const CounterConsole = () => {
               direction="row"
               spacing={2}
               justifyContent="center"
-              sx={{ mt: 4 }}
+              sx={{ mt: 2, flexWrap: "wrap" }}
             >
               {!activeUser ? (
                 <Button
@@ -54,7 +60,7 @@ export const CounterConsole = () => {
                   size="large"
                   onClick={callNext}
                   startIcon={<Play size={20} fill="currentColor" />}
-                  sx={{ px: 10, py: 2, fontSize: "1.1rem", borderRadius: 4 }}
+                  sx={{ px: { xs: 4, md: 6 }, py: 1.25, borderRadius: 3 }}
                 >
                   Chamar Próximo Utente
                 </Button>
@@ -69,7 +75,7 @@ export const CounterConsole = () => {
                         bgcolor: "white",
                         color: "primary.main",
                         "&:hover": { bgcolor: alpha("#fff", 0.9) },
-                        px: 5,
+                        px: 3,
                       }}
                     >
                       Confirmar Presença
@@ -80,7 +86,7 @@ export const CounterConsole = () => {
                       color="success"
                       onClick={finish}
                       startIcon={<CheckCircle2 size={20} />}
-                      sx={{ px: 5 }}
+                      sx={{ px: 3 }}
                     >
                       Finalizar Atendimento
                     </Button>
@@ -91,7 +97,7 @@ export const CounterConsole = () => {
                     onClick={skip}
                     startIcon={<UserX size={20} />}
                     sx={{
-                      px: 5,
+                      px: 3,
                       color: isPending ? "white" : "error.main",
                       borderColor: isPending
                         ? alpha("#fff", 0.3)
@@ -107,7 +113,7 @@ export const CounterConsole = () => {
         </Grid>
 
         {/* LADO DIREITO: GESTÃO DA FILA */}
-        <Grid size={{ xs: 12, md: 5, lg: 4 }} sx={{ height: "100%" }}>
+        <Grid size={{ xs: 12, md: 5, lg: 4 }}>
           <QueueSidebar queue={queue} onCancel={cancel} />
         </Grid>
       </Grid>

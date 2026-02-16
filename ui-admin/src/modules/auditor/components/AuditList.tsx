@@ -9,7 +9,7 @@ export const AuditList = () => {
   const { summary } = useGetHeader();
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box>
       <Title title="Auditoria de Segurança" />
 
       <AuditSummary summary={summary} />
@@ -19,7 +19,7 @@ export const AuditList = () => {
       >
         <Card
           sx={{
-            borderRadius: 6,
+            borderRadius: 5,
             border: "1px solid",
             borderColor: "divider",
             overflow: "hidden",
@@ -28,8 +28,8 @@ export const AuditList = () => {
           <Datagrid
             rowClick="show"
             sx={{
-              "& .MuiTableCell-head": { bgcolor: "grey.50" },
-              "& .MuiDataGrid-cell": { fontVariantNumeric: "tabular-nums" },
+              "& .MuiTableCell-head": { bgcolor: "background.default" },
+              "& .MuiTableCell-root": { py: 1.25 },
             }}
           >
             <TextField

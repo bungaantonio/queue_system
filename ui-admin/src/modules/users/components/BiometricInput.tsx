@@ -59,7 +59,9 @@ export const BiometricInput = ({
         borderRadius: 4,
         border: "1px solid",
         borderColor: isSuccess ? "success.light" : "divider",
-        bgcolor: isSuccess ? alpha("#10B981", 0.02) : "grey.50",
+        bgcolor: isSuccess
+          ? (theme) => alpha(theme.palette.success.main, 0.04)
+          : "grey.50",
       }}
     >
       <Stack direction="row" spacing={3} alignItems="center">
@@ -79,7 +81,8 @@ export const BiometricInput = ({
             color:
               isSuccess || status === "scanning" ? "white" : "text.disabled",
             boxShadow: isSuccess
-              ? `0 8px 20px ${alpha("#10B981", 0.3)}`
+              ? (theme) =>
+                  `0 8px 20px ${alpha(theme.palette.success.main, 0.3)}`
               : "none",
             transition: "all 0.3s ease",
           }}

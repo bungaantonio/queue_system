@@ -33,7 +33,7 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
         <Box
           sx={{
             position: "absolute",
-            top: -20,
+            top: -12,
             animation: `${pulse} 2s infinite ease-in-out`,
             display: "flex",
             alignItems: "center",
@@ -70,12 +70,14 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
         <Typography
           variant="h1"
           sx={{
-            fontSize: isIdle ? "5rem" : { xs: "6rem", md: "11rem" },
+            fontSize: isIdle
+              ? { xs: "2.8rem", md: "4rem" }
+              : { xs: "4.4rem", md: "6.6rem" },
             fontWeight: 900,
             lineHeight: 0.8,
-            letterSpacing: -8,
+            letterSpacing: -5,
             color: isPending ? "white" : "text.primary",
-            mb: 2,
+            mb: 1.25,
             fontVariantNumeric: "tabular-nums",
           }}
         >
@@ -85,10 +87,11 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 600,
+            fontWeight: 700,
             color: isPending ? alpha("#fff", 0.9) : "text.secondary",
-            maxWidth: "80%",
-            letterSpacing: -1,
+            maxWidth: "85%",
+            letterSpacing: -0.5,
+            fontSize: { xs: "1.1rem", md: "1.5rem" },
           }}
         >
           {user?.name || "Aguardando próxima chamada"}

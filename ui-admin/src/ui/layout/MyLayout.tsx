@@ -12,11 +12,17 @@ export const MyLayout = (props: LayoutProps) => (
     appBar={MyAppBar}
     menu={MyMenu}
     sx={{
+      "& .RaLayout-contentWithSidebar": {
+        minHeight: "calc(100dvh - 62px)",
+      },
       "& .RaLayout-content": {
-        // Redundância de segurança para garantir o "espaço para respirar"
-        padding: "32px !important",
+        width: "100%",
+        maxWidth: "1460px",
+        marginInline: "auto",
+        paddingInline: { xs: 12, md: 16, xl: 24 },
+        paddingBlock: { xs: 12, md: 16 },
         backgroundColor: "background.default",
-        minHeight: "100vh",
+        boxSizing: "border-box",
       },
     }}
   />

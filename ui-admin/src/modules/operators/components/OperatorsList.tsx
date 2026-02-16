@@ -5,19 +5,19 @@ import { RoleBadge } from "./RoleBadge";
 import { Users } from "lucide-react";
 
 export const OperatorsList = () => (
-  <Box sx={{ p: 4 }}>
+  <Box>
     <Title title="Gestão de Operadores" />
 
-    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 4 }}>
+    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2.5 }}>
       <Box
         sx={{
-          p: 1.5,
+          p: 1.25,
           bgcolor: "primary.main",
-          borderRadius: 3,
+          borderRadius: 2.5,
           color: "white",
         }}
       >
-        <Users size={24} />
+        <Users size={20} />
       </Box>
       <Box>
         <Typography variant="h4">Operadores</Typography>
@@ -37,7 +37,7 @@ export const OperatorsList = () => (
       <Datagrid
         rowClick="edit"
         sx={{
-          borderRadius: 5,
+          borderRadius: 4,
           overflow: "hidden",
           border: "1px solid",
           borderColor: "divider",
@@ -47,7 +47,7 @@ export const OperatorsList = () => (
             py: 2,
           },
           "& .MuiTableRow-root:hover": {
-            bgcolor: alpha("#4f46e5", 0.02),
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.03),
           },
         }}
       >
