@@ -6,7 +6,10 @@ import {
   BooleanInput,
   SelectInput,
   required,
+  minLength,
+  type SaveHandler,
 } from "react-admin";
+import { Stack, Typography, Alert, Box } from "@mui/material";
 import { BiometricInput } from "./BiometricInput";
 import { utentesGateway } from "../utentesGateway";
 import type { UtenteCreatePayload } from "../utentes.types";
@@ -23,6 +26,12 @@ interface UtentesCreateFormValues {
   credential_identifier: string;
   attendance_type: "normal" | "priority" | "urgent";
 }
+
+const attendanceChoices = [
+  { id: "normal", name: "Normal (Geral)" },
+  { id: "priority", name: "Prioritário" },
+  { id: "urgent", name: "Urgente" },
+];
 
 export const UtentesCreate = () => {
   const handleSave = async (values: UtentesCreateFormValues) => {
@@ -48,43 +57,95 @@ export const UtentesCreate = () => {
     await utentesGateway.create(payload);
   };
 
+  const onSubmit: SaveHandler<UtentesCreateFormValues> = async (
+    values: Partial<UtentesCreateFormValues>,
+  ) => {
+    await handleSave(values as UtentesCreateFormValues);
+  };
+
   return (
     <Create redirect="list">
       <SimpleForm
-        onSubmit={(values: any) =>
-          handleSave(values as UtentesCreateFormValues)
-        }
+        defaultValues={{ attendance_type: "normal" }}
+        onSubmit={onSubmit}
       >
-        <TextInput source="name" label="Nome Completo" validate={required()} />
-        <TextInput
-          source="document_id"
-          label="Nº Documento"
-          validate={required()}
-        />
-        <TextInput
-          source="phone"
-          label="Contacto Telefónico"
-          validate={required()}
-        />
-        <DateInput
-          source="birth_date"
-          label="Data de Nascimento"
-          validate={required()}
-        />
+        <Stack spacing={1.25} sx={{ mb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: 900 }}>
+            Novo Utente
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Registe identificação, biometria e prioridade de atendimento.
+          </Typography>
+        </Stack>
+
+        <Alert severity="info" sx={{ mb: 2 }}>
+          A biometria é obrigatória para vincular o utente ao fluxo de fila.
+        </Alert>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gap: 2,
+            width: "100%",
+          }}
+        >
+          <TextInput
+            source="name"
+            label="Nome completo"
+            fullWidth
+            validate={[required(), minLength(3)]}
+          />
+          <TextInput
+            source="document_id"
+            label="Número de identificação"
+            fullWidth
+            validate={[required(), minLength(5)]}
+          />
+          <TextInput
+            source="phone"
+            label="Contacto telefónico"
+            fullWidth
+            validate={[required(), minLength(7)]}
+          />
+          <DateInput
+            source="birth_date"
+            label="Data de nascimento"
+            fullWidth
+            validate={required()}
+          />
+        </Box>
+
         <BiometricInput source="credential_identifier" operatorId={42} />
-        <BooleanInput source="is_pregnant" label="Utente Gestante" />
-        <DateInput source="pregnant_until" label="Data prevista parto" />
-        <BooleanInput source="is_disabled_temp" label="Mobilidade Reduzida" />
-        <DateInput source="disabled_until" label="Validade do atestado" />
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gap: 2,
+            width: "100%",
+          }}
+        >
+          <BooleanInput source="is_pregnant" label="Utente gestante" />
+          <DateInput
+            source="pregnant_until"
+            label="Data prevista parto"
+            fullWidth
+          />
+          <BooleanInput source="is_disabled_temp" label="Mobilidade reduzida" />
+          <DateInput
+            source="disabled_until"
+            label="Validade do atestado"
+            fullWidth
+          />
+        </Box>
+
         <SelectInput
           source="attendance_type"
-          label="Tipo de Atendimento"
+          label="Tipo de atendimento"
+          choices={attendanceChoices}
+          fullWidth
           validate={required()}
-          choices={[
-            { id: "normal", name: "Normal (Geral)" },
-            { id: "priority", name: "Prioritário (Crianças/Grávidas/Idosos)" },
-            { id: "urgent", name: "Urgente (Emergência)" },
-          ]}
         />
       </SimpleForm>
     </Create>

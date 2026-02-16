@@ -1,5 +1,5 @@
 // src/modules/queue/components/AtendimentoProvider.tsx
-import React, {
+import {
   createContext,
   useEffect,
   useState,
@@ -7,21 +7,15 @@ import React, {
   ReactNode,
 } from "react";
 import { atendimentoGateway } from "../atendimentoGateway";
+import { normalizeQueueSnapshot } from "../atendimento.types";
 import { sessionStore } from "../../../core/session/sessionStorage";
 import { CONFIG } from "../../../core/config/config";
-
-// 1. Definições de Tipos mais rigorosas para evitar 'any'
-interface Utente {
-  id: number;
-  position: string;
-  name: string;
-  status: "waiting" | "called_pending" | "being_served";
-}
+import type { QueueEntry, QueueSnapshot } from "../atendimento.types";
 
 interface AtendimentoContextType {
-  queue: Utente[];
-  called: Utente | null;
-  current: Utente | null;
+  queue: QueueEntry[];
+  called: QueueEntry | null;
+  current: QueueEntry | null;
   loading: boolean;
   callNext: () => Promise<void>;
   finish: () => Promise<void>;
@@ -35,29 +29,15 @@ export const AtendimentoContext = createContext<AtendimentoContextType | null>(
 );
 
 export const AtendimentoProvider = ({ children }: { children: ReactNode }) => {
-  const [queue, setQueue] = useState<Utente[]>([]);
-  const [called, setCalled] = useState<Utente | null>(null);
-  const [current, setCurrent] = useState<Utente | null>(null);
+  const [queue, setQueue] = useState<QueueEntry[]>([]);
+  const [called, setCalled] = useState<QueueEntry | null>(null);
+  const [current, setCurrent] = useState<QueueEntry | null>(null);
   const [loading, setLoading] = useState(true);
 
-  /**
-   * Função para processar os dados vindos da API ou do SSE.
-   * Notei nos teus logs que o backend envia: { success: true, data: { queue, called, current } }
-   */
-  const updateState = useCallback((response: any) => {
-    console.log("AtendimentoProvider: Processando atualização", response);
-
-    // Extrai o objeto de dados (seja da resposta direta ou do campo 'data')
-    const payload = response?.data || response;
-
-    if (payload && typeof payload === "object" && !Array.isArray(payload)) {
-      setQueue(payload.queue || []);
-      setCalled(payload.called || null);
-      setCurrent(payload.current || null);
-    } else if (Array.isArray(payload)) {
-      setQueue(payload);
-    }
-
+  const updateState = useCallback((snapshot: QueueSnapshot) => {
+    setQueue(snapshot.queue);
+    setCalled(snapshot.called);
+    setCurrent(snapshot.current);
     setLoading(false);
   }, []);
 
@@ -115,10 +95,11 @@ export const AtendimentoProvider = ({ children }: { children: ReactNode }) => {
     };
 
     // Escuta o evento específico definido no teu backend
-    eventSource.addEventListener("queue_sync", (e: any) => {
+    eventSource.addEventListener("queue_sync", (e: MessageEvent<string>) => {
       try {
-        const parsedData = JSON.parse(e.data);
-        if (isMounted) updateState(parsedData);
+        const parsedData = JSON.parse(e.data) as unknown;
+        const snapshot = normalizeQueueSnapshot(parsedData);
+        if (isMounted && snapshot) updateState(snapshot);
       } catch (err) {
         console.error("Erro ao processar mensagem SSE:", err);
       }

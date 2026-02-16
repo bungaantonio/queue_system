@@ -1,11 +1,12 @@
 import { Chip, alpha, useTheme } from "@mui/material";
-import { ShieldCheck, UserCog, SearchCheck } from "lucide-react";
+import { ShieldCheck, UserCog, SearchCheck, Cpu } from "lucide-react";
 import { useRecordContext } from "react-admin";
 
 const roleConfigs = {
   admin: { label: "Administrador", tone: "flow", icon: ShieldCheck },
   attendant: { label: "Atendente", tone: "ready", icon: UserCog },
   auditor: { label: "Auditor", tone: "stable", icon: SearchCheck },
+  system: { label: "Sistema", tone: "rigor", icon: Cpu },
 };
 
 export const RoleBadge = ({ source = "role" }: { source?: string }) => {
@@ -18,9 +19,11 @@ export const RoleBadge = ({ source = "role" }: { source?: string }) => {
   const color =
     config.tone === "ready"
       ? theme.palette.success.main
-      : config.tone === "stable"
-        ? theme.palette.text.secondary
-        : theme.palette.primary.main;
+      : config.tone === "rigor"
+        ? theme.palette.error.main
+        : config.tone === "stable"
+          ? theme.palette.text.secondary
+          : theme.palette.primary.main;
 
   return (
     <Chip

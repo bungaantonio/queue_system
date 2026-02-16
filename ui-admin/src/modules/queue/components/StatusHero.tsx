@@ -9,12 +9,23 @@ const pulse = keyframes`
 `;
 
 interface StatusHeroProps {
-  user: { position: string; name: string } | null;
+  user: { position: number; name: string; ticket?: string } | null;
   isPending: boolean;
 }
 
 export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
   const isIdle = !user;
+  const headline = isIdle
+    ? "BALCÃO DISPONÍVEL"
+    : isPending
+      ? "VALIDAÇÃO NECESSÁRIA"
+      : "UTENTE EM ATENDIMENTO";
+
+  const subline = isIdle
+    ? "Aguardando próxima chamada"
+    : isPending
+      ? "Confirme a presença para iniciar atendimento"
+      : user?.name || "Atendimento em curso";
 
   return (
     <Box
@@ -60,29 +71,41 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
             mb: 1,
           }}
         >
-          {isIdle
-            ? "BALCÃO DISPONÍVEL"
-            : isPending
-              ? "VALIDAÇÃO NECESSÁRIA"
-              : "UTENTE EM ATENDIMENTO"}
+          {headline}
         </Typography>
 
-        <Typography
-          variant="h1"
-          sx={{
-            fontSize: isIdle
-              ? { xs: "2.8rem", md: "4rem" }
-              : { xs: "4.4rem", md: "6.6rem" },
-            fontWeight: 900,
-            lineHeight: 0.8,
-            letterSpacing: -5,
-            color: isPending ? "white" : "text.primary",
-            mb: 1.25,
-            fontVariantNumeric: "tabular-nums",
-          }}
-        >
-          {user?.position || "FREE"}
-        </Typography>
+        <Stack spacing={0.3} alignItems="center">
+          <Typography
+            variant="h1"
+            sx={{
+              fontSize: isIdle
+                ? { xs: "2.8rem", md: "4rem" }
+                : { xs: "4.4rem", md: "6.6rem" },
+              fontWeight: 900,
+              lineHeight: 0.8,
+              letterSpacing: -5,
+              color: isPending ? "white" : "text.primary",
+              mb: 0.1,
+              fontVariantNumeric: "tabular-nums",
+            }}
+          >
+            {typeof user?.position === "number" ? user.position : "FREE"}
+          </Typography>
+          {!isIdle && user?.ticket ? (
+            <Typography
+              variant="caption"
+              sx={{
+                fontFamily: "monospace",
+                fontSize: "0.78rem",
+                fontWeight: 900,
+                letterSpacing: "0.08em",
+                color: isPending ? alpha("#fff", 0.9) : "primary.main",
+              }}
+            >
+              TICKET {user.ticket}
+            </Typography>
+          ) : null}
+        </Stack>
 
         <Typography
           variant="h4"
@@ -94,7 +117,7 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
             fontSize: { xs: "1.1rem", md: "1.5rem" },
           }}
         >
-          {user?.name || "Aguardando próxima chamada"}
+          {subline}
         </Typography>
       </Stack>
     </Box>

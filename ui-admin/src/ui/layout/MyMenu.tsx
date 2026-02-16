@@ -8,39 +8,65 @@ export const MyMenu = (props: MenuProps) => (
     {...props}
     sx={{
       width: 236,
-      mt: 1,
+      mt: 0.5,
       px: 1,
-      backgroundColor: "transparent",
+      py: 0.75,
+      borderRight: "1px solid",
+      borderColor: "divider",
+      backgroundColor: (theme: Theme) =>
+        alpha(theme.palette.background.paper, 0.9),
       "& .RaMenuItemLink-root": {
+        minHeight: 38,
+        px: 1,
+        mb: 0.45,
         borderRadius: 2.5,
-        mb: 0.25,
-        py: 1.1,
-        fontWeight: 700,
-        fontSize: "0.7rem",
-        textTransform: "uppercase",
-        letterSpacing: "0.08em",
+        border: "1px solid transparent",
         color: "text.secondary",
-        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+        fontWeight: 800,
+        fontSize: "0.7rem",
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        transition: "all 160ms ease",
         "&:hover": {
-          backgroundColor: (theme: Theme) =>
-            alpha(theme.palette.primary.main, 0.04),
           color: "primary.main",
-          transform: "translateX(2px)",
+          borderColor: (theme: Theme) => alpha(theme.palette.primary.main, 0.2),
+          backgroundColor: (theme: Theme) =>
+            alpha(theme.palette.primary.main, 0.06),
         },
         "&.RaMenuItemLink-active": {
+          color: "primary.main",
+          borderColor: (theme: Theme) =>
+            alpha(theme.palette.primary.main, 0.28),
           backgroundColor: (theme: Theme) =>
             alpha(theme.palette.primary.main, 0.1),
-          color: "primary.main",
-          borderLeft: "3px solid",
-          borderColor: "primary.main",
+          boxShadow: (theme: Theme) =>
+            `inset 2px 0 0 ${theme.palette.primary.main}`,
           "& .RaMenuItemLink-icon": {
             color: "primary.main",
           },
         },
       },
       "& .RaMenuItemLink-icon": {
-        minWidth: 34,
-        fontSize: "1.05rem",
+        minWidth: 32,
+        fontSize: "1rem",
+      },
+      "&.RaMenu-closed": {
+        width: 74,
+        px: 0.5,
+      },
+      "&.RaMenu-closed .RaMenuItemLink-root": {
+        px: 0,
+        justifyContent: "center !important",
+        borderLeft: "none",
+      },
+      "&.RaMenu-closed .RaMenuItemLink-icon": {
+        minWidth: 0,
+      },
+      "&.RaMenu-closed .RaMenuItemLink-primaryText": {
+        display: "none",
+      },
+      "&.RaMenu-closed .RaMenuItemLink-active": {
+        boxShadow: "none",
       },
     }}
   />

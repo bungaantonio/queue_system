@@ -3,16 +3,23 @@ import {
   SimpleForm,
   TextInput,
   SelectInput,
-  BooleanInput,
   Toolbar,
   SaveButton,
   DeleteWithConfirmButton,
   useRecordContext,
   useNotify,
   useRefresh,
+  useGetRecordId,
 } from "react-admin";
-import { Button } from "@mui/material";
+import { Button, Stack, Alert, Typography, Chip } from "@mui/material";
 import { operatorsGateway } from "../operatorsGateway";
+
+const roleChoices = [
+  { id: "admin", name: "Administrador" },
+  { id: "attendant", name: "Atendente" },
+  { id: "auditor", name: "Auditor" },
+  { id: "system", name: "Sistema", disabled: true },
+];
 
 const OperatorEditToolbar = () => {
   const record = useRecordContext();
@@ -52,19 +59,56 @@ const OperatorEditToolbar = () => {
   );
 };
 
+const EditHeader = () => {
+  const record = useRecordContext();
+  const id = useGetRecordId();
+
+  return (
+    <Stack spacing={1.25} sx={{ mb: 1.5 }}>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Typography variant="h5" sx={{ fontWeight: 900 }}>
+          Operador #{id}
+        </Typography>
+        <Chip
+          size="small"
+          label={record?.active ? "ATIVO" : "INATIVO"}
+          color={record?.active ? "success" : "default"}
+          variant={record?.active ? "filled" : "outlined"}
+        />
+      </Stack>
+      <Typography variant="body2" color="text.secondary">
+        Atualize função e dados de acesso. A conta de sistema não deve ser
+        alterada.
+      </Typography>
+      {record?.role === "system" ? (
+        <Alert severity="warning">
+          Conta técnica detectada: alterações de função foram bloqueadas.
+        </Alert>
+      ) : null}
+    </Stack>
+  );
+};
+
 export const OperatorsEdit = () => (
   <Edit mutationMode="pessimistic">
     <SimpleForm toolbar={<OperatorEditToolbar />}>
-      <TextInput source="username" label="Nome de utilizador" />
-      <BooleanInput source="active" label="Ativo" disabled />
+      <EditHeader />
+
+      <TextInput source="id" label="ID" disabled />
+      <TextInput source="username" label="Nome de utilizador" fullWidth />
       <SelectInput
         source="role"
         label="Função"
-        choices={[
-          { id: "admin", name: "Administrador" },
-          { id: "attendant", name: "Atendente" },
-          { id: "auditor", name: "Auditor" },
-        ]}
+        choices={roleChoices}
+        disableValue="disabled"
+      />
+      <TextInput source="createdAt" label="Criado em" disabled fullWidth />
+      <TextInput source="lastLogin" label="Último login" disabled fullWidth />
+      <TextInput
+        source="lastActivity"
+        label="Última atividade"
+        disabled
+        fullWidth
       />
     </SimpleForm>
   </Edit>

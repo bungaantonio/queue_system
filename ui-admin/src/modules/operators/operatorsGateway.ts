@@ -1,24 +1,43 @@
 import { httpClient } from "../../core/http/apiClient";
-import type { Operator } from "./types";
+import { normalizeOperator } from "./types";
+import type { Operator, OperatorApi } from "./types";
 
 export const operatorsGateway = {
-  getList: async (): Promise<Operator[]> =>
-    httpClient.get<Operator[]>("/operators"),
+  getList: async (): Promise<Operator[]> => {
+    const data = await httpClient.get<OperatorApi[]>("/operators");
+    return Array.isArray(data) ? data.map(normalizeOperator) : [];
+  },
 
-  getOne: async (id: number): Promise<Operator> =>
-    httpClient.get<Operator>(`/operators/${id}`),
+  getOne: async (id: number): Promise<Operator> => {
+    const data = await httpClient.get<OperatorApi>(`/operators/${id}`);
+    return normalizeOperator(data);
+  },
 
-  create: async (data: Omit<Operator, "id">): Promise<Operator> =>
-    httpClient.post<Operator>("/operators", data),
+  create: async (data: Omit<OperatorApi, "id">): Promise<Operator> => {
+    const created = await httpClient.post<OperatorApi>("/operators", data);
+    return normalizeOperator(created);
+  },
 
-  update: async (id: number, data: Partial<Operator>): Promise<Operator> =>
-    httpClient.put<Operator>(`/operators/${id}`, data),
+  update: async (id: number, data: Partial<OperatorApi>): Promise<Operator> => {
+    const updated = await httpClient.put<OperatorApi>(`/operators/${id}`, data);
+    return normalizeOperator(updated);
+  },
 
-  deactivate: async (id: number): Promise<Operator> =>
-    httpClient.patch<Operator>(`/operators/${id}/deactivate`, {}),
+  deactivate: async (id: number): Promise<Operator> => {
+    const data = await httpClient.patch<OperatorApi>(
+      `/operators/${id}/deactivate`,
+      {},
+    );
+    return normalizeOperator(data);
+  },
 
-  activate: async (id: number): Promise<Operator> =>
-    httpClient.patch<Operator>(`/operators/${id}/activate`, {}),
+  activate: async (id: number): Promise<Operator> => {
+    const data = await httpClient.patch<OperatorApi>(
+      `/operators/${id}/activate`,
+      {},
+    );
+    return normalizeOperator(data);
+  },
 
   delete: async (id: number): Promise<void> =>
     operatorsGateway.deactivate(id).then(() => undefined),
