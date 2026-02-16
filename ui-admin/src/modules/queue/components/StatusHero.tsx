@@ -51,7 +51,7 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
             gap: 1,
           }}
         >
-          <BellRing size={24} color="#ffffff" />
+          <BellRing size={24} color="white" />
           <Typography
             variant="caption"
             sx={{ color: "white", fontWeight: 900, letterSpacing: 2 }}
@@ -67,7 +67,9 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
           sx={{
             fontWeight: 900,
             letterSpacing: 4,
-            color: isPending ? alpha("#fff", 0.7) : "primary.main",
+            color: isPending
+              ? (theme) => alpha(theme.palette.common.white, 0.7)
+              : "primary.main",
             mb: 1,
           }}
         >
@@ -99,7 +101,9 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
                 fontSize: "0.78rem",
                 fontWeight: 900,
                 letterSpacing: "0.08em",
-                color: isPending ? alpha("#fff", 0.9) : "primary.main",
+                color: isPending
+                  ? (theme) => alpha(theme.palette.common.white, 0.9)
+                  : "primary.main",
               }}
             >
               TICKET {user.ticket}
@@ -111,7 +115,9 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
           variant="h4"
           sx={{
             fontWeight: 700,
-            color: isPending ? alpha("#fff", 0.9) : "text.secondary",
+            color: isPending
+              ? (theme) => alpha(theme.palette.common.white, 0.9)
+              : "text.secondary",
             maxWidth: "85%",
             letterSpacing: -0.5,
             fontSize: { xs: "1.1rem", md: "1.5rem" },

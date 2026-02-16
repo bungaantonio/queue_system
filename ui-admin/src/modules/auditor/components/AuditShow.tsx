@@ -15,11 +15,12 @@ import {
   alpha,
   Stack,
   Alert,
-  Chip,
 } from "@mui/material";
 import { AuditIntegrityBadge } from "./AuditIntegrityBadge";
 import { Terminal, Link2 } from "lucide-react";
 import type { AuditVerificationDetail } from "../types";
+import { PageHeader } from "../../shared/components/PageHeader";
+import { StatusChip } from "../../shared/components/StatusChip";
 
 const TechnicalField = ({ label, value }: { label: string; value: string }) => (
   <Box sx={{ mb: 1.5 }}>
@@ -52,10 +53,11 @@ export const AuditShow = () => (
   <Show
     sx={{ "& .RaShow-main": { boxShadow: "none", bgcolor: "transparent" } }}
   >
-    <Box sx={{ maxWidth: 1120 }}>
-      <Typography variant="h4" sx={{ mb: 2 }}>
-        Evento de Auditoria
-      </Typography>
+    <Box sx={{ maxWidth: 1120, width: "100%", mx: "auto" }}>
+      <PageHeader
+        title="Evento de Auditoria"
+        description="Inspeção técnica do encadeamento e da prova criptográfica."
+      />
 
       <AuditStatusHeader />
 
@@ -73,19 +75,10 @@ export const AuditShow = () => (
                 <FunctionField
                   label="Ação"
                   render={(record: AuditVerificationDetail) => (
-                    <Chip
-                      size="small"
+                    <StatusChip
                       label={String(record.action || "N/A").toUpperCase()}
                       color={record.valid ? "primary" : "error"}
                       variant={record.valid ? "outlined" : "filled"}
-                      sx={{
-                        height: 22,
-                        "& .MuiChip-label": {
-                          px: 1,
-                          fontSize: "0.62rem",
-                          fontWeight: 900,
-                        },
-                      }}
                     />
                   )}
                 />
@@ -113,7 +106,7 @@ export const AuditShow = () => (
               alignItems="center"
               sx={{ mb: 1.25 }}
             >
-              <Terminal size={18} color="var(--fcc-stable)" />
+              <Terminal size={18} color="var(--mui-palette-text-secondary)" />
               <Typography variant="subtitle2">PROVA CRIPTOGRÁFICA</Typography>
             </Stack>
             <AuditRecordContent />

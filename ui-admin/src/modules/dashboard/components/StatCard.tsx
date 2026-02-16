@@ -75,7 +75,13 @@ export const StatCard = ({
         <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
           <Typography
             variant="h2"
-            sx={{ fontWeight: 900, fontVariantNumeric: "tabular-nums" }}
+            sx={{
+              fontWeight: 900,
+              fontVariantNumeric: "tabular-nums",
+              fontSize: { xs: "2rem", md: "2.8rem" },
+              lineHeight: 1,
+              wordBreak: "break-word",
+            }}
           >
             {value}
           </Typography>

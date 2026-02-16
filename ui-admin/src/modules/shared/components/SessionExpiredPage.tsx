@@ -17,7 +17,8 @@ export const SessionExpiredPage: React.FC = () => {
     >
       <Box
         sx={{
-          width: { xs: "100%", sm: 400 },
+          width: "100%",
+          maxWidth: 420,
           textAlign: "center",
         }}
       >

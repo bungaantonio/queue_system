@@ -8,64 +8,48 @@ import {
   Title,
   useListContext,
 } from "react-admin";
-import { Box, Typography, Stack, alpha, Chip, Card } from "@mui/material";
+import { Box, Stack, Chip, Card } from "@mui/material";
 import { Users, Shield, Cpu } from "lucide-react";
 import { RoleBadge } from "./RoleBadge";
 import type { Operator } from "../types";
+import { PageHeader } from "../../shared/components/PageHeader";
+import { StatusChip } from "../../shared/components/StatusChip";
+import {
+  datagridBaseSx,
+  datagridHoverSx,
+  listCardSx,
+  listMainTransparentSx,
+} from "../../shared/styles/listStyles";
 
 export const OperatorsList = () => (
   <Box>
     <Title title="Operadores" />
 
-    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
-      <Box
-        sx={{
-          p: 1.25,
-          bgcolor: "primary.main",
-          borderRadius: 2.5,
-          color: "white",
-          display: "grid",
-          placeItems: "center",
-        }}
-      >
-        <Users size={20} />
-      </Box>
-      <Box>
-        <Typography variant="h4">Operadores</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Acesso, função e estado operacional dos utilizadores internos.
-        </Typography>
-      </Box>
-    </Stack>
+    <PageHeader
+      title="Operadores"
+      description="Acesso, função e estado operacional dos utilizadores internos."
+      icon={<Users size={20} />}
+    />
 
     <List
       sort={{ field: "username", order: "ASC" }}
       perPage={25}
-      sx={{
-        bgcolor: "transparent",
-        "& .RaList-main": { boxShadow: "none", border: "none" },
-      }}
+      sx={listMainTransparentSx}
     >
       <OperatorsOverview />
 
-      <Card
-        sx={{
-          borderRadius: 4,
-          border: "1px solid",
-          borderColor: "divider",
-          overflow: "hidden",
-        }}
-      >
+      <Card sx={listCardSx}>
         <Datagrid
           rowClick="edit"
           bulkActionButtons={false}
           sx={{
+            ...datagridBaseSx,
+            ...datagridHoverSx,
             "& .MuiTableCell-head": {
-              bgcolor: "background.default",
               py: 1.5,
             },
-            "& .MuiTableRow-root:hover": {
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.03),
+            "& .column-createdAt, & .column-lastLogin": {
+              display: { xs: "none", lg: "table-cell" },
             },
           }}
         >
@@ -83,20 +67,10 @@ export const OperatorsList = () => (
           <FunctionField
             label="Estado"
             render={(record: Operator) => (
-              <Chip
-                size="small"
+              <StatusChip
                 label={record.active ? "ATIVO" : "INATIVO"}
                 color={record.active ? "success" : "default"}
                 variant={record.active ? "filled" : "outlined"}
-                sx={{
-                  height: 22,
-                  "& .MuiChip-label": {
-                    px: 1,
-                    fontSize: "0.62rem",
-                    fontWeight: 900,
-                    letterSpacing: "0.08em",
-                  },
-                }}
               />
             )}
           />

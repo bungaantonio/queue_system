@@ -64,7 +64,11 @@ export const BiometricInput = ({
           : "grey.50",
       }}
     >
-      <Stack direction="row" spacing={3} alignItems="center">
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={3}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+      >
         <Box
           sx={{
             width: 64,
@@ -125,6 +129,7 @@ export const BiometricInput = ({
           startIcon={
             isSuccess ? <RefreshCw size={16} /> : <Fingerprint size={16} />
           }
+          sx={{ width: { xs: "100%", sm: "auto" } }}
         >
           {isSuccess ? "Recapturar" : "Iniciar Leitura"}
         </Button>

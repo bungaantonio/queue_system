@@ -41,7 +41,7 @@ const OperatorEditToolbar = () => {
   };
 
   return (
-    <Toolbar>
+    <Toolbar sx={{ flexWrap: "wrap", gap: 1 }}>
       <SaveButton />
       {canActivate ? (
         <Button onClick={handleActivate} variant="outlined" color="success">
@@ -65,7 +65,11 @@ const EditHeader = () => {
 
   return (
     <Stack spacing={1.25} sx={{ mb: 1.5 }}>
-      <Stack direction="row" spacing={1} alignItems="center">
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+      >
         <Typography variant="h5" sx={{ fontWeight: 900 }}>
           Operador #{id}
         </Typography>

@@ -7,6 +7,7 @@ import {
   IconButton,
   alpha,
   Chip,
+  useTheme,
 } from "@mui/material";
 import { Trash2, UserPlus } from "lucide-react";
 import type { QueueEntry } from "../atendimento.types";
@@ -18,6 +19,8 @@ export const QueueSidebar = ({
   queue: QueueEntry[];
   onCancel: (id: number) => void | Promise<void>;
 }) => {
+  const theme = useTheme();
+
   return (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Stack
@@ -37,7 +40,7 @@ export const QueueSidebar = ({
             {queue.length} utente(s) em espera
           </Typography>
         </Stack>
-        <UserPlus size={16} color="var(--fcc-stable)" />
+        <UserPlus size={16} color={theme.palette.text.secondary} />
       </Stack>
 
       <Stack spacing={0.9} sx={{ overflowY: "auto", flex: 1, pr: 0.5 }}>
@@ -83,8 +86,9 @@ export const QueueSidebar = ({
                   p: 1.25,
                   borderRadius: 3,
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: { xs: "flex-start", sm: "center" },
                   justifyContent: "space-between",
+                  gap: 1,
                   border: "1px solid",
                   borderColor: isNext ? "primary.light" : "divider",
                   bgcolor: isNext
@@ -109,7 +113,7 @@ export const QueueSidebar = ({
                     sx={{
                       fontWeight: 900,
                       color: isNext ? "primary.main" : "text.disabled",
-                      minWidth: 44,
+                      minWidth: { xs: 34, sm: 44 },
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
@@ -119,7 +123,7 @@ export const QueueSidebar = ({
                     <Typography
                       variant="body2"
                       sx={{ fontWeight: 700, lineHeight: 1.2 }}
-                      noWrap
+                      noWrap={false}
                     >
                       {item.name}
                     </Typography>
@@ -127,7 +131,7 @@ export const QueueSidebar = ({
                       direction="row"
                       spacing={0.6}
                       alignItems="center"
-                      sx={{ mt: 0.3 }}
+                      sx={{ mt: 0.3, flexWrap: "wrap", rowGap: 0.6 }}
                     >
                       {item.ticket ? (
                         <Chip
@@ -200,6 +204,7 @@ export const QueueSidebar = ({
                   sx={{
                     opacity: 0.28,
                     "&:hover": { opacity: 1, color: "error.main" },
+                    alignSelf: { xs: "flex-start", sm: "center" },
                   }}
                   aria-label={`Cancelar ${item.name}`}
                 >
