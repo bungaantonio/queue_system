@@ -87,10 +87,10 @@ export const AtendimentoProvider = ({ children }: { children: ReactNode }) => {
 
     const eventSource = new EventSource(sseUrl);
 
-    eventSource.onopen = () => console.log("✅ SSE conectado:", sseUrl);
+    eventSource.onopen = () => console.log("SSE conectado:", sseUrl);
 
     eventSource.onerror = (err) => {
-      console.error("❌ SSE erro:", err);
+      console.error("SSE erro:", err);
       // O navegador tenta reconectar automaticamente
     };
 
