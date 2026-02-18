@@ -1,4 +1,7 @@
 // src/features/ConsultPage.tsx
+// Fazer a implementação correta da página de consulta,
+// com estados de "Aguardando", "Chamada Ativa" e "Em Atendimento".
+// Responder também os utentes que não estão na fila ou que consultam um ticket inválido.
 import { motion as Motion, AnimatePresence } from "motion/react";
 import { useSearchParams } from "react-router-dom";
 import { useState } from "react";
@@ -60,11 +63,11 @@ export default function ConsultPage() {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ex: A-102"
+              placeholder="Exemplo: LA033"
               className="flex-1 min-w-0 w-full bg-white border-2 border-slate-200 rounded-2xl px-4 py-4 font-black text-lg uppercase tracking-wider focus:border-indigo-600 focus:outline-none transition-all"
             />
             <button className="bg-slate-900 text-white px-6 rounded-2xl font-black uppercase text-xs hover:bg-indigo-600 transition-colors shadow-lg shadow-slate-200">
-              Ver
+              Consultar
             </button>
           </form>
         </section>
@@ -77,7 +80,7 @@ export default function ConsultPage() {
               className="py-20 text-center border-2 border-dashed border-slate-200 rounded-[2.5rem]"
             >
               <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">
-                Insira o código do seu ticket para começar
+                Utilize o formulário acima para consultar o seu ticket
               </p>
             </Motion.div>
           ) : isCalled ? (
@@ -101,7 +104,7 @@ export default function ConsultPage() {
                     Dirija-se ao
                   </p>
                   <p className="text-indigo-600 text-4xl font-black uppercase tracking-tighter">
-                    Guichê 01
+                    Balcão 01
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-indigo-100">
@@ -119,7 +122,7 @@ export default function ConsultPage() {
                     />
                   </svg>
                   <span className="text-xs font-black uppercase tracking-widest">
-                    A sua vez chegou
+                    Chamada em curso
                   </span>
                 </div>
               </div>
@@ -133,7 +136,7 @@ export default function ConsultPage() {
               className="bg-emerald-500 p-6 sm:p-8 rounded-[2.5rem] sm:rounded-[3rem] text-white text-center shadow-xl border-4 border-emerald-400"
             >
               <h2 className="text-3xl font-black uppercase tracking-tighter">
-                Em Atendimento
+                Atendimento em curso
               </h2>
               <div className="h-1 w-20 bg-white/30 mx-auto my-4 rounded-full" />
               <p className="text-emerald-50 text-xs font-bold uppercase tracking-widest opacity-80">
@@ -151,24 +154,22 @@ export default function ConsultPage() {
               <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-indigo-500/10 to-transparent" />
               <div className="relative text-center">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 block mb-4">
-                  Posição Atual
+                  Acompanhe a sua posição na fila
                 </span>
                 <div className="flex items-center justify-center">
                   <span className="text-7xl sm:text-[10rem] font-black text-white leading-none tracking-tighter tabular-nums">
-                    {position || "?"}
-                  </span>
-                  <span className="text-4xl font-black text-indigo-500 mb-12 ml-2">
-                    º
+                    {position ?? "-"}
                   </span>
                 </div>
                 <div className="mt-4 flex flex-col items-center gap-2">
                   <div className="h-1 w-12 bg-indigo-600 rounded-full" />
                   <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
-                    Pessoas à sua frente
+                    Ainda existem utentes à sua frente
                   </p>
                 </div>
               </div>
             </Motion.div>
+
           )}
         </AnimatePresence>
 
@@ -194,8 +195,7 @@ export default function ConsultPage() {
               Monitorização Ativa
             </h4>
             <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-              Esta página atualiza automaticamente. Não é necessário fazer
-              "refresh".
+              Esta página atualiza automaticamente. Não é necessário atualizar manualmente.
             </p>
           </div>
         </div>
@@ -210,7 +210,7 @@ export default function ConsultPage() {
             </span>
             <span className="text-xl font-black text-slate-900">
               {totalWaiting}{" "}
-              <span className="text-xs text-slate-400 uppercase">Clientes</span>
+              <span className="text-xs text-slate-400 uppercase">Utentes</span>
             </span>
           </div>
           <div className="h-8 w-px bg-slate-200" />
