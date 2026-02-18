@@ -55,7 +55,7 @@ export const MyAppBar = () => (
               letterSpacing: "0.5px",
             }}
           >
-            A
+            QMS
           </Typography>
           <Typography
             sx={{
@@ -66,7 +66,7 @@ export const MyAppBar = () => (
               letterSpacing: "0.3px",
             }}
           >
-            ADMIN
+            Admin
           </Typography>
         </Box>
       </Box>
