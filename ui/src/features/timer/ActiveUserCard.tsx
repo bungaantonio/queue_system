@@ -20,7 +20,7 @@ export default function ActiveUserCard() {
     return (
       <div className="h-full flex items-center justify-center">
         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-200">
-          Guichê Disponível
+          Balcão Disponível para Atendimento
         </span>
       </div>
     );
@@ -48,10 +48,10 @@ export default function ActiveUserCard() {
           {isOverdue ? (
             <>
               <span className="text-[clamp(14px,1.05vw,18px)] font-black uppercase tracking-[0.12em] text-amber-600 leading-none">
-                Finalizando
+                Atendimento quase concluído
               </span>
               <span className="text-[clamp(8px,0.75vw,10px)] font-black uppercase tracking-[0.2em] text-slate-400 block mt-1">
-                Aguarde, por favor
+                Por favor, aguarde
               </span>
             </>
           ) : (
@@ -60,7 +60,7 @@ export default function ActiveUserCard() {
                 {minutes}:{seconds}
               </span>
               <span className="text-[clamp(8px,0.75vw,10px)] font-black uppercase tracking-[0.2em] text-slate-400 block mt-1">
-                Tempo Restante
+                Tempo estimado de atendimento
               </span>
             </>
           )}
@@ -69,7 +69,7 @@ export default function ActiveUserCard() {
 
       <div className="bg-indigo-50 rounded-[2rem] py-4 px-5 xl:px-6 flex items-center gap-3 border border-indigo-100/50">
         <span className="text-[clamp(9px,0.85vw,12px)] font-black text-indigo-300 uppercase tracking-[0.25em] shrink-0">
-          Ticket
+          Número do ticket
         </span>
         <span className="ml-auto block text-right text-[clamp(30px,2.7vw,56px)] font-black text-indigo-600 tracking-tighter tabular-nums leading-none">
           {user.ticket}
@@ -87,7 +87,7 @@ export default function ActiveUserCard() {
           />
         </div>
         <div className="flex justify-between text-[clamp(8px,0.75vw,10px)] font-black uppercase text-slate-400 tracking-[0.2em] px-1">
-          <span>{isOverdue ? "Atendimento em curso" : "Status do SLA"}</span>
+          <span>{isOverdue ? "Atendimento em curso" : "Progresso do atendimento"}</span>
           <span>{isOverdue ? "Aguarde" : `${Math.round(progress)}%`}</span>
         </div>
       </div>

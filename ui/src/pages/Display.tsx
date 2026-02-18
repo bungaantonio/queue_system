@@ -10,8 +10,11 @@ import QueuePreviewCard from "../features/waiting-list/QueuePreviewCard.tsx";
 import ActiveUserCard from "../features/timer/ActiveUserCard.tsx";
 import CallOverlay from "../features/called-user/CallOverlay";
 
+import { obterMesEDiaAtual } from "../utils/dateUtils.ts";
+
 export default function Display() {
   useQueueData();
+  const { mes, dia } = obterMesEDiaAtual();
 
   return (
     <div className="h-screen w-screen flex flex-col bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans">
@@ -67,7 +70,7 @@ export default function Display() {
                 />
               </svg>
               <p className="text-4xl font-black text-white tracking-tighter uppercase">
-                Guichê 01
+                Balcão 01
               </p>
             </div>
           </div>
@@ -87,10 +90,10 @@ export default function Display() {
               </div>
               <div className="ml-4 flex flex-col border-l border-white/20 pl-4">
                 <span className="text-xs font-black text-indigo-400 uppercase">
-                  Fev
+                  {mes}
                 </span>
                 <span className="text-xl font-black text-white leading-none">
-                  14
+                  {dia}
                 </span>
               </div>
             </div>
