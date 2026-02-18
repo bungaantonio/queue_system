@@ -25,6 +25,17 @@ export const AuditIntegrityBadge = ({
         borderRadius: "6px",
         bgcolor: alpha(color, 0.08),
         border: `1px solid ${alpha(color, 0.2)}`,
+        position: "relative",
+        overflow: "hidden",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: "3px",
+          bgcolor: color,
+        },
         width: "fit-content",
       }}
     >

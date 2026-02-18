@@ -1,6 +1,6 @@
 // src/modules/dashboard/components/StatCard.tsx
 import { Card, Box, Typography, Stack, alpha, useTheme } from "@mui/material";
-import type { LucideIcon } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { DashboardTone, getToneSurface } from "../dashboardTokens";
 
 interface StatCardProps {
@@ -11,102 +11,131 @@ interface StatCardProps {
   trend?: string;
 }
 
-export const StatCard = ({ title, value, icon: Icon, tone, trend }: StatCardProps) => {
+export const StatCard = ({
+  title,
+  value,
+  icon: Icon,
+  tone,
+  trend,
+}: StatCardProps) => {
   const theme = useTheme();
-  const s = getToneSurface(theme, tone);
+  const toneSurface = getToneSurface(theme, tone);
 
   return (
     <Card
       elevation={0}
       sx={{
-        p: "20px 24px",
+        p: 2.5,
         height: "100%",
         position: "relative",
         overflow: "hidden",
-        borderRadius: "12px",
         border: "1px solid",
-        borderColor: s.border,
-        background: `linear-gradient(150deg, ${alpha(s.color, 0.06)} 0%, #ffffff 55%)`,
-        transition: "box-shadow 0.2s, border-color 0.2s",
+        borderColor: toneSurface.border,
+        background: `linear-gradient(135deg, ${alpha(
+          toneSurface.color,
+          0.03,
+        )} 0%, ${theme.palette.background.paper} 100%)`,
+        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         "&:hover": {
-          boxShadow: `0 8px 24px ${alpha(s.color, 0.14)}`,
-          borderColor: alpha(s.color, 0.35),
+          transform: "translateY(-4px)",
+          borderColor: toneSurface.color,
+          boxShadow: `0 12px 40px -8px ${alpha(toneSurface.color, 0.25)}`,
+          "& .stat-icon": {
+            transform: "scale(1.08) rotate(-5deg)",
+          },
+          "& .stat-bg-icon": {
+            transform: "rotate(-10deg) scale(1.1)",
+            opacity: 0.08,
+          },
         },
       }}
     >
-      {/* Ícone fantasma decorativo */}
       <Box
-        aria-hidden
+        className="stat-bg-icon"
         sx={{
           position: "absolute",
-          bottom: -8,
-          right: -8,
-          color: alpha(s.color, 0.06),
-          pointerEvents: "none",
+          top: -20,
+          right: -20,
+          color: toneSurface.color,
+          opacity: 0.04,
+          transform: "rotate(-15deg)",
+          transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       >
-        <Icon size={88} strokeWidth={1} />
+        <Icon size={120} strokeWidth={1.5} />
       </Box>
 
       <Stack spacing={2}>
-        {/* Linha de título + ícone */}
-        <Stack direction="row" alignItems="center" spacing={1.5}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="flex-start"
+        >
           <Box
+            className="stat-icon"
             sx={{
-              width: 36,
-              height: 36,
-              borderRadius: "9px",
-              bgcolor: s.accent,
-              color: s.color,
+              p: 1.25,
+              borderRadius: 2.5,
+              bgcolor: toneSurface.accent,
+              color: toneSurface.color,
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
+              boxShadow: `0 4px 12px ${alpha(toneSurface.color, 0.15)}`,
+              transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           >
-            <Icon size={18} strokeWidth={2} />
+            <Icon size={22} strokeWidth={2.5} />
           </Box>
-
-          <Typography
-            variant="overline"
-            sx={{
-              color: "text.secondary",
-              fontWeight: 700,
-              letterSpacing: "0.06em",
-              fontSize: "0.6875rem",
-              lineHeight: 1.2,
-            }}
-          >
-            {title}
-          </Typography>
-        </Stack>
-
-        {/* Valor */}
-        <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
-          <Typography
-            component="span"
-            sx={{
-              fontFamily: '"DM Sans", sans-serif',
-              fontWeight: 800,
-              fontVariantNumeric: "tabular-nums",
-              fontSize: { xs: "1.875rem", md: "2.25rem" },
-              lineHeight: 1,
-              letterSpacing: "-0.03em",
-              color: "text.primary",
-              wordBreak: "break-word",
-            }}
-          >
-            {value}
-          </Typography>
           {trend && (
             <Typography
               variant="caption"
-              sx={{ color: "success.dark", fontWeight: 700 }}
+              sx={{
+                color: "success.main",
+                fontWeight: 700,
+                bgcolor: alpha(theme.palette.success.main, 0.1),
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+              }}
             >
               {trend}
             </Typography>
           )}
-        </Box>
+        </Stack>
+
+        <Stack spacing={0.5}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              fontWeight: 700,
+              letterSpacing: 1.2,
+              textTransform: "uppercase",
+              fontSize: "0.7rem",
+            }}
+          >
+            {title}
+          </Typography>
+
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: 900,
+              fontVariantNumeric: "tabular-nums",
+              fontSize: { xs: "2.2rem", md: "2.8rem" },
+              lineHeight: 1,
+              wordBreak: "break-word",
+              background: `linear-gradient(135deg, ${toneSurface.color} 0%, ${alpha(
+                toneSurface.color,
+                0.7,
+              )} 100%)`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            {value}
+          </Typography>
+        </Stack>
       </Stack>
     </Card>
   );

@@ -9,8 +9,18 @@ import {
   LinearProgress,
   alpha,
 } from "@mui/material";
+import { keyframes } from "@mui/material/styles";
 import { Fingerprint, CheckCircle2, RefreshCw } from "lucide-react";
 import { biometricService } from "../../../services/biometricService";
+
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
 export const BiometricInput = ({
   source,
@@ -56,12 +66,49 @@ export const BiometricInput = ({
     <Paper
       sx={{
         p: 3,
-        borderRadius: 4,
+        borderRadius: 2,
         border: "1px solid",
-        borderColor: isSuccess ? "success.light" : "divider",
-        bgcolor: isSuccess
-          ? (theme) => alpha(theme.palette.success.main, 0.04)
-          : "grey.50",
+        borderColor: isSuccess
+          ? (theme) => alpha(theme.palette.success.main, 0.4)
+          : (theme) => alpha(theme.palette.divider, 0.9),
+        background: (theme) =>
+          isSuccess
+            ? `linear-gradient(135deg, ${alpha(
+                theme.palette.success.main,
+                0.12,
+              )} 0%, ${alpha(theme.palette.background.paper, 0.9)} 100%)`
+            : `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
+                theme.palette.background.default,
+                0.6,
+              )} 100%)`,
+        position: "relative",
+        overflow: "hidden",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: "3px",
+          bgcolor: isSuccess ? "success.main" : "primary.main",
+          opacity: isSuccess ? 1 : 0.35,
+        },
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          right: -40,
+          top: -40,
+          width: 120,
+          height: 120,
+          borderRadius: "50%",
+          background: (theme) =>
+            alpha(
+              isSuccess
+                ? theme.palette.success.main
+                : theme.palette.secondary.main,
+              0.08,
+            ),
+        },
       }}
     >
       <Stack
@@ -73,7 +120,7 @@ export const BiometricInput = ({
           sx={{
             width: 64,
             height: 64,
-            borderRadius: 3,
+            borderRadius: 2,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -92,7 +139,15 @@ export const BiometricInput = ({
           }}
         >
           {status === "scanning" ? (
-            <RefreshCw className="animate-spin" />
+            <Box
+              component="span"
+              sx={{
+                display: "flex",
+                animation: `${spin} 1s linear infinite`,
+              }}
+            >
+              <RefreshCw />
+            </Box>
           ) : isSuccess ? (
             <CheckCircle2 />
           ) : (
@@ -113,11 +168,30 @@ export const BiometricInput = ({
               ? "Assinatura digital vinculada"
               : "Posicione o dedo no leitor para iniciar"}
           </Typography>
+          <Box
+            sx={{
+              mt: 1,
+              height: 3,
+              width: 42,
+              bgcolor: isSuccess ? "success.main" : "primary.main",
+              borderRadius: 1,
+              opacity: 0.8,
+            }}
+          />
           {status === "scanning" && (
             <LinearProgress
               variant="determinate"
               value={progress}
-              sx={{ mt: 1, height: 4, borderRadius: 2 }}
+              sx={{
+                mt: 1,
+                height: 4,
+                borderRadius: 2,
+                bgcolor: (theme) => alpha(theme.palette.divider, 0.6),
+                "& .MuiLinearProgress-bar": {
+                  background: (theme) =>
+                    `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
+                },
+              }}
             />
           )}
         </Box>

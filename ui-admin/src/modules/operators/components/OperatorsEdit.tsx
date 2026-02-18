@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   Edit,
   SimpleForm,
@@ -11,8 +12,18 @@ import {
   useRefresh,
   useGetRecordId,
 } from "react-admin";
-import { Button, Stack, Alert, Typography, Chip } from "@mui/material";
+import {
+  Button,
+  Stack,
+  Typography,
+  Chip,
+  Paper,
+  Box,
+  alpha,
+  useTheme,
+} from "@mui/material";
 import { operatorsGateway } from "../operatorsGateway";
+import { PageContainer } from "../../shared/components/PageContainer";
 
 const roleChoices = [
   { id: "admin", name: "Administrador" },
@@ -62,6 +73,7 @@ const OperatorEditToolbar = () => {
 const EditHeader = () => {
   const record = useRecordContext();
   const id = useGetRecordId();
+  const theme = useTheme();
 
   return (
     <Stack spacing={1.25} sx={{ mb: 1.5 }}>
@@ -85,9 +97,26 @@ const EditHeader = () => {
         alterada.
       </Typography>
       {record?.role === "system" ? (
-        <Alert severity="warning">
-          Conta técnica detectada: alterações de função foram bloqueadas.
-        </Alert>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 1.5,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: alpha(theme.palette.warning.main, 0.4),
+            background: `linear-gradient(135deg, ${alpha(
+              theme.palette.warning.main,
+              0.16,
+            )} 0%, ${alpha(theme.palette.warning.main, 0.05)} 100%)`,
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+            Conta técnica detectada
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Alterações de função foram bloqueadas para este operador.
+          </Typography>
+        </Paper>
       ) : null}
     </Stack>
   );
@@ -95,25 +124,82 @@ const EditHeader = () => {
 
 export const OperatorsEdit = () => (
   <Edit mutationMode="pessimistic">
-    <SimpleForm toolbar={<OperatorEditToolbar />}>
-      <EditHeader />
+    <PageContainer>
+      <SimpleForm toolbar={<OperatorEditToolbar />} sx={{ p: 0 }}>
+        <EditHeader />
 
-      <TextInput source="id" label="ID" disabled />
-      <TextInput source="username" label="Nome de utilizador" fullWidth />
-      <SelectInput
-        source="role"
-        label="Função"
-        choices={roleChoices}
-        disableValue="disabled"
-      />
-      <TextInput source="createdAt" label="Criado em" disabled fullWidth />
-      <TextInput source="lastLogin" label="Último login" disabled fullWidth />
-      <TextInput
-        source="lastActivity"
-        label="Última atividade"
-        disabled
-        fullWidth
-      />
-    </SimpleForm>
+        <FormSection
+          title="Dados de acesso"
+          description="Informações de login e perfil operacional."
+        >
+          <TextInput source="id" label="ID" disabled />
+          <TextInput source="username" label="Nome de utilizador" fullWidth />
+          <SelectInput
+            source="role"
+            label="Função"
+            choices={roleChoices}
+            disableValue="disabled"
+          />
+        </FormSection>
+
+        <FormSection
+          title="Metadados"
+          description="Registros automáticos do operador."
+        >
+          <TextInput source="createdAt" label="Criado em" disabled fullWidth />
+          <TextInput
+            source="lastLogin"
+            label="Último login"
+            disabled
+            fullWidth
+          />
+          <TextInput
+            source="lastActivity"
+            label="Última atividade"
+            disabled
+            fullWidth
+          />
+        </FormSection>
+      </SimpleForm>
+    </PageContainer>
   </Edit>
 );
+
+const FormSection = ({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: ReactNode;
+}) => {
+  const theme = useTheme();
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: { xs: 2, md: 2.5 },
+        mb: 2,
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: alpha(theme.palette.divider, 0.9),
+        background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
+          theme.palette.background.default,
+          0.6,
+        )} 100%)`,
+      }}
+    >
+      <Stack spacing={0.5} sx={{ mb: 2 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+          {title}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          {description}
+        </Typography>
+        <Box sx={{ width: 36, height: 3, bgcolor: "primary.main" }} />
+      </Stack>
+      <Stack spacing={2}>{children}</Stack>
+    </Paper>
+  );
+};
