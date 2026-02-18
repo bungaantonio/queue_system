@@ -21,6 +21,7 @@ import { Terminal, Link2 } from "lucide-react";
 import type { AuditVerificationDetail } from "../types";
 import { PageHeader } from "../../shared/components/PageHeader";
 import { StatusChip } from "../../shared/components/StatusChip";
+import { PageContainer } from "../../shared/components/PageContainer";
 
 const TechnicalField = ({ label, value }: { label: string; value: string }) => (
   <Box sx={{ mb: 1.5 }}>
@@ -51,9 +52,11 @@ const TechnicalField = ({ label, value }: { label: string; value: string }) => (
 
 export const AuditShow = () => (
   <Show
-    sx={{ "& .RaShow-main": { boxShadow: "none", bgcolor: "transparent" } }}
+    sx={{
+      "& .RaShow-main": { boxShadow: "none", bgcolor: "transparent", p: 0 },
+    }}
   >
-    <Box sx={{ maxWidth: 1120, width: "100%", mx: "auto" }}>
+    <PageContainer sx={{ maxWidth: 1120, mx: "auto" }}>
       <PageHeader
         title="Evento de Auditoria"
         description="Inspeção técnica do encadeamento e da prova criptográfica."
@@ -113,7 +116,7 @@ export const AuditShow = () => (
           </Paper>
         </Grid>
       </Grid>
-    </Box>
+    </PageContainer>
   </Show>
 );
 

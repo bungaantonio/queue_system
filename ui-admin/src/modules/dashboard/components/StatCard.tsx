@@ -12,12 +12,12 @@ interface StatCardProps {
 }
 
 export const StatCard = ({
-                           title,
-                           value,
-                           icon: Icon,
-                           tone,
-                           trend,
-                         }: StatCardProps) => {
+  title,
+  value,
+  icon: Icon,
+  tone,
+  trend,
+}: StatCardProps) => {
   const theme = useTheme();
   const toneSurface = getToneSurface(theme, tone);
 
@@ -33,7 +33,7 @@ export const StatCard = ({
         borderColor: toneSurface.border,
         background: `linear-gradient(135deg, ${alpha(
           toneSurface.color,
-          0.03
+          0.03,
         )} 0%, ${theme.palette.background.paper} 100%)`,
         transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         "&:hover": {
@@ -126,7 +126,7 @@ export const StatCard = ({
               wordBreak: "break-word",
               background: `linear-gradient(135deg, ${toneSurface.color} 0%, ${alpha(
                 toneSurface.color,
-                0.7
+                0.7,
               )} 100%)`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",

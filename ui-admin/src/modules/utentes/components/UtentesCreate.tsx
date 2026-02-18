@@ -14,6 +14,7 @@ import { BiometricInput } from "./BiometricInput";
 import { utentesGateway } from "../utentesGateway";
 import type { UtenteCreatePayload } from "../utentes.types";
 import { PageHeader } from "../../shared/components/PageHeader";
+import { PageContainer } from "../../shared/components/PageContainer";
 
 interface UtentesCreateFormValues {
   name: string;
@@ -66,86 +67,88 @@ export const UtentesCreate = () => {
 
   return (
     <Create redirect="list">
-      <SimpleForm
-        defaultValues={{ attendance_type: "normal" }}
-        onSubmit={onSubmit}
-      >
-        <PageHeader
-          title="Novo Utente"
-          description="Registe identificação, biometria e prioridade de atendimento."
-          mb={1}
-        />
-
-        <Alert severity="info" sx={{ mb: 2 }}>
-          A biometria é obrigatória para vincular o utente ao fluxo de fila.
-        </Alert>
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            gap: 2,
-            width: "100%",
-          }}
+      <PageContainer>
+        <SimpleForm
+          defaultValues={{ attendance_type: "normal" }}
+          onSubmit={onSubmit}
         >
-          <TextInput
-            source="name"
-            label="Nome completo"
-            fullWidth
-            validate={[required(), minLength(3)]}
+          <PageHeader
+            title="Novo Utente"
+            description="Registe identificação, biometria e prioridade de atendimento."
+            mb={1}
           />
-          <TextInput
-            source="document_id"
-            label="Número de identificação"
-            fullWidth
-            validate={[required(), minLength(5)]}
-          />
-          <TextInput
-            source="phone"
-            label="Contacto telefónico"
-            fullWidth
-            validate={[required(), minLength(7)]}
-          />
-          <DateInput
-            source="birth_date"
-            label="Data de nascimento"
+
+          <Alert severity="info" sx={{ mb: 2 }}>
+            A biometria é obrigatória para vincular o utente ao fluxo de fila.
+          </Alert>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: 2,
+              width: "100%",
+            }}
+          >
+            <TextInput
+              source="name"
+              label="Nome completo"
+              fullWidth
+              validate={[required(), minLength(3)]}
+            />
+            <TextInput
+              source="document_id"
+              label="Número de identificação"
+              fullWidth
+              validate={[required(), minLength(5)]}
+            />
+            <TextInput
+              source="phone"
+              label="Contacto telefónico"
+              fullWidth
+              validate={[required(), minLength(7)]}
+            />
+            <DateInput
+              source="birth_date"
+              label="Data de nascimento"
+              fullWidth
+              validate={required()}
+            />
+          </Box>
+
+          <BiometricInput source="credential_identifier" operatorId={42} />
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: 2,
+              width: "100%",
+            }}
+          >
+            <BooleanInput source="is_pregnant" label="Utente gestante" />
+            <DateInput
+              source="pregnant_until"
+              label="Data prevista parto"
+              fullWidth
+            />
+            <BooleanInput source="is_disabled_temp" label="Mobilidade reduzida" />
+            <DateInput
+              source="disabled_until"
+              label="Validade do atestado"
+              fullWidth
+            />
+          </Box>
+
+          <SelectInput
+            source="attendance_type"
+            label="Tipo de atendimento"
+            choices={attendanceChoices}
             fullWidth
             validate={required()}
           />
-        </Box>
-
-        <BiometricInput source="credential_identifier" operatorId={42} />
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            gap: 2,
-            width: "100%",
-          }}
-        >
-          <BooleanInput source="is_pregnant" label="Utente gestante" />
-          <DateInput
-            source="pregnant_until"
-            label="Data prevista parto"
-            fullWidth
-          />
-          <BooleanInput source="is_disabled_temp" label="Mobilidade reduzida" />
-          <DateInput
-            source="disabled_until"
-            label="Validade do atestado"
-            fullWidth
-          />
-        </Box>
-
-        <SelectInput
-          source="attendance_type"
-          label="Tipo de atendimento"
-          choices={attendanceChoices}
-          fullWidth
-          validate={required()}
-        />
-      </SimpleForm>
+        </SimpleForm>
+      </PageContainer>
     </Create>
   );
 };

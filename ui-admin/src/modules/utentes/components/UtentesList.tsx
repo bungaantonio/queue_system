@@ -7,10 +7,11 @@ import {
   SearchInput,
   useListContext,
 } from "react-admin";
-import { Box, Stack, Card, Chip } from "@mui/material";
+import { Stack, Card, Chip } from "@mui/material";
 import { UserSearch, UserRoundCheck } from "lucide-react";
 import type { Utente } from "../utentes.types";
 import { PageHeader } from "../../shared/components/PageHeader";
+import { PageContainer } from "../../shared/components/PageContainer";
 import {
   datagridBaseSx,
   datagridHoverSx,
@@ -19,7 +20,7 @@ import {
 } from "../../shared/styles/listStyles";
 
 export const UtentesList = () => (
-  <Box>
+  <PageContainer>
     <PageHeader
       title="Utentes"
       description="Base operacional para identificação e atendimento."
@@ -60,7 +61,7 @@ export const UtentesList = () => (
         </Datagrid>
       </Card>
     </List>
-  </Box>
+  </PageContainer>
 );
 
 const UtentesOverview = () => {

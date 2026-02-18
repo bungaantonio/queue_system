@@ -29,6 +29,7 @@ import { StatCard } from "./components/StatCard";
 import { AtendimentoContext } from "../queue/components/AtendimentoProvider";
 import { useGetHeader } from "../auditor/hooks/useAuditSummary";
 import type { Operator } from "../operators/types";
+import { PageContainer } from "../shared/components/PageContainer";
 import {
   DashboardTone,
   dashboardPanelSx,
@@ -61,7 +62,7 @@ export const DashboardPage = () => {
   const integrityTone: DashboardTone = hasAlerts ? "rigor" : "ready";
 
   return (
-    <Box>
+    <PageContainer>
       <Title title="Dashboard de Controle" />
 
       <Stack spacing={3}>
@@ -307,7 +308,7 @@ export const DashboardPage = () => {
           </Grid>
         </Grid>
       </Stack>
-    </Box>
+    </PageContainer>
   );
 };
 

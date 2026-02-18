@@ -111,11 +111,8 @@ export const theme = createTheme(
             backgroundColor: palette.background.default,
           },
           content: {
-            padding: "32px",
+            padding: 0,
             backgroundColor: "transparent",
-            "@media (max-width: 899.95px)": {
-              padding: "16px",
-            },
           },
         },
       },
