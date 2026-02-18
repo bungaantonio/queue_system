@@ -16,7 +16,7 @@ export default function PendingValidationCard() {
             animate={{ opacity: 1 }}
           >
             <span className="text-[clamp(10px,1vw,16px)] font-black text-slate-300 uppercase tracking-[0.35em]">
-              Sistema em Espera
+              Aguardando nova chamada
             </span>
           </Motion.div>
         ) : (
@@ -48,7 +48,7 @@ export default function PendingValidationCard() {
 
               <div className="bg-white text-indigo-700 px-6 py-2.5 rounded-[1.2rem] shadow-xl transform -rotate-1">
                 <span className="font-black text-[clamp(10px,0.8vw,13px)] uppercase tracking-[0.15em] block">
-                  Siga para o Guichê
+                  Siga para o Balcão
                 </span>
               </div>
             </div>

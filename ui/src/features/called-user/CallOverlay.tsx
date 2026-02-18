@@ -44,7 +44,7 @@ export default function CallOverlay() {
           className="text-center text-white"
         >
           <span className="bg-white text-indigo-600 px-10 py-3 rounded-full text-lg font-black uppercase tracking-[0.4em] mb-10 inline-block shadow-2xl">
-            Sua Vez
+            Chamada Ativa
           </span>
           <h1 className="text-[22rem] font-black leading-none tracking-tighter drop-shadow-2xl">
             {user.ticket}
