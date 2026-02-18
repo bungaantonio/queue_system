@@ -9,8 +9,18 @@ import {
   LinearProgress,
   alpha,
 } from "@mui/material";
+import { keyframes } from "@mui/material/styles";
 import { Fingerprint, CheckCircle2, RefreshCw } from "lucide-react";
 import { biometricService } from "../../../services/biometricService";
+
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
 export const BiometricInput = ({
   source,
@@ -92,7 +102,15 @@ export const BiometricInput = ({
           }}
         >
           {status === "scanning" ? (
-            <RefreshCw className="animate-spin" />
+            <Box
+              component="span"
+              sx={{
+                display: "flex",
+                animation: `${spin} 1s linear infinite`,
+              }}
+            >
+              <RefreshCw />
+            </Box>
           ) : isSuccess ? (
             <CheckCircle2 />
           ) : (

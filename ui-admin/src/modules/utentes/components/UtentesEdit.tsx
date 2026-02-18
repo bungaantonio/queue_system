@@ -7,6 +7,7 @@ import {
 } from "react-admin";
 import { Stack, Typography, Alert } from "@mui/material";
 import { BiometricInput } from "./BiometricInput";
+import { PageContainer } from "../../shared/components/PageContainer";
 
 const EditHeader = () => {
   const record = useRecordContext();
@@ -29,21 +30,23 @@ const EditHeader = () => {
 
 export const UtentesEdit = () => (
   <Edit mutationMode="pessimistic">
-    <SimpleForm>
-      <EditHeader />
+    <PageContainer>
+      <SimpleForm>
+        <EditHeader />
 
-      <TextInput source="id" label="ID" disabled />
-      <TextInput source="name" label="Nome completo" fullWidth />
-      <TextInput source="document_id" label="Documento (ID)" fullWidth />
-      <TextInput
-        source="id_number"
-        label="Documento (origem API)"
-        disabled
-        fullWidth
-      />
-      <TextInput source="phone" label="Telefone" fullWidth />
-      <DateInput source="birth_date" label="Data de nascimento" />
-      <BiometricInput source="credential_identifier" operatorId={42} />
-    </SimpleForm>
+        <TextInput source="id" label="ID" disabled />
+        <TextInput source="name" label="Nome completo" fullWidth />
+        <TextInput source="document_id" label="Documento (ID)" fullWidth />
+        <TextInput
+          source="id_number"
+          label="Documento (origem API)"
+          disabled
+          fullWidth
+        />
+        <TextInput source="phone" label="Telefone" fullWidth />
+        <DateInput source="birth_date" label="Data de nascimento" />
+        <BiometricInput source="credential_identifier" operatorId={42} />
+      </SimpleForm>
+    </PageContainer>
   </Edit>
 );

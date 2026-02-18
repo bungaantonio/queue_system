@@ -6,13 +6,14 @@ import {
   DateField,
   FunctionField,
 } from "react-admin";
-import { Box, Card, Skeleton, Alert } from "@mui/material";
+import { Card, Skeleton, Alert } from "@mui/material";
 import { AuditSummary } from "./AuditSummary";
 import { AuditIntegrityBadge } from "./AuditIntegrityBadge";
 import { useGetHeader } from "../hooks/useAuditSummary";
 import type { AuditVerificationDetail } from "../types";
 import { PageHeader } from "../../shared/components/PageHeader";
 import { StatusChip } from "../../shared/components/StatusChip";
+import { PageContainer } from "../../shared/components/PageContainer";
 import {
   datagridBaseSx,
   listCardSx,
@@ -23,7 +24,7 @@ export const AuditList = () => {
   const { summary, loading, error } = useGetHeader();
 
   return (
-    <Box>
+    <PageContainer>
       <PageHeader
         title="Integridade Operacional"
         description="Priorize eventos inválidos e confirme concatenação criptográfica."
@@ -97,6 +98,6 @@ export const AuditList = () => {
           </Datagrid>
         </Card>
       </List>
-    </Box>
+    </PageContainer>
   );
 };

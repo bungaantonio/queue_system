@@ -13,6 +13,7 @@ import {
 } from "react-admin";
 import { Button, Stack, Alert, Typography, Chip } from "@mui/material";
 import { operatorsGateway } from "../operatorsGateway";
+import { PageContainer } from "../../shared/components/PageContainer";
 
 const roleChoices = [
   { id: "admin", name: "Administrador" },
@@ -95,25 +96,27 @@ const EditHeader = () => {
 
 export const OperatorsEdit = () => (
   <Edit mutationMode="pessimistic">
-    <SimpleForm toolbar={<OperatorEditToolbar />}>
-      <EditHeader />
+    <PageContainer>
+      <SimpleForm toolbar={<OperatorEditToolbar />}>
+        <EditHeader />
 
-      <TextInput source="id" label="ID" disabled />
-      <TextInput source="username" label="Nome de utilizador" fullWidth />
-      <SelectInput
-        source="role"
-        label="Função"
-        choices={roleChoices}
-        disableValue="disabled"
-      />
-      <TextInput source="createdAt" label="Criado em" disabled fullWidth />
-      <TextInput source="lastLogin" label="Último login" disabled fullWidth />
-      <TextInput
-        source="lastActivity"
-        label="Última atividade"
-        disabled
-        fullWidth
-      />
-    </SimpleForm>
+        <TextInput source="id" label="ID" disabled />
+        <TextInput source="username" label="Nome de utilizador" fullWidth />
+        <SelectInput
+          source="role"
+          label="Função"
+          choices={roleChoices}
+          disableValue="disabled"
+        />
+        <TextInput source="createdAt" label="Criado em" disabled fullWidth />
+        <TextInput source="lastLogin" label="Último login" disabled fullWidth />
+        <TextInput
+          source="lastActivity"
+          label="Última atividade"
+          disabled
+          fullWidth
+        />
+      </SimpleForm>
+    </PageContainer>
   </Edit>
 );

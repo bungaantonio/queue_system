@@ -7,12 +7,13 @@ import {
   DateField,
   useListContext,
 } from "react-admin";
-import { Box, Stack, Chip, Card } from "@mui/material";
+import { Stack, Chip, Card } from "@mui/material";
 import { Users, Shield, Cpu } from "lucide-react";
 import { RoleBadge } from "./RoleBadge";
 import type { Operator } from "../types";
 import { PageHeader } from "../../shared/components/PageHeader";
 import { StatusChip } from "../../shared/components/StatusChip";
+import { PageContainer } from "../../shared/components/PageContainer";
 import {
   datagridBaseSx,
   datagridHoverSx,
@@ -21,7 +22,7 @@ import {
 } from "../../shared/styles/listStyles";
 
 export const OperatorsList = () => (
-  <Box>
+  <PageContainer>
     <PageHeader
       title="Operadores"
       description="Acesso, função e estado operacional dos utilizadores internos."
@@ -77,7 +78,7 @@ export const OperatorsList = () => (
         </Datagrid>
       </Card>
     </List>
-  </Box>
+  </PageContainer>
 );
 
 const OperatorsOverview = () => {

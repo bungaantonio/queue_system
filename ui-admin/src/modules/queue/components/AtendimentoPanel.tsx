@@ -16,6 +16,7 @@ import { AtendimentoContext } from "./AtendimentoProvider";
 import { StatusHero } from "./StatusHero";
 import { QueueSidebar } from "./QueueSidebar";
 import { StatusChip } from "../../shared/components/StatusChip";
+import { PageContainer } from "../../shared/components/PageContainer";
 
 export const AtendimentoPanel = () => {
   const context = useContext(AtendimentoContext);
@@ -48,7 +49,7 @@ export const AtendimentoPanel = () => {
         : "stable";
 
   return (
-    <Box sx={{ minHeight: { md: 540 } }}>
+    <PageContainer sx={{ minHeight: { md: 540 } }}>
       <Title title="Painel de Atendimento" />
 
       <Grid container spacing={{ xs: 1.5, md: 2 }}>
@@ -228,6 +229,6 @@ export const AtendimentoPanel = () => {
           <QueueSidebar queue={queue} onCancel={cancel} />
         </Grid>
       </Grid>
-    </Box>
+    </PageContainer>
   );
 };
