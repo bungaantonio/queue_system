@@ -14,13 +14,13 @@ import {
   Paper,
   alpha,
   Stack,
-  Alert,
 } from "@mui/material";
 import { AuditIntegrityBadge } from "./AuditIntegrityBadge";
 import { Terminal, Link2 } from "lucide-react";
 import type { AuditVerificationDetail } from "../types";
 import { PageHeader } from "../../shared/components/PageHeader";
 import { StatusChip } from "../../shared/components/StatusChip";
+import { PageContainer } from "../../shared/components/PageContainer";
 
 const TechnicalField = ({ label, value }: { label: string; value: string }) => (
   <Box sx={{ mb: 1.5 }}>
@@ -42,6 +42,19 @@ const TechnicalField = ({ label, value }: { label: string; value: string }) => (
         fontSize: "0.75rem",
         color: "text.secondary",
         wordBreak: "break-all",
+        borderRadius: 2,
+        position: "relative",
+        overflow: "hidden",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: "3px",
+          bgcolor: "primary.main",
+          opacity: 0.35,
+        },
       }}
     >
       {value || "---"}
@@ -51,9 +64,11 @@ const TechnicalField = ({ label, value }: { label: string; value: string }) => (
 
 export const AuditShow = () => (
   <Show
-    sx={{ "& .RaShow-main": { boxShadow: "none", bgcolor: "transparent" } }}
+    sx={{
+      "& .RaShow-main": { boxShadow: "none", bgcolor: "transparent", p: 0 },
+    }}
   >
-    <Box sx={{ maxWidth: 1120, width: "100%", mx: "auto" }}>
+    <PageContainer sx={{ maxWidth: 1120, mx: "auto" }}>
       <PageHeader
         title="Evento de Auditoria"
         description="Inspeção técnica do encadeamento e da prova criptográfica."
@@ -63,7 +78,30 @@ export const AuditShow = () => (
 
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 5 }}>
-          <Paper sx={{ p: 2, borderRadius: 5 }}>
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: 2,
+              border: "1px solid",
+              borderColor: (theme) => alpha(theme.palette.divider, 0.9),
+              background: (theme) =>
+                `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
+                  theme.palette.background.default,
+                  0.6,
+                )} 100%)`,
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: "6px",
+                bgcolor: "primary.main",
+              },
+            }}
+          >
             <Stack spacing={1.5}>
               <Typography
                 variant="caption"
@@ -96,8 +134,25 @@ export const AuditShow = () => (
           <Paper
             sx={{
               p: 2,
-              borderRadius: 5,
-              bgcolor: (theme) => alpha(theme.palette.text.primary, 0.02),
+              borderRadius: 2,
+              border: "1px solid",
+              borderColor: (theme) => alpha(theme.palette.divider, 0.9),
+              background: (theme) =>
+                `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
+                  theme.palette.background.default,
+                  0.6,
+                )} 100%)`,
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: "6px",
+                bgcolor: "secondary.main",
+              },
             }}
           >
             <Stack
@@ -113,7 +168,7 @@ export const AuditShow = () => (
           </Paper>
         </Grid>
       </Grid>
-    </Box>
+    </PageContainer>
   </Show>
 );
 
@@ -122,16 +177,46 @@ const AuditStatusHeader = () => {
   if (!record) return null;
 
   const hasChainIssue = !record.previous_hash_matches || !record.valid;
+  const tone = hasChainIssue ? "error" : "success";
   return (
-    <Alert
-      severity={hasChainIssue ? "error" : "success"}
-      sx={{ mb: 2, borderRadius: 3 }}
-      icon={<Link2 size={16} />}
+    <Paper
+      elevation={0}
+      sx={{
+        mb: 2,
+        p: 1.5,
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: (theme) => alpha(theme.palette[tone].main, 0.35),
+        background: (theme) =>
+          `linear-gradient(135deg, ${alpha(
+            theme.palette[tone].main,
+            0.16,
+          )} 0%, ${alpha(theme.palette.background.paper, 0.96)} 100%)`,
+        position: "relative",
+        overflow: "hidden",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: "6px",
+          bgcolor: (theme) => theme.palette[tone].main,
+        },
+      }}
     >
-      {hasChainIssue
-        ? "Inconsistência detectada na cadeia. Priorize verificação manual."
-        : "Encadeamento e hash verificados com sucesso."}
-    </Alert>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Link2 size={16} color="var(--mui-palette-text-secondary)" />
+        <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+          {hasChainIssue ? "ATENÇÃO IMEDIATA" : "CADEIA ESTÁVEL"}
+        </Typography>
+      </Stack>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        {hasChainIssue
+          ? "Inconsistência detectada na cadeia. Priorize verificação manual."
+          : "Encadeamento e hash verificados com sucesso."}
+      </Typography>
+    </Paper>
   );
 };
 

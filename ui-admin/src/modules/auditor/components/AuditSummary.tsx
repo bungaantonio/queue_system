@@ -37,13 +37,36 @@ const StatCard = ({
     elevation={0}
     sx={{
       p: 1.5,
-      borderRadius: 4,
-      bgcolor: alpha(color, 0.04),
-      borderColor: alpha(color, 0.12),
+      borderRadius: 2,
+      border: "1px solid",
+      borderColor: alpha(color, 0.25),
+      background: `linear-gradient(135deg, rgba(255,255,255,0.96) 0%, ${alpha(
+        color,
+        0.08,
+      )} 100%)`,
+      position: "relative",
+      overflow: "hidden",
+      "&::before": {
+        content: '""',
+        position: "absolute",
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: "5px",
+        bgcolor: color,
+      },
     }}
   >
     <Stack direction="row" spacing={1.5} alignItems="center">
-      <Box sx={{ p: 0.9, borderRadius: 2, bgcolor: alpha(color, 0.12), color }}>
+      <Box
+        sx={{
+          p: 0.9,
+          borderRadius: 1.5,
+          bgcolor: alpha(color, 0.12),
+          color,
+          boxShadow: `0 6px 14px ${alpha(color, 0.18)}`,
+        }}
+      >
         <Icon size={18} />
       </Box>
       <Box>
@@ -138,13 +161,36 @@ export const AuditSummary = ({
         elevation={0}
         sx={{
           p: 1.5,
-          borderRadius: 4,
+          borderRadius: 2,
+          border: "1px solid",
           borderColor: summary.all_valid
             ? (theme) => alpha(theme.palette.success.main, 0.25)
             : (theme) => alpha(theme.palette.error.main, 0.25),
           bgcolor: summary.all_valid
             ? (theme) => alpha(theme.palette.success.main, 0.06)
             : (theme) => alpha(theme.palette.error.main, 0.06),
+          background: summary.all_valid
+            ? (theme) =>
+                `linear-gradient(135deg, ${alpha(
+                  theme.palette.success.main,
+                  0.16,
+                )} 0%, ${alpha(theme.palette.background.paper, 0.96)} 100%)`
+            : (theme) =>
+                `linear-gradient(135deg, ${alpha(
+                  theme.palette.error.main,
+                  0.16,
+                )} 0%, ${alpha(theme.palette.background.paper, 0.96)} 100%)`,
+          position: "relative",
+          overflow: "hidden",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: "6px",
+            bgcolor: summary.all_valid ? "success.main" : "error.main",
+          },
         }}
       >
         <Stack spacing={1}>
