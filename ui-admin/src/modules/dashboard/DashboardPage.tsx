@@ -29,8 +29,6 @@ import { StatCard } from "./components/StatCard";
 import { AtendimentoContext } from "../queue/components/AtendimentoProvider";
 import { useGetHeader } from "../auditor/hooks/useAuditSummary";
 import type { Operator } from "../operators/types";
-import { PageHeader } from "../shared/components/PageHeader";
-import { StatusChip } from "../shared/components/StatusChip";
 import {
   DashboardTone,
   dashboardPanelSx,
@@ -47,6 +45,7 @@ export const DashboardPage = () => {
   const called = atendimento?.called ?? null;
   const current = atendimento?.current ?? null;
 
+  const theme = useTheme();
   const activeOperators = useMemo(
     () => operators.filter((op) => op.active).length,
     [operators],
@@ -56,35 +55,78 @@ export const DashboardPage = () => {
     [operators],
   );
 
+  const hasActiveCall = Boolean(called || current);
+  const hasAlerts = summary ? !summary.all_valid : false;
   const queueTone: DashboardTone = queue.length > 5 ? "watch" : "ready";
-  const integrityTone: DashboardTone =
-    summary && !summary.all_valid ? "rigor" : "ready";
+  const integrityTone: DashboardTone = hasAlerts ? "rigor" : "ready";
 
   return (
     <Box>
       <Title title="Dashboard de Controle" />
 
-      <Stack spacing={2.5}>
-        <PageHeader
-          title="Centro de Comando"
-          description="Priorize ações por estado: fluxo, vigilância e integridade."
-          actions={
+      <Stack spacing={3}>
+        <Box sx={{ mb: 1 }}>
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            justifyContent="space-between"
+            alignItems={{ xs: "flex-start", md: "center" }}
+            spacing={2}
+            sx={{
+              pb: 3,
+              borderBottom: (theme) =>
+                `2px solid ${alpha(theme.palette.divider, 0.6)}`,
+            }}
+          >
+            <Stack spacing={0.5}>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 900,
+                  background: `linear-gradient(135deg, ${theme.palette.text.primary} 0%, ${alpha(
+                    theme.palette.primary.main,
+                    0.8,
+                  )} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Centro de Comando
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  maxWidth: 600,
+                  lineHeight: 1.6,
+                }}
+              >
+                Priorize ações por estado: fluxo, vigilância e integridade.
+              </Typography>
+            </Stack>
             <Stack
               direction={{ xs: "column", sm: "row" }}
               spacing={1}
               alignItems={{ xs: "stretch", sm: "center" }}
               sx={{ width: { xs: "100%", lg: "auto" } }}
             >
-              <StatusChip
+              <Chip
                 icon={<UserCog size={12} />}
                 label={`${attendantsOnline} ATENDENTES ONLINE`}
                 sx={{
                   fontSize: "0.62rem",
+                  fontWeight: 700,
                   bgcolor: (theme) => alpha(theme.palette.success.main, 0.12),
                   color: "success.dark",
                   border: "1px solid",
                   borderColor: (theme) =>
                     alpha(theme.palette.success.main, 0.28),
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    bgcolor: (theme) => alpha(theme.palette.success.main, 0.18),
+                    transform: "scale(1.02)",
+                  },
                 }}
               />
               <Button
@@ -92,109 +134,87 @@ export const DashboardPage = () => {
                 to="/atendimento"
                 variant="contained"
                 endIcon={<ArrowRight size={16} />}
-                sx={{ width: { xs: "100%", sm: "auto" } }}
+                sx={{
+                  width: { xs: "100%", sm: "auto" },
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: 0.5,
+                  px: 3,
+                  py: 1.25,
+                  boxShadow: (theme) =>
+                    `0 4px 14px ${alpha(theme.palette.primary.main, 0.3)}`,
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    boxShadow: (theme) =>
+                      `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
+                  },
+                }}
               >
                 Abrir Atendimento
               </Button>
             </Stack>
-          }
-          mb={0}
-        />
+          </Stack>
+        </Box>
 
-        {(called || current) && (
-          <Paper
-            sx={{
-              ...dashboardPanelSx,
-              p: 1.5,
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
-              borderColor: (theme) => alpha(theme.palette.primary.main, 0.26),
-            }}
-          >
-            <Stack
-              direction={{ xs: "column", md: "row" }}
-              spacing={1}
-              justifyContent="space-between"
-              alignItems={{ xs: "flex-start", md: "center" }}
-            >
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1}
-                alignItems={{ xs: "flex-start", sm: "center" }}
-                sx={{ width: "100%" }}
-              >
-                <BellRing size={16} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                  CHAMADA EM CURSO
-                </Typography>
-                <StatusChip
-                  label={called ? "AGUARDANDO CONFIRMAÇÃO" : "EM ATENDIMENTO"}
+        <Grid container spacing={2.5}>
+          {[
+            {
+              title: "Fila em Espera",
+              value: queue.length,
+              icon: Clock3,
+              tone: queueTone,
+            },
+            {
+              title: "Chamada Ativa",
+              value: hasActiveCall ? "SIM" : "NÃO",
+              icon: BellRing,
+              tone: (hasActiveCall ? "flow" : "stable") as DashboardTone,
+            },
+            {
+              title: "Operadores Ativos",
+              value: `${activeOperators}/${operators.length}`,
+              icon: Users,
+              tone: "ready" as DashboardTone,
+            },
+            {
+              title: "Integridade",
+              value: hasAlerts ? "ALERTA" : "OK",
+              icon: hasAlerts ? ShieldAlert : ShieldCheck,
+              tone: integrityTone,
+            },
+          ].map((stat) => (
+            <Grid size={{ xs: 12, sm: 6, xl: 3 }} key={stat.title}>
+              <StatCard {...stat} />
+            </Grid>
+          ))}
+        </Grid>
+
+        <Grid container spacing={2.5}>
+          <Grid size={{ xs: 12, lg: 7 }}>
+            <Paper sx={dashboardPanelSx}>
+              <Stack spacing={0.75} sx={{ mb: 2 }}>
+                <Typography
+                  variant="overline"
                   sx={{
-                    height: 20,
-                    fontSize: "0.6rem",
-                    bgcolor: called
-                      ? (theme) => alpha(theme.palette.warning.main, 0.14)
-                      : (theme) => alpha(theme.palette.success.main, 0.14),
-                    color: called ? "warning.dark" : "success.dark",
+                    color: "text.secondary",
+                    fontWeight: 800,
+                    letterSpacing: 1.2,
+                    fontSize: "0.7rem",
+                  }}
+                >
+                  PRIORIDADES OPERACIONAIS
+                </Typography>
+                <Box
+                  sx={{
+                    height: 2,
+                    width: 40,
+                    bgcolor: "primary.main",
+                    borderRadius: 1,
                   }}
                 />
               </Stack>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ width: "100%" }}
-              >
-                {called?.name || current?.name}{" "}
-                <strong>{called?.position || current?.position}</strong>
-              </Typography>
-            </Stack>
-          </Paper>
-        )}
-
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6, xl: 3 }}>
-            <StatCard
-              title="Fila em Espera"
-              value={queue.length}
-              icon={Clock3}
-              tone={queueTone}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, xl: 3 }}>
-            <StatCard
-              title="Chamada Ativa"
-              value={called || current ? "SIM" : "NÃO"}
-              icon={BellRing}
-              tone={called || current ? "flow" : "stable"}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, xl: 3 }}>
-            <StatCard
-              title="Operadores Ativos"
-              value={`${activeOperators}/${operators.length}`}
-              icon={Users}
-              tone="ready"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, xl: 3 }}>
-            <StatCard
-              title="Integridade"
-              value={summary?.all_valid ? "OK" : "ALERTA"}
-              icon={summary?.all_valid ? ShieldCheck : ShieldAlert}
-              tone={integrityTone}
-            />
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, lg: 7 }}>
-            <Paper sx={dashboardPanelSx}>
-              <Typography
-                variant="subtitle2"
-                sx={{ color: "text.secondary", mb: 1 }}
-              >
-                PRIORIDADES OPERACIONAIS
-              </Typography>
-              <Stack spacing={1}>
+              <Stack spacing={1.5}>
                 <PriorityRow
                   state={queue.length > 5 ? "watch" : "ready"}
                   label="Gestão de fila"
@@ -205,20 +225,22 @@ export const DashboardPage = () => {
                   }
                 />
                 <PriorityRow
-                  state={called ? "flow" : "stable"}
+                  state={hasActiveCall ? "flow" : "stable"}
                   label="Chamada no display"
                   detail={
                     called
                       ? `Aguardando confirmação de ${called.name}.`
-                      : "Sem chamada pendente no momento."
+                      : current
+                        ? `Em atendimento: ${current.name}.`
+                        : "Sem chamada pendente no momento."
                   }
                 />
                 <PriorityRow
-                  state={summary?.all_valid === false ? "rigor" : "ready"}
+                  state={hasAlerts ? "rigor" : "ready"}
                   label="Integridade de auditoria"
                   detail={
-                    summary?.all_valid === false
-                      ? `${summary.invalid_records} registro(s) inconsistentes.`
+                    hasAlerts
+                      ? `${summary?.invalid_records ?? 0} registro(s) inconsistentes.`
                       : "Cadeia de auditoria consistente."
                   }
                 />
@@ -228,13 +250,28 @@ export const DashboardPage = () => {
 
           <Grid size={{ xs: 12, lg: 5 }}>
             <Paper sx={dashboardPanelSx}>
-              <Typography
-                variant="subtitle2"
-                sx={{ color: "text.secondary", mb: 1 }}
-              >
-                PAINEL DE RISCO
-              </Typography>
-              <Stack spacing={1}>
+              <Stack spacing={0.75} sx={{ mb: 2 }}>
+                <Typography
+                  variant="overline"
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: 800,
+                    letterSpacing: 1.2,
+                    fontSize: "0.7rem",
+                  }}
+                >
+                  PAINEL DE RISCO
+                </Typography>
+                <Box
+                  sx={{
+                    height: 2,
+                    width: 40,
+                    bgcolor: "error.main",
+                    borderRadius: 1,
+                  }}
+                />
+              </Stack>
+              <Stack spacing={1.5}>
                 <RiskTag
                   icon={AlertTriangle}
                   label="Espera prolongada"
@@ -256,17 +293,13 @@ export const DashboardPage = () => {
                 <RiskTag
                   icon={ShieldCheck}
                   label="Integridade"
-                  value={
-                    summary?.all_valid ? "Verificada" : "Revisão necessária"
-                  }
-                  tone={summary?.all_valid ? "ready" : "rigor"}
+                  value={hasAlerts ? "Revisão necessária" : "Verificada"}
+                  tone={hasAlerts ? "rigor" : "ready"}
                 />
                 <RiskTag
                   icon={CheckCircle2}
                   label="Capacidade de atendimento"
-                  value={
-                    attendantsOnline > 0 ? "Operacional" : "Sem atendente ativo"
-                  }
+                  value={attendantsOnline > 0 ? "Operacional" : "Crítico"}
                   tone={attendantsOnline > 0 ? "ready" : "rigor"}
                 />
               </Stack>
@@ -294,15 +327,36 @@ const PriorityRow = ({
   return (
     <Stack
       direction={{ xs: "column", md: "row" }}
-      spacing={0.75}
+      spacing={1}
       alignItems={{ xs: "flex-start", md: "center" }}
       justifyContent="space-between"
       sx={{
-        p: 1,
-        borderRadius: 2,
+        p: 1.5,
+        borderRadius: 2.5,
         border: "1px solid",
         borderColor: toneSurface.border,
         bgcolor: toneSurface.bg,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        position: "relative",
+        overflow: "hidden",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: "3px",
+          bgcolor: toneSurface.color,
+          transition: "width 0.3s ease",
+        },
+        "&:hover": {
+          borderColor: toneSurface.color,
+          bgcolor: alpha(toneSurface.color, 0.08),
+          transform: "translateX(4px)",
+          "&::before": {
+            width: "5px",
+          },
+        },
       }}
     >
       <Typography variant="body2" sx={{ fontWeight: 700 }}>
@@ -314,11 +368,12 @@ const PriorityRow = ({
         label={detail}
         sx={{
           width: { xs: "100%", md: "auto" },
+          fontWeight: 600,
           "& .MuiChip-label": {
             whiteSpace: "normal",
-            lineHeight: 1.3,
-            py: 0.25,
-            fontSize: "0.68rem",
+            lineHeight: 1.4,
+            py: 0.5,
+            fontSize: "0.7rem",
           },
         }}
       />
@@ -345,24 +400,49 @@ const RiskTag = ({
       direction={{ xs: "column", sm: "row" }}
       alignItems={{ xs: "flex-start", sm: "center" }}
       justifyContent="space-between"
-      spacing={0.75}
+      spacing={1}
       sx={{
-        p: 1,
-        borderRadius: 2,
+        p: 1.5,
+        borderRadius: 2.5,
         border: "1px solid",
         borderColor: toneSurface.border,
         bgcolor: toneSurface.bg,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "&:hover": {
+          borderColor: toneSurface.color,
+          bgcolor: alpha(toneSurface.color, 0.08),
+          transform: "scale(1.02)",
+          "& .risk-icon": {
+            transform: "rotate(10deg) scale(1.1)",
+          },
+        },
       }}
     >
-      <Stack direction="row" spacing={1} alignItems="center">
-        <Icon size={16} color={toneSurface.color} />
-        <Typography variant="body2">{label}</Typography>
+      <Stack direction="row" spacing={1.5} alignItems="center">
+        <Box
+          className="risk-icon"
+          sx={{
+            color: toneSurface.color,
+            display: "flex",
+            transition: "transform 0.3s ease",
+          }}
+        >
+          <Icon size={18} strokeWidth={2.5} />
+        </Box>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {label}
+        </Typography>
       </Stack>
       <Typography
         variant="caption"
         sx={{
           color: toneSurface.color,
-          fontWeight: 900,
+          fontWeight: 800,
+          letterSpacing: 0.5,
+          bgcolor: alpha(toneSurface.color, 0.15),
+          px: 1.5,
+          py: 0.5,
+          borderRadius: 1.5,
           alignSelf: { xs: "flex-start", sm: "auto" },
         }}
       >
