@@ -2,7 +2,6 @@
 import { useContext } from "react";
 import { Title } from "react-admin";
 import {
-  Box,
   Button,
   Stack,
   Paper,
@@ -39,7 +38,7 @@ export const AtendimentoPanel = () => {
     ? "A aguardar confirmação"
     : isInService
       ? "Em atendimento"
-      : "Balcão disponível";
+      : "Disponível";
   const panelTone = isPending
     ? "flow"
     : isInService
@@ -62,7 +61,7 @@ export const AtendimentoPanel = () => {
               flexDirection: "column",
               justifyContent: "space-between",
               p: { xs: 2, md: 3 },
-              borderRadius: 5,
+              borderRadius: 3,
               position: "relative",
               overflow: "hidden",
               transition: "background-color 0.4s ease, border-color 0.2s ease",
@@ -72,6 +71,15 @@ export const AtendimentoPanel = () => {
                   : panelTone === "ready"
                     ? (theme) => alpha(theme.palette.success.main, 0.08)
                     : "background.paper",
+              background:
+                panelTone === "flow"
+                  ? (theme) =>
+                      `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
+                  : (theme) =>
+                      `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
+                        theme.palette.background.default,
+                        0.6,
+                      )} 100%)`,
               border: "1px solid",
               borderColor:
                 panelTone === "flow"
