@@ -10,6 +10,7 @@ import {
   useRecordContext,
   useNotify,
   useRefresh,
+  useRedirect,
   useGetRecordId,
 } from "react-admin";
 import {
@@ -36,8 +37,10 @@ const OperatorEditToolbar = () => {
   const record = useRecordContext();
   const notify = useNotify();
   const refresh = useRefresh();
+  const redirect = useRedirect();
   const canDeactivate = Boolean(record?.active);
   const canActivate = record?.active === false;
+  const canDelete = record?.role !== "system";
 
   const handleActivate = async () => {
     if (!record?.id) return;
@@ -65,6 +68,28 @@ const OperatorEditToolbar = () => {
           confirmTitle="Desativar operador"
           confirmContent="Esta ação desativa o operador (não remove do banco)."
         />
+      ) : null}
+      {canDelete ? (
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={async () => {
+            if (!record?.id) return;
+            const confirmed = window.confirm(
+              "Esta ação elimina o operador permanentemente. Deseja continuar?",
+            );
+            if (!confirmed) return;
+            try {
+              await operatorsGateway.deletePermanent(Number(record.id));
+              notify("Operador eliminado com sucesso.", { type: "success" });
+              redirect("list", "operators");
+            } catch {
+              notify("Falha ao eliminar operador.", { type: "error" });
+            }
+          }}
+        >
+          Eliminar operador
+        </Button>
       ) : null}
     </Toolbar>
   );

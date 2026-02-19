@@ -31,6 +31,10 @@ export const operatorsGateway = {
     return normalizeOperator(data);
   },
 
+  deletePermanent: async (id: number): Promise<void> => {
+    await httpClient.delete(`/operators/${id}`);
+  },
+
   activate: async (id: number): Promise<Operator> => {
     const data = await httpClient.patch<OperatorApi>(
       `/operators/${id}/activate`,
