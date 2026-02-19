@@ -3,6 +3,19 @@ import { CONFIG } from "../config/config";
 import { ApiError } from "./ApiError";
 import { getApiPayload } from "../../application/auth.types";
 import type { HttpPort } from "./http.types";
+import {
+  notifyServerAvailable,
+  notifyServerUnavailable,
+} from "../../ui/connection/connectionEvents";
+
+const networkError = () => {
+  notifyServerUnavailable();
+  return new ApiError(
+    0,
+    { detail: "Servidor indisponível" },
+    "Servidor indisponível",
+  );
+};
 
 const parseJSON = async (res: Response): Promise<unknown> => {
   try {
@@ -30,12 +43,18 @@ const refreshAccessToken = async (): Promise<string> => {
     throw new ApiError(401, { detail: "Sessão expirada" });
   }
 
-  const refreshRes = await fetch(`${CONFIG.AUTH_URL}/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: refreshToken }),
-  });
+  let refreshRes: Response;
+  try {
+    refreshRes = await fetch(`${CONFIG.AUTH_URL}/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+  } catch {
+    throw networkError();
+  }
 
+  notifyServerAvailable();
   const refreshPayload = await parseJSON(refreshRes);
   if (!refreshRes.ok) {
     sessionStore.clear();
@@ -74,11 +93,22 @@ const request = async <T>(
     token = await refreshAccessToken();
   }
 
-  let res = await fetchWithToken(token);
+  let res: Response;
+  try {
+    res = await fetchWithToken(token);
+  } catch {
+    throw networkError();
+  }
+  notifyServerAvailable();
 
   if (res.status === 401) {
     token = await refreshAccessToken();
-    res = await fetchWithToken(token);
+    try {
+      res = await fetchWithToken(token);
+    } catch {
+      throw networkError();
+    }
+    notifyServerAvailable();
     if (!res.ok) {
       const errorBody = await parseJSON(res);
       throw new ApiError(res.status, errorBody);

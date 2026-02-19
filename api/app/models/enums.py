@@ -78,6 +78,7 @@ class AuditAction(str, Enum):
     OPERATOR_UPDATED = "Operador atualizado"
     OPERATOR_ACTIVATED = "Operador ativado"
     OPERATOR_DEACTIVATED = "Operador desativado"
+    OPERATOR_DELETED = "Operador eliminado"
 
     # Auditoria / Sistema
     AUDIT_VERIFIED = "Cadeia de auditoria verificada"

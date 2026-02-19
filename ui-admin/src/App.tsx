@@ -4,6 +4,7 @@ import { Route } from "react-router-dom";
 
 import { adminDataProvider } from "./application/adminDataProvider";
 import { adminAuthProvider } from "./application/adminAuthProvider";
+import { i18nProvider } from "./application/i18nProvider";
 
 import { DashboardPage } from "./modules/dashboard/DashboardPage.tsx";
 
@@ -41,6 +42,7 @@ export const App = () => (
       layout={MyLayout}
       authProvider={adminAuthProvider}
       dataProvider={adminDataProvider}
+      i18nProvider={i18nProvider}
       dashboard={DashboardPage}
       disableTelemetry
     >

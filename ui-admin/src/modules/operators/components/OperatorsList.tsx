@@ -7,7 +7,7 @@ import {
   DateField,
   useListContext,
 } from "react-admin";
-import { Stack, Card, Box, Paper, Typography, alpha, useTheme } from "@mui/material";
+import { Stack, Box, Paper, Typography, alpha, useTheme } from "@mui/material";
 import { Users, Shield, Cpu } from "lucide-react";
 import { RoleBadge } from "./RoleBadge";
 import type { Operator } from "../types";
@@ -17,7 +17,6 @@ import { PageContainer } from "../../shared/components/PageContainer";
 import {
   datagridBaseSx,
   datagridHoverSx,
-  listCardSx,
   listMainTransparentSx,
 } from "../../shared/styles/listStyles";
 
@@ -37,53 +36,63 @@ export const OperatorsList = () => (
     >
       <OperatorsOverview />
 
-      <Card sx={listCardSx}>
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 2,
+          border: "1px solid",
+          borderColor: (theme) => alpha(theme.palette.divider, 0.8),
+          overflow: "hidden",
+        }}
+      >
+        {/* Cabeçalho */}
         <Box
           sx={{
-            px: { xs: 2, md: 2.5 },
-            pt: { xs: 2, md: 2.5 },
-            pb: 1,
+            px: 2.5,
+            py: 1.75,
             borderBottom: "1px solid",
-            borderColor: (theme) => alpha(theme.palette.divider, 0.8),
+            borderColor: (theme) => alpha(theme.palette.divider, 0.6),
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 1,
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.03),
           }}
         >
-          <Box>
-            <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-              Tabela de operadores
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Ordenado por utilizador
-            </Typography>
-          </Box>
-          <Box
-            sx={{
-              height: 6,
-              width: 44,
-              borderRadius: 1,
-              bgcolor: "primary.main",
-            }}
-          />
+          <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: 1.5,
+                display: "grid",
+                placeItems: "center",
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                color: "primary.main",
+              }}
+            >
+              <Users size={16} />
+            </Box>
+            <Box>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 800, lineHeight: 1.2 }}
+              >
+                Tabela de operadores
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Clique numa linha para editar
+              </Typography>
+            </Box>
+          </Stack>
         </Box>
+
         <Datagrid
           rowClick="edit"
           bulkActionButtons={false}
           sx={{
             ...datagridBaseSx,
             ...datagridHoverSx,
-            "& .MuiTableHead-root": {
-              background: (theme) =>
-                `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
-                  theme.palette.background.default,
-                  0.6,
-                )} 100%)`,
-            },
-            "& .MuiTableCell-head": {
-              py: 1.5,
-            },
+            "& .RaDatagrid-root": { boxShadow: "none" },
             "& .column-createdAt, & .column-lastLogin": {
               display: { xs: "none", lg: "table-cell" },
             },
@@ -91,8 +100,8 @@ export const OperatorsList = () => (
         >
           <TextField
             source="id"
-            label="ID"
-            sx={{ fontWeight: 800, color: "text.disabled" }}
+            label="Ref."
+            sx={{ fontWeight: 700, color: "text.disabled", fontSize: "0.8rem" }}
           />
           <TextField
             source="username"
@@ -113,7 +122,7 @@ export const OperatorsList = () => (
           <DateField source="createdAt" label="Criado em" showTime />
           <DateField source="lastLogin" label="Último login" showTime />
         </Datagrid>
-      </Card>
+      </Paper>
     </List>
   </PageContainer>
 );
@@ -123,81 +132,96 @@ const OperatorsOverview = () => {
   const theme = useTheme();
   if (isPending) return null;
 
-  const active = data.filter((item) => item.active).length;
+  const active = data.filter((o) => o.active).length;
   const inactive = data.length - active;
-  const system = data.filter((item) => item.role === "system").length;
+  const system = data.filter((o) => o.role === "system").length;
+
+  const stats = [
+    {
+      icon: Shield,
+      label: "Ativos",
+      value: active,
+      tone: theme.palette.success.main,
+    },
+    {
+      icon: Users,
+      label: "Inativos",
+      value: inactive,
+      tone: theme.palette.text.secondary,
+    },
+    {
+      icon: Cpu,
+      label: "Sistema",
+      value: system,
+      tone: theme.palette.error.main,
+    },
+  ];
 
   return (
-    <Stack direction={{ xs: "column", md: "row" }} spacing={1} sx={{ mb: 1.5 }}>
-      {[
-        {
-          icon: Shield,
-          label: "Ativos",
-          value: active,
-          tone: theme.palette.success.main,
-        },
-        {
-          icon: Users,
-          label: "Inativos",
-          value: inactive,
-          tone: theme.palette.text.secondary,
-        },
-        {
-          icon: Cpu,
-          label: "Sistema",
-          value: system,
-          tone: theme.palette.error.main,
-        },
-      ].map((item) => {
-        const Icon = item.icon;
-        return (
-          <Paper
-            key={item.label}
-            elevation={0}
-            sx={{
-              flex: 1,
-              minWidth: { xs: "100%", md: 0 },
-              p: 1.5,
-              borderRadius: 2,
-              border: "1px solid",
-              borderColor: alpha(item.tone, 0.2),
-              background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
-                item.tone,
-                0.08,
-              )} 100%)`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 1,
-            }}
-          >
-            <Stack spacing={0.3}>
-              <Typography
-                variant="overline"
-                sx={{ fontWeight: 900, letterSpacing: 1.2 }}
-              >
-                {item.label}
-              </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 900 }}>
-                {item.value}
-              </Typography>
-            </Stack>
-            <Box
+    <Stack
+      direction={{ xs: "column", sm: "row" }}
+      spacing={1.5}
+      sx={{ mb: 1.5 }}
+    >
+      {stats.map(({ icon: Icon, label, value, tone }) => (
+        <Paper
+          key={label}
+          elevation={0}
+          sx={{
+            flex: 1,
+            p: 2,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: alpha(tone, 0.2),
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(tone, 0.07)} 100%)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            position: "relative",
+            overflow: "hidden",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: "4px",
+              bgcolor: tone,
+            },
+          }}
+        >
+          <Stack spacing={0.25} sx={{ pl: 0.5 }}>
+            <Typography
+              variant="overline"
               sx={{
-                width: 38,
-                height: 38,
-                borderRadius: 1.5,
-                display: "grid",
-                placeItems: "center",
-                bgcolor: alpha(item.tone, 0.12),
-                color: item.tone,
+                fontWeight: 800,
+                letterSpacing: 1,
+                color: "text.secondary",
+                lineHeight: 1.4,
               }}
             >
-              <Icon size={18} />
-            </Box>
-          </Paper>
-        );
-      })}
+              {label}
+            </Typography>
+            <Typography variant="h5" sx={{ fontWeight: 900, color: tone }}>
+              {value}
+            </Typography>
+          </Stack>
+
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: 2,
+              display: "grid",
+              placeItems: "center",
+              bgcolor: alpha(tone, 0.1),
+              color: tone,
+            }}
+          >
+            <Icon size={20} />
+          </Box>
+        </Paper>
+      ))}
     </Stack>
   );
 };

@@ -135,6 +135,24 @@ def audit_operator_deactivated(
     )
 
 
+def audit_operator_deleted(
+        db: Session,
+        actor_operator_id: int,
+        target_operator_id: int,
+        username: str,
+) -> Audit:
+    return audit_log(
+        db=db,
+        action=AuditAction.OPERATOR_DELETED,
+        operator_id=actor_operator_id,
+        details=build_audit_details(
+            action=AuditAction.OPERATOR_DELETED,
+            msg="Operador eliminado",
+            extra={"target_operator_id": target_operator_id, "username": username},
+        ),
+    )
+
+
 def audit_operator_activated(
         db: Session,
         actor_operator_id: int,

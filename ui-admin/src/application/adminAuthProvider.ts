@@ -1,6 +1,7 @@
 import { sessionStore } from "../core/session/sessionStorage";
 import { CONFIG } from "../core/config/config";
 import { ApiError } from "../core/http/ApiError";
+import { notifyServerAvailable } from "../ui/connection/connectionEvents";
 import {
   LoginData,
   LoginResponseData,
@@ -30,12 +31,22 @@ const getErrorMessage = (payload: unknown, fallback: string) => {
 
 export const adminAuthProvider = {
   login: async ({ username, password }: LoginData) => {
-    const res = await fetch(`${CONFIG.AUTH_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${CONFIG.AUTH_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+    } catch {
+      throw new ApiError(
+        0,
+        { detail: "Servidor indisponível" },
+        "Servidor indisponível",
+      );
+    }
 
+    notifyServerAvailable();
     const payload = await parseJSON(res);
 
     if (!res.ok) {

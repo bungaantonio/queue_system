@@ -10,6 +10,7 @@ import {
   useRecordContext,
   useNotify,
   useRefresh,
+  useRedirect,
   useGetRecordId,
 } from "react-admin";
 import {
@@ -36,8 +37,11 @@ const OperatorEditToolbar = () => {
   const record = useRecordContext();
   const notify = useNotify();
   const refresh = useRefresh();
+  const redirect = useRedirect();
   const canDeactivate = Boolean(record?.active);
   const canActivate = record?.active === false;
+  const isSystem = record?.role === "system";
+  const canDelete = !isSystem;
 
   const handleActivate = async () => {
     if (!record?.id) return;
@@ -53,7 +57,7 @@ const OperatorEditToolbar = () => {
 
   return (
     <Toolbar sx={{ flexWrap: "wrap", gap: 1 }}>
-      <SaveButton />
+      <SaveButton disabled={isSystem} />
       {canActivate ? (
         <Button onClick={handleActivate} variant="outlined" color="success">
           Ativar operador
@@ -64,7 +68,30 @@ const OperatorEditToolbar = () => {
           label="Desativar operador"
           confirmTitle="Desativar operador"
           confirmContent="Esta ação desativa o operador (não remove do banco)."
+          disabled={isSystem}
         />
+      ) : null}
+      {canDelete ? (
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={async () => {
+            if (!record?.id) return;
+            const confirmed = window.confirm(
+              "Esta ação elimina o operador permanentemente. Deseja continuar?",
+            );
+            if (!confirmed) return;
+            try {
+              await operatorsGateway.deletePermanent(Number(record.id));
+              notify("Operador eliminado com sucesso.", { type: "success" });
+              redirect("list", "operators");
+            } catch {
+              notify("Falha ao eliminar operador.", { type: "error" });
+            }
+          }}
+        >
+          Eliminar operador
+        </Button>
       ) : null}
     </Toolbar>
   );
@@ -114,7 +141,7 @@ const EditHeader = () => {
             Conta técnica detectada
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Alterações de função foram bloqueadas para este operador.
+            Esta conta é protegida. Edição, ativação e eliminação foram bloqueadas.
           </Typography>
         </Paper>
       ) : null}
@@ -132,8 +159,7 @@ export const OperatorsEdit = () => (
           title="Dados de acesso"
           description="Informações de login e perfil operacional."
         >
-          <TextInput source="id" label="ID" disabled />
-          <TextInput source="username" label="Nome de utilizador" fullWidth />
+          <OperatorAccessFields />
           <SelectInput
             source="role"
             label="Função"
@@ -164,6 +190,28 @@ export const OperatorsEdit = () => (
     </PageContainer>
   </Edit>
 );
+
+const OperatorAccessFields = () => {
+  const record = useRecordContext();
+  return (
+    <>
+      <TextInput source="id" label="ID" disabled />
+      <TextInput
+        source="username"
+        label="Nome de utilizador"
+        fullWidth
+        disabled={record?.role === "system"}
+      />
+      <SelectInput
+        source="role"
+        label="Função"
+        choices={roleChoices}
+        disableValue="disabled"
+        disabled={record?.role === "system"}
+      />
+    </>
+  );
+};
 
 const FormSection = ({
   title,
