@@ -16,7 +16,7 @@ import {
   alpha,
   useTheme,
 } from "@mui/material";
-import { ShieldAlert, Clock } from "lucide-react";
+import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { AuditSummary } from "./AuditSummary";
 import { AuditIntegrityBadge } from "./AuditIntegrityBadge";
 import { useGetHeader } from "../hooks/useAuditSummary";
@@ -31,7 +31,11 @@ import {
 } from "../../shared/styles/listStyles";
 
 export const AuditList = () => {
-  const { summary, loading, error } = useGetHeader();
+  const { summary, loading, error } = useGetHeader() as {
+    summary: ReturnType<typeof useGetHeader>["summary"];
+    loading: boolean;
+    error: Error | null;
+  };
   const theme = useTheme();
 
   return (
@@ -41,9 +45,8 @@ export const AuditList = () => {
         description="Priorize eventos inválidos e confirme concatenação criptográfica."
       />
 
-      {loading && <Skeleton variant="rounded" height={152} sx={{ mb: 2.5 }} />}
-
-      {!loading && !!error && (
+      {loading && <Skeleton variant="rounded" height={180} sx={{ mb: 2.5 }} />}
+      {!loading && error && (
         <AuditCallout
           tone="warning"
           title="Resumo indisponível"
@@ -51,17 +54,7 @@ export const AuditList = () => {
           sx={{ mb: 2.5 }}
         />
       )}
-
       {!loading && !error && <AuditSummary summary={summary} />}
-
-      {summary && !summary.all_valid && (
-        <AuditCallout
-          tone="error"
-          title="Integridade comprometida"
-          description={`${summary.invalid_records} registo(s) com integridade comprometida. Revise os eventos destacados abaixo.`}
-          sx={{ mb: 2 }}
-        />
-      )}
 
       <List title="Auditoria e Histórico" sx={listMainTransparentSx}>
         <Paper
@@ -73,7 +66,7 @@ export const AuditList = () => {
             overflow: "hidden",
           }}
         >
-          {/* Cabeçalho */}
+          {/* Cabeçalho técnico */}
           <Box
             sx={{
               px: 2.5,
@@ -86,32 +79,73 @@ export const AuditList = () => {
               bgcolor: alpha(theme.palette.primary.main, 0.03),
             }}
           >
-            <Stack direction="row" alignItems="center" spacing={1.5}>
-              <Box
+            <Box>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 800, lineHeight: 1.2 }}
+              >
+                Registo de eventos
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Ordenado por horário · Clique num evento para inspecionar
+              </Typography>
+            </Box>
+            {summary && !summary.all_valid && (
+              <Stack
+                direction="row"
+                spacing={0.75}
+                alignItems="center"
                 sx={{
-                  width: 32,
-                  height: 32,
+                  px: 1.25,
+                  py: 0.6,
                   borderRadius: 1.5,
-                  display: "grid",
-                  placeItems: "center",
-                  bgcolor: alpha(theme.palette.primary.main, 0.1),
-                  color: "primary.main",
+                  bgcolor: alpha(theme.palette.error.main, 0.08),
+                  border: "1px solid",
+                  borderColor: alpha(theme.palette.error.main, 0.25),
                 }}
               >
-                <Clock size={16} />
-              </Box>
-              <Box>
+                <ShieldAlert size={13} color={theme.palette.error.main} />
                 <Typography
-                  variant="subtitle2"
-                  sx={{ fontWeight: 800, lineHeight: 1.2 }}
+                  sx={{
+                    fontFamily: "monospace",
+                    fontWeight: 700,
+                    fontSize: "0.65rem",
+                    color: "error.main",
+                    letterSpacing: "0.06em",
+                  }}
                 >
-                  Linha do tempo de auditoria
+                  {summary.invalid_records} VIOLAÇÃO(ÕES)
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Eventos ordenados por horário
+              </Stack>
+            )}
+            {summary?.all_valid && (
+              <Stack
+                direction="row"
+                spacing={0.75}
+                alignItems="center"
+                sx={{
+                  px: 1.25,
+                  py: 0.6,
+                  borderRadius: 1.5,
+                  bgcolor: alpha(theme.palette.success.main, 0.08),
+                  border: "1px solid",
+                  borderColor: alpha(theme.palette.success.main, 0.25),
+                }}
+              >
+                <ShieldCheck size={13} color={theme.palette.success.main} />
+                <Typography
+                  sx={{
+                    fontFamily: "monospace",
+                    fontWeight: 700,
+                    fontSize: "0.65rem",
+                    color: "success.dark",
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  CADEIA ÍNTEGRA
                 </Typography>
-              </Box>
-            </Stack>
+              </Stack>
+            )}
           </Box>
 
           <Datagrid
@@ -120,7 +154,10 @@ export const AuditList = () => {
             rowSx={(record: AuditVerificationDetail) =>
               record.valid
                 ? {}
-                : { bgcolor: alpha(theme.palette.error.main, 0.04) }
+                : {
+                    bgcolor: alpha(theme.palette.error.main, 0.05),
+                    borderLeft: `3px solid ${theme.palette.error.main}`,
+                  }
             }
             sx={{
               ...datagridBaseSx,
@@ -129,6 +166,14 @@ export const AuditList = () => {
               "& .RaDatagrid-tableWrapper": {
                 maxHeight: "60vh",
                 overflow: "auto",
+              },
+              "& .MuiTableHead-root": {
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
+              },
+              "& .MuiTableCell-head": {
+                bgcolor: "background.paper",
               },
               "& .column-operator_id, & .column-user_id": {
                 display: { xs: "none", md: "table-cell" },
@@ -139,6 +184,7 @@ export const AuditList = () => {
               source="id"
               label="ID"
               sx={{
+                fontFamily: "monospace",
                 fontWeight: 700,
                 color: "text.disabled",
                 fontSize: "0.75rem",
@@ -160,7 +206,11 @@ export const AuditList = () => {
               source="timestamp"
               label="Horário"
               showTime
-              sx={{ color: "text.secondary" }}
+              sx={{
+                fontFamily: "monospace",
+                fontSize: "0.8rem",
+                color: "text.secondary",
+              }}
             />
             <AuditIntegrityBadge source="valid" />
           </Datagrid>
@@ -184,6 +234,7 @@ const AuditCallout = ({
   const theme = useTheme();
   const color =
     tone === "warning" ? theme.palette.warning.main : theme.palette.error.main;
+  const Icon = tone === "warning" ? ShieldAlert : ShieldAlert;
 
   return (
     <Stack
@@ -191,11 +242,11 @@ const AuditCallout = ({
       spacing={1.5}
       alignItems="flex-start"
       sx={{
-        p: 1.5,
+        p: 1.75,
         borderRadius: 2,
         border: "1px solid",
         borderColor: alpha(color, 0.3),
-        background: `linear-gradient(135deg, ${alpha(color, 0.1)} 0%, ${alpha(color, 0.04)} 100%)`,
+        bgcolor: alpha(color, 0.06),
         position: "relative",
         overflow: "hidden",
         "&::before": {
@@ -210,16 +261,12 @@ const AuditCallout = ({
         ...sx,
       }}
     >
-      <ShieldAlert
-        size={16}
-        color={color}
-        style={{ marginTop: 2, flexShrink: 0 }}
-      />
+      <Icon size={16} color={color} style={{ marginTop: 2, flexShrink: 0 }} />
       <Box>
         <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
           {title}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
           {description}
         </Typography>
       </Box>
