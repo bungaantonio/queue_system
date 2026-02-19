@@ -12,7 +12,7 @@ import {
 import { Users, Trash2 } from "lucide-react";
 import type { QueueEntry } from "../atendimento.types";
 
-const VISIBLE = 5;
+const VISIBLE = 6;
 
 const priorityMap = {
   urgent: { label: "URGENTE", color: "error" },

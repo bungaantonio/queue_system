@@ -9,13 +9,14 @@ import {
 import type { SxProps, Theme } from "@mui/material";
 import {
   Box,
-  Card,
+  Paper,
   Skeleton,
   Stack,
   Typography,
   alpha,
   useTheme,
 } from "@mui/material";
+import { ShieldAlert, Clock } from "lucide-react";
 import { AuditSummary } from "./AuditSummary";
 import { AuditIntegrityBadge } from "./AuditIntegrityBadge";
 import { useGetHeader } from "../hooks/useAuditSummary";
@@ -25,7 +26,7 @@ import { StatusChip } from "../../shared/components/StatusChip";
 import { PageContainer } from "../../shared/components/PageContainer";
 import {
   datagridBaseSx,
-  listCardSx,
+  datagridHoverSx,
   listMainTransparentSx,
 } from "../../shared/styles/listStyles";
 
@@ -40,120 +41,91 @@ export const AuditList = () => {
         description="Priorize eventos inválidos e confirme concatenação criptográfica."
       />
 
-      {loading ? (
-        <Skeleton variant="rounded" height={152} sx={{ mb: 2.5 }} />
-      ) : null}
-      {!loading && error ? (
+      {loading && <Skeleton variant="rounded" height={152} sx={{ mb: 2.5 }} />}
+
+      {!loading && !!error && (
         <AuditCallout
           tone="warning"
           title="Resumo indisponível"
           description="Falha ao carregar o resumo da auditoria."
           sx={{ mb: 2.5 }}
         />
-      ) : null}
-      {!loading && !error ? <AuditSummary summary={summary} /> : null}
+      )}
 
-      {summary && !summary.all_valid ? (
+      {!loading && !error && <AuditSummary summary={summary} />}
+
+      {summary && !summary.all_valid && (
         <AuditCallout
           tone="error"
           title="Integridade comprometida"
-          description={`Existem ${summary.invalid_records} registros com integridade comprometida. Revise os eventos destacados abaixo.`}
+          description={`${summary.invalid_records} registo(s) com integridade comprometida. Revise os eventos destacados abaixo.`}
           sx={{ mb: 2 }}
         />
-      ) : null}
+      )}
 
       <List title="Auditoria e Histórico" sx={listMainTransparentSx}>
-        <Card
+        <Paper
+          elevation={0}
           sx={{
-            ...listCardSx,
             borderRadius: 2,
             border: "1px solid",
-            borderColor: alpha(theme.palette.divider, 0.9),
-            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
-              theme.palette.background.default,
-              0.5,
-            )} 100%)`,
-            position: "relative",
+            borderColor: alpha(theme.palette.divider, 0.8),
             overflow: "hidden",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              background: `repeating-linear-gradient(135deg, ${alpha(
-                theme.palette.primary.main,
-                0.05,
-              )} 0px, ${alpha(
-                theme.palette.primary.main,
-                0.05,
-              )} 6px, transparent 6px, transparent 14px)`,
-              opacity: 0.35,
-              pointerEvents: "none",
-            },
           }}
         >
+          {/* Cabeçalho */}
           <Box
             sx={{
-              px: { xs: 2, md: 2.5 },
-              pt: { xs: 2, md: 2.5 },
-              pb: 1,
+              px: 2.5,
+              py: 1.75,
               borderBottom: "1px solid",
-              borderColor: alpha(theme.palette.divider, 0.8),
+              borderColor: alpha(theme.palette.divider, 0.6),
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: 1,
-              position: "relative",
-              zIndex: 1,
+              bgcolor: alpha(theme.palette.primary.main, 0.03),
             }}
           >
-            <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                Linha do tempo de auditoria
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Eventos ordenados por horário
-              </Typography>
-            </Box>
-            <Box
-              sx={{
-                height: 6,
-                width: 44,
-                borderRadius: 1,
-                bgcolor: theme.palette.primary.main,
-                boxShadow: `0 0 0 4px ${alpha(
-                  theme.palette.primary.main,
-                  0.15,
-                )}`,
-              }}
-            />
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 1.5,
+                  display: "grid",
+                  placeItems: "center",
+                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                  color: "primary.main",
+                }}
+              >
+                <Clock size={16} />
+              </Box>
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ fontWeight: 800, lineHeight: 1.2 }}
+                >
+                  Linha do tempo de auditoria
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Eventos ordenados por horário
+                </Typography>
+              </Box>
+            </Stack>
           </Box>
+
           <Datagrid
             rowClick="show"
             bulkActionButtons={false}
-            rowSx={(record: AuditVerificationDetail) => ({
-              bgcolor: record.valid
-                ? "transparent"
-                : "rgba(var(--mui-palette-error-mainChannel) / 0.04)",
-            })}
+            rowSx={(record: AuditVerificationDetail) =>
+              record.valid
+                ? {}
+                : { bgcolor: alpha(theme.palette.error.main, 0.04) }
+            }
             sx={{
               ...datagridBaseSx,
-              position: "relative",
-              zIndex: 1,
-              "& .MuiTableCell-root": { py: 1.15 },
-              "& .MuiTableHead-root": {
-                position: "sticky",
-                top: 0,
-                zIndex: 2,
-                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
-                  theme.palette.background.default,
-                  0.6,
-                )} 100%)`,
-              },
-              "& .MuiTableCell-head": {
-                textTransform: "uppercase",
-                fontSize: "0.68rem",
-                letterSpacing: "0.1em",
-              },
+              ...datagridHoverSx,
+              "& .RaDatagrid-root": { boxShadow: "none" },
               "& .RaDatagrid-tableWrapper": {
                 maxHeight: "60vh",
                 overflow: "auto",
@@ -167,12 +139,11 @@ export const AuditList = () => {
               source="id"
               label="ID"
               sx={{
-                fontWeight: 800,
+                fontWeight: 700,
                 color: "text.disabled",
-                fontSize: "0.7rem",
+                fontSize: "0.75rem",
               }}
             />
-
             <FunctionField
               label="Evento"
               render={(record: AuditVerificationDetail) => (
@@ -183,7 +154,6 @@ export const AuditList = () => {
                 />
               )}
             />
-
             <TextField source="operator_id" label="Operador" />
             <TextField source="user_id" label="Utente" />
             <DateField
@@ -194,7 +164,7 @@ export const AuditList = () => {
             />
             <AuditIntegrityBadge source="valid" />
           </Datagrid>
-        </Card>
+        </Paper>
       </List>
     </PageContainer>
   );
@@ -212,21 +182,20 @@ const AuditCallout = ({
   sx?: SxProps<Theme>;
 }) => {
   const theme = useTheme();
-  const toneColor =
-    tone === "warning"
-      ? theme.palette.warning.main
-      : theme.palette.error.main;
+  const color =
+    tone === "warning" ? theme.palette.warning.main : theme.palette.error.main;
+
   return (
-    <Box
+    <Stack
+      direction="row"
+      spacing={1.5}
+      alignItems="flex-start"
       sx={{
         p: 1.5,
         borderRadius: 2,
         border: "1px solid",
-        borderColor: alpha(toneColor, 0.4),
-        background: `linear-gradient(135deg, ${alpha(
-          toneColor,
-          0.16,
-        )} 0%, ${alpha(toneColor, 0.06)} 100%)`,
+        borderColor: alpha(color, 0.3),
+        background: `linear-gradient(135deg, ${alpha(color, 0.1)} 0%, ${alpha(color, 0.04)} 100%)`,
         position: "relative",
         overflow: "hidden",
         "&::before": {
@@ -235,20 +204,25 @@ const AuditCallout = ({
           left: 0,
           top: 0,
           bottom: 0,
-          width: "6px",
-          bgcolor: toneColor,
+          width: "4px",
+          bgcolor: color,
         },
         ...sx,
       }}
     >
-      <Stack spacing={0.4}>
+      <ShieldAlert
+        size={16}
+        color={color}
+        style={{ marginTop: 2, flexShrink: 0 }}
+      />
+      <Box>
         <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
           {title}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {description}
         </Typography>
-      </Stack>
-    </Box>
+      </Box>
+    </Stack>
   );
 };
