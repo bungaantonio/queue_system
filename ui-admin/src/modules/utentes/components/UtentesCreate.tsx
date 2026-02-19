@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+// src/modules/utentes/components/UtentesCreate.tsx
 import {
   Create,
   SimpleForm,
@@ -10,14 +10,15 @@ import {
   minLength,
   type SaveHandler,
 } from "react-admin";
-import { Box, Paper, Stack, Typography, alpha, useTheme } from "@mui/material";
+import { Box } from "@mui/material";
 import { BiometricInput } from "./BiometricInput";
+import { FormSection } from "../../shared/components/FormSection";
 import { utentesGateway } from "../utentesGateway";
 import type { UtenteCreatePayload } from "../utentes.types";
 import { PageHeader } from "../../shared/components/PageHeader";
 import { PageContainer } from "../../shared/components/PageContainer";
 
-interface UtentesCreateFormValues {
+interface FormValues {
   name: string;
   birth_date: string;
   document_id: string;
@@ -37,10 +38,11 @@ const attendanceChoices = [
 ];
 
 export const UtentesCreate = () => {
-  const handleSave = async (values: UtentesCreateFormValues) => {
-    if (!values.credential_identifier) {
+  const onSubmit: SaveHandler<FormValues> = async (raw) => {
+    const values = raw as FormValues;
+
+    if (!values.credential_identifier)
       throw new Error("Credencial biométrica não capturada.");
-    }
 
     const payload: UtenteCreatePayload = {
       user: {
@@ -60,12 +62,6 @@ export const UtentesCreate = () => {
     await utentesGateway.create(payload);
   };
 
-  const onSubmit: SaveHandler<UtentesCreateFormValues> = async (
-    values: Partial<UtentesCreateFormValues>,
-  ) => {
-    await handleSave(values as UtentesCreateFormValues);
-  };
-
   return (
     <Create redirect="list">
       <PageContainer>
@@ -74,201 +70,147 @@ export const UtentesCreate = () => {
           onSubmit={onSubmit}
           sx={{ p: 0 }}
         >
-          <Stack spacing={2}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <PageHeader
               title="Novo Utente"
-              description="Registe identificação, biometria e prioridade de atendimento."
+              description="Preencha os blocos abaixo para registar o utente no sistema."
               mb={0}
             />
 
-            <InfoCallout>
-              A biometria é obrigatória para vincular o utente ao fluxo de fila.
-            </InfoCallout>
-
-            <FormSection
-              title="Dados do utente"
-              description="Identificação e contacto principal."
-              tone="primary"
+            {/* Grade principal: 2 colunas, 3 linhas (1 ocupa duas linhas) */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  lg: "minmax(0, 1fr) minmax(0, 1fr)",
+                },
+                gap: 2,
+                alignItems: { xs: "start", lg: "stretch" },
+                gridTemplateAreas: {
+                  xs: `"identificacao" "biometria" "tipo" "condicoes"`,
+                  lg: `"identificacao biometria" "identificacao tipo" "condicoes condicoes"`,
+                },
+                gridAutoRows: { lg: "minmax(0, 1fr)" },
+                minWidth: 0,
+              }}
             >
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                  gap: 2,
-                  width: "100%",
-                }}
-              >
-                <TextInput
-                  source="name"
-                  label="Nome completo"
-                  fullWidth
-                  validate={[required(), minLength(3)]}
-                />
-                <TextInput
-                  source="document_id"
-                  label="Número de identificação"
-                  fullWidth
-                  validate={[required(), minLength(5)]}
-                />
-                <TextInput
-                  source="phone"
-                  label="Contacto telefónico"
-                  fullWidth
-                  validate={[required(), minLength(7)]}
-                />
-                <DateInput
-                  source="birth_date"
-                  label="Data de nascimento"
-                  fullWidth
-                  validate={required()}
-                />
-              </Box>
-            </FormSection>
-
-            <FormSection
-              title="Biometria"
-              description="Captura obrigatória para autenticar o utente."
-              tone="success"
-            >
-              <BiometricInput source="credential_identifier" operatorId={42} />
-            </FormSection>
-
-            <FormSection
-              title="Prioridade e condição"
-              description="Informações para prioridade de atendimento."
-              tone="secondary"
-            >
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                  gap: 2,
-                  width: "100%",
-                }}
-              >
-                <BooleanInput source="is_pregnant" label="Utente gestante" />
-                <DateInput
-                  source="pregnant_until"
-                  label="Data prevista do parto"
-                  fullWidth
-                />
-                <BooleanInput
-                  source="is_disabled_temp"
-                  label="Mobilidade reduzida"
-                />
-                <DateInput
-                  source="disabled_until"
-                  label="Validade do atestado"
-                  fullWidth
-                />
+              <Box sx={{ gridArea: "identificacao", minWidth: 0 }}>
+                <FormSection
+                  step={1}
+                  tone="primary"
+                  title="Identificação"
+                  description="Dados pessoais e contacto principal."
+                  sx={{ height: { lg: "100%" } }}
+                >
+                  <TextInput
+                    source="name"
+                    label="Nome completo"
+                    fullWidth
+                    validate={[required(), minLength(3)]}
+                  />
+                  <TextInput
+                    source="document_id"
+                    label="Número de identificação"
+                    fullWidth
+                    validate={[required(), minLength(5)]}
+                  />
+                  <TextInput
+                    source="phone"
+                    label="Contacto telefónico"
+                    fullWidth
+                    validate={[required(), minLength(7)]}
+                  />
+                  <DateInput
+                    source="birth_date"
+                    label="Data de nascimento"
+                    fullWidth
+                    validate={required()}
+                  />
+                </FormSection>
               </Box>
 
-              <SelectInput
-                source="attendance_type"
-                label="Tipo de atendimento"
-                choices={attendanceChoices}
-                fullWidth
-                validate={required()}
-              />
-            </FormSection>
-          </Stack>
+              <Box sx={{ gridArea: "biometria", minWidth: 0 }}>
+                <FormSection
+                  step={2}
+                  tone="success"
+                  title="Biometria"
+                  description="Captura obrigatória para autenticar o utente no sistema de fila."
+                  sx={{ height: { lg: "100%" } }}
+                >
+                  <BiometricInput
+                    source="credential_identifier"
+                    operatorId={42}
+                  />
+                </FormSection>
+              </Box>
+
+              <Box sx={{ gridArea: "tipo", minWidth: 0 }}>
+                <FormSection
+                  step={3}
+                  tone="secondary"
+                  title="Tipo de atendimento"
+                  description="Defina o tipo de atendimento do utente."
+                  sx={{ height: { lg: "100%" } }}
+                >
+                  <SelectInput
+                    source="attendance_type"
+                    label="Tipo de atendimento"
+                    choices={attendanceChoices}
+                    fullWidth
+                    validate={required()}
+                  />
+                </FormSection>
+              </Box>
+
+              <Box sx={{ gridArea: "condicoes", minWidth: 0 }}>
+                <FormSection
+                  step={4}
+                  tone="secondary"
+                  title="Condições especiais"
+                  description="Registe condições temporárias do utente."
+                >
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                      gap: 2,
+                      alignItems: "start",
+                    }}
+                  >
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                    >
+                      <BooleanInput
+                        source="is_pregnant"
+                        label="Utente gestante"
+                      />
+                      <DateInput
+                        source="pregnant_until"
+                        label="Data prevista do parto"
+                        fullWidth
+                      />
+                    </Box>
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                    >
+                      <BooleanInput
+                        source="is_disabled_temp"
+                        label="Mobilidade reduzida"
+                      />
+                      <DateInput
+                        source="disabled_until"
+                        label="Validade do atestado"
+                        fullWidth
+                      />
+                    </Box>
+                  </Box>
+                </FormSection>
+              </Box>
+            </Box>
+          </Box>
         </SimpleForm>
       </PageContainer>
     </Create>
-  );
-};
-
-const FormSection = ({
-  title,
-  description,
-  children,
-  tone,
-}: {
-  title: string;
-  description: string;
-  children: ReactNode;
-  tone?: "primary" | "secondary" | "success";
-}) => {
-  const theme = useTheme();
-  const toneColor =
-    tone === "secondary"
-      ? theme.palette.secondary.main
-      : tone === "success"
-        ? theme.palette.success.main
-        : theme.palette.primary.main;
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: { xs: 2, md: 2.5 },
-        borderRadius: 2,
-        border: "1px solid",
-        borderColor: alpha(toneColor, 0.3),
-        background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(
-          toneColor,
-          0.08,
-        )} 100%)`,
-        position: "relative",
-        overflow: "hidden",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: "6px",
-          bgcolor: toneColor,
-        },
-      }}
-    >
-      <Stack spacing={0.5} sx={{ mb: 2 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-          {title}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          {description}
-        </Typography>
-        <Box sx={{ width: 36, height: 3, bgcolor: toneColor }} />
-      </Stack>
-      <Stack spacing={2}>{children}</Stack>
-    </Paper>
-  );
-};
-
-const InfoCallout = ({ children }: { children: ReactNode }) => {
-  const theme = useTheme();
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 1.5,
-        borderRadius: 2,
-        border: "1px solid",
-        borderColor: alpha(theme.palette.primary.main, 0.3),
-        background: `linear-gradient(135deg, ${alpha(
-          theme.palette.primary.main,
-          0.18,
-        )} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
-        position: "relative",
-        overflow: "hidden",
-        "&::after": {
-          content: '""',
-          position: "absolute",
-          right: -20,
-          top: -20,
-          width: 60,
-          height: 60,
-          borderRadius: "50%",
-          background: alpha(theme.palette.primary.main, 0.2),
-        },
-      }}
-    >
-      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-        Nota operacional
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {children}
-      </Typography>
-    </Paper>
   );
 };

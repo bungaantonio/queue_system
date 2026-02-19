@@ -1,6 +1,7 @@
 import { sessionStore } from "../core/session/sessionStorage";
 import { CONFIG } from "../core/config/config";
 import { ApiError } from "../core/http/ApiError";
+import { notifyServerAvailable } from "../ui/connection/connectionEvents";
 import {
   LoginData,
   LoginResponseData,
@@ -45,6 +46,7 @@ export const adminAuthProvider = {
       );
     }
 
+    notifyServerAvailable();
     const payload = await parseJSON(res);
 
     if (!res.ok) {
