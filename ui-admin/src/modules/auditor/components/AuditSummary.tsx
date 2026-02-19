@@ -1,6 +1,5 @@
 // src/modules/auditor/components/AuditSummary.tsx
 import {
-  Box,
   Paper,
   Typography,
   Grid,
@@ -14,84 +13,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   ShieldCheck,
-  type LucideIcon,
 } from "lucide-react";
 import type { AuditChainSummary } from "../types";
-
-const StatCard = ({
-  title,
-  value,
-  icon: Icon,
-  color,
-  helper,
-}: {
-  title: string;
-  value: string | number;
-  icon: LucideIcon;
-  color: string;
-  helper?: string;
-}) => (
-  <Paper
-    elevation={0}
-    sx={{
-      p: 1.75,
-      borderRadius: 2,
-      border: "1px solid",
-      borderColor: alpha(color, 0.22),
-      background: `linear-gradient(135deg, #ffffff 0%, ${alpha(color, 0.07)} 100%)`,
-      position: "relative",
-      overflow: "hidden",
-      "&::before": {
-        content: '""',
-        position: "absolute",
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: "4px",
-        bgcolor: color,
-      },
-    }}
-  >
-    <Stack direction="row" spacing={1.5} alignItems="center">
-      <Box
-        sx={{
-          p: 0.9,
-          borderRadius: 1.5,
-          bgcolor: alpha(color, 0.1),
-          color,
-          display: "grid",
-          placeItems: "center",
-        }}
-      >
-        <Icon size={18} />
-      </Box>
-      <Box>
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 800,
-            color: "text.secondary",
-            display: "block",
-            lineHeight: 1.1,
-          }}
-        >
-          {title.toUpperCase()}
-        </Typography>
-        <Typography
-          variant="h5"
-          sx={{ fontWeight: 900, color, fontVariantNumeric: "tabular-nums" }}
-        >
-          {value}
-        </Typography>
-        {helper && (
-          <Typography variant="caption" color="text.secondary">
-            {helper}
-          </Typography>
-        )}
-      </Box>
-    </Stack>
-  </Paper>
-);
 
 export const AuditSummary = ({
   summary,
@@ -106,60 +29,22 @@ export const AuditSummary = ({
       ? Math.round((summary.valid_records / summary.total_records) * 100)
       : 100;
 
-  const chainColor = summary.all_valid
+  const chainOk = summary.all_valid;
+  const chainColor = chainOk
     ? theme.palette.success.main
     : theme.palette.error.main;
 
   return (
     <Stack spacing={1.5} sx={{ mb: 2.5 }}>
-      <Grid container spacing={1.5}>
-        {[
-          {
-            title: "Total de Registos",
-            value: summary.total_records,
-            icon: Database,
-            color: theme.palette.primary.main,
-            helper: "Base analisada",
-          },
-          {
-            title: "Válidos",
-            value: summary.valid_records,
-            icon: CheckCircle2,
-            color: theme.palette.success.main,
-            helper: "Sem inconsistência",
-          },
-          {
-            title: "Inválidos",
-            value: summary.invalid_records,
-            icon: AlertTriangle,
-            color: theme.palette.error.main,
-            helper: "Exigem revisão",
-          },
-          {
-            title: "Integridade",
-            value: `${integrityPct}%`,
-            icon: ShieldCheck,
-            color: chainColor,
-            helper: summary.all_valid
-              ? "Cadeia consistente"
-              : "Risco detectado",
-          },
-        ].map((card) => (
-          <Grid key={card.title} size={{ xs: 12, sm: 6, lg: 3 }}>
-            <StatCard {...card} />
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Barra de saúde da cadeia */}
+      {/* Barra de saúde — primeiro, porque é o mais importante */}
       <Paper
         elevation={0}
         sx={{
-          p: 1.75,
+          p: 2,
           borderRadius: 2,
-          border: "1px solid",
-          borderColor: alpha(chainColor, 0.25),
-          background: `linear-gradient(135deg, ${alpha(chainColor, 0.1)} 0%, ${alpha(theme.palette.background.paper, 0.96)} 100%)`,
+          border: "2px solid",
+          borderColor: alpha(chainColor, 0.4),
+          background: `linear-gradient(135deg, ${alpha(chainColor, 0.08)} 0%, ${theme.palette.background.paper} 100%)`,
           position: "relative",
           overflow: "hidden",
           "&::before": {
@@ -168,36 +53,133 @@ export const AuditSummary = ({
             left: 0,
             top: 0,
             bottom: 0,
-            width: "4px",
+            width: "5px",
             bgcolor: chainColor,
           },
         }}
       >
-        <Stack spacing={1}>
+        <Stack spacing={1.25}>
           <Stack
-            direction={{ xs: "column", sm: "row" }}
+            direction="row"
             justifyContent="space-between"
-            alignItems={{ xs: "flex-start", sm: "center" }}
-            spacing={0.5}
+            alignItems="center"
           >
-            <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
-              Saúde da cadeia de auditoria
-            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <ShieldCheck size={16} color={chainColor} strokeWidth={2.5} />
+              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                Saúde da cadeia
+              </Typography>
+            </Stack>
             <Typography
-              variant="caption"
-              sx={{ fontWeight: 900, color: chainColor }}
+              sx={{
+                fontFamily: "monospace",
+                fontWeight: 900,
+                fontSize: "1.4rem",
+                color: chainColor,
+                letterSpacing: "-1px",
+              }}
             >
-              {summary.all_valid ? "ESTÁVEL" : "ATENÇÃO IMEDIATA"}
+              {integrityPct}%
             </Typography>
           </Stack>
+
           <LinearProgress
             variant="determinate"
             value={integrityPct}
-            color={summary.all_valid ? "success" : "error"}
+            color={chainOk ? "success" : "error"}
             sx={{ height: 6, borderRadius: 99 }}
           />
+
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontWeight: 600 }}
+          >
+            {chainOk
+              ? "Todos os registos verificados com sucesso. Cadeia consistente."
+              : `${summary.invalid_records} registo(s) comprometido(s). Verificação manual necessária.`}
+          </Typography>
         </Stack>
       </Paper>
+
+      {/* Métricas secundárias */}
+      <Grid container spacing={1.5}>
+        {[
+          {
+            icon: Database,
+            label: "Total analisado",
+            value: summary.total_records,
+            color: theme.palette.text.secondary,
+          },
+          {
+            icon: CheckCircle2,
+            label: "Íntegros",
+            value: summary.valid_records,
+            color: theme.palette.success.main,
+          },
+          {
+            icon: AlertTriangle,
+            label: "Comprometidos",
+            value: summary.invalid_records,
+            color:
+              summary.invalid_records > 0
+                ? theme.palette.error.main
+                : theme.palette.text.disabled,
+          },
+        ].map(({ icon: Icon, label, value, color }) => (
+          <Grid key={label} size={{ xs: 12, sm: 4 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                px: 2,
+                py: 1.5,
+                borderRadius: 2,
+                border: "1px solid",
+                borderColor: alpha(color, 0.2),
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                position: "relative",
+                overflow: "hidden",
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: "3px",
+                  bgcolor: color,
+                },
+              }}
+            >
+              <Stack spacing={0.1} sx={{ pl: 0.5 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 700,
+                    color: "text.secondary",
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {label.toUpperCase()}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: "monospace",
+                    fontWeight: 900,
+                    fontSize: "1.5rem",
+                    color,
+                    lineHeight: 1,
+                  }}
+                >
+                  {value}
+                </Typography>
+              </Stack>
+              <Icon size={18} color={alpha(color, 0.4)} />
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
     </Stack>
   );
 };
