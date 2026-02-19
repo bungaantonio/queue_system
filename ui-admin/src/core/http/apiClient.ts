@@ -3,9 +3,19 @@ import { CONFIG } from "../config/config";
 import { ApiError } from "./ApiError";
 import { getApiPayload } from "../../application/auth.types";
 import type { HttpPort } from "./http.types";
+import {
+  notifyServerAvailable,
+  notifyServerUnavailable,
+} from "../../ui/connection/connectionEvents";
 
-const networkError = () =>
-  new ApiError(0, { detail: "Servidor indisponível" }, "Servidor indisponível");
+const networkError = () => {
+  notifyServerUnavailable();
+  return new ApiError(
+    0,
+    { detail: "Servidor indisponível" },
+    "Servidor indisponível",
+  );
+};
 
 const parseJSON = async (res: Response): Promise<unknown> => {
   try {
@@ -44,6 +54,7 @@ const refreshAccessToken = async (): Promise<string> => {
     throw networkError();
   }
 
+  notifyServerAvailable();
   const refreshPayload = await parseJSON(refreshRes);
   if (!refreshRes.ok) {
     sessionStore.clear();
@@ -88,6 +99,7 @@ const request = async <T>(
   } catch {
     throw networkError();
   }
+  notifyServerAvailable();
 
   if (res.status === 401) {
     token = await refreshAccessToken();
@@ -96,6 +108,7 @@ const request = async <T>(
     } catch {
       throw networkError();
     }
+    notifyServerAvailable();
     if (!res.ok) {
       const errorBody = await parseJSON(res);
       throw new ApiError(res.status, errorBody);
