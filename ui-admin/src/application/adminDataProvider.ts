@@ -1,4 +1,10 @@
-import type { DataProvider } from "react-admin";
+import type {
+  DataProvider,
+  GetListParams,
+  GetListResult,
+  QueryFunctionContext,
+  RaRecord,
+} from "react-admin";
 import { operatorsGateway } from "../modules/operators/operatorsGateway";
 import { utentesGateway } from "../modules/utentes/utentesGateway";
 import { auditorGateway } from "../modules/auditor/auditorGateway";
@@ -110,9 +116,13 @@ const applyPagination = (
 };
 
 export const adminDataProvider: DataProvider = {
-  getList: async (resource, params) => {
+  getList: async <RecordType extends RaRecord = any>(
+    resource: string,
+    params: GetListParams & QueryFunctionContext,
+  ): Promise<GetListResult<RecordType>> => {
     const gateway = getGateway(resource);
-    if (!gateway?.getList) return { data: [], total: 0 };
+    if (!gateway?.getList)
+      return { data: [] as RecordType[], total: 0 };
 
     const data = (await gateway.getList()) as Record<string, unknown>[];
     const filtered = applyFilters(data, params?.filter);
@@ -120,7 +130,7 @@ export const adminDataProvider: DataProvider = {
     const paginated = applyPagination(sorted, params?.pagination);
 
     return {
-      data: paginated,
+      data: paginated as RecordType[],
       total: filtered.length,
     };
   },
