@@ -22,7 +22,7 @@ export const AtendimentoPanel = () => {
 
   if (!context || context.loading) {
     return (
-      <Paper sx={{ p: 2, borderRadius: 4 }}>
+      <Paper sx={{ mt: 2, p: 2, borderRadius: 4 }}>
         <Typography variant="body2" color="text.secondary">
           A carregar estado de atendimento...
         </Typography>
