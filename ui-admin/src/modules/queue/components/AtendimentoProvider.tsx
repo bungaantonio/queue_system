@@ -11,6 +11,10 @@ import { normalizeQueueSnapshot } from "../atendimento.types";
 import { sessionStore } from "../../../core/session/sessionStorage";
 import { CONFIG } from "../../../core/config/config";
 import type { QueueEntry, QueueSnapshot } from "../atendimento.types";
+import {
+  notifySseConnected,
+  notifySseDisconnected,
+} from "../../../ui/connection/connectionEvents";
 
 interface AtendimentoContextType {
   queue: QueueEntry[];
@@ -87,9 +91,13 @@ export const AtendimentoProvider = ({ children }: { children: ReactNode }) => {
 
     const eventSource = new EventSource(sseUrl);
 
-    eventSource.onopen = () => console.log("SSE conectado:", sseUrl);
+    eventSource.onopen = () => {
+      notifySseConnected();
+      console.log("SSE conectado:", sseUrl);
+    };
 
     eventSource.onerror = (err) => {
+      notifySseDisconnected();
       console.error("SSE erro:", err);
       // O navegador tenta reconectar automaticamente
     };
