@@ -1,13 +1,16 @@
 from typing import List, Optional, cast
 from sqlalchemy.orm import Session
+from app.core.exceptions import AppException
 from app.helpers.password import get_password_hash
 from app.helpers.audit_helpers import (
     audit_operator_created,
     audit_operator_updated,
     audit_operator_activated,
     audit_operator_deactivated,
+    audit_operator_deleted,
 )
 from app.crud import operator_crud
+from app.models.models import RefreshToken
 from app.schemas.operator_schemas import (
     OperatorResponse,
     OperatorCreateRequest,
@@ -123,6 +126,34 @@ class OperatorService:
         db.commit()
         db.refresh(db_op)
         return OperatorResponse.model_validate(db_op)
+
+    @staticmethod
+    def delete_operator(
+        db: Session, operator_id: int, acting_operator_id: int
+    ) -> Optional[OperatorResponse]:
+        if operator_id == acting_operator_id:
+            raise AppException("operator.self_delete_forbidden")
+
+        db_op = operator_crud.get_operator_by_id(db, operator_id)
+        if not db_op:
+            return None
+
+        deleted_snapshot = OperatorResponse.model_validate(db_op)
+
+        audit_operator_deleted(
+            db=db,
+            actor_operator_id=acting_operator_id,
+            target_operator_id=cast(int, db_op.id),
+            username=cast(str, db_op.username),
+        )
+
+        db.query(RefreshToken).filter(
+            RefreshToken.user_id == cast(int, db_op.id)
+        ).delete(synchronize_session=False)
+        db.delete(db_op)
+
+        db.commit()
+        return deleted_snapshot
 
     @staticmethod
     def get_by_id(db: Session, operator_id: int) -> Optional[OperatorResponse]:

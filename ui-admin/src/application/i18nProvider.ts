@@ -29,7 +29,19 @@ const ptPT = {
       undo: "Anular",
       update: "Atualizar",
     },
+    auth: {
+      auth_check_error: "Sessão expirada. Inicie sessão novamente.",
+      user_menu: "Perfil",
+      username: "Utilizador",
+      password: "Palavra-passe",
+      sign_in: "Iniciar sessão",
+      sign_in_error: "Credenciais inválidas",
+      logout: "Terminar sessão",
+    },
     input: {
+      password: {
+        toggle_hidden: "Mostrar palavra-passe",
+      },
       file: {
         upload_several: "Arraste os ficheiros ou clique para selecionar.",
         upload_single: "Arraste o ficheiro ou clique para selecionar.",
@@ -44,6 +56,16 @@ const ptPT = {
       not_found: "Não encontrado.",
       unsaved_changes: "Tem alterações por guardar.",
     },
+    notification: {
+      created: "Criado com sucesso.",
+      updated: "Atualizado com sucesso.",
+      deleted: "Eliminado com sucesso.",
+      bad_item: "Elemento inválido.",
+      item_doesnt_exist: "O elemento já não existe.",
+      http_error: "Erro de comunicação com o servidor.",
+      data_provider_error: "Erro no fornecedor de dados. Consulte a consola.",
+      canceled: "Ação cancelada.",
+    },
     navigation: {
       first: "Primeira",
       last: "Última",
@@ -52,6 +74,16 @@ const ptPT = {
       page_range_info: "%{offsetBegin}-%{offsetEnd} de %{total}",
       page_rows_per_page: "Linhas por página",
       prev: "Anterior",
+    },
+    page: {
+      create: "Criar %{name}",
+      dashboard: "Página inicial",
+      edit: "Editar %{name} #%{id}",
+      error: "Ocorreu um erro",
+      list: "%{name}",
+      loading: "A carregar",
+      not_found: "Não encontrado",
+      show: "Ver %{name} #%{id}",
     },
     validation: {
       email: "Email inválido.",

@@ -31,16 +31,97 @@ const getGateway = (resource: string): ResourceGateway | null => {
   return null;
 };
 
+const normalizeString = (value: unknown) =>
+  String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "");
+
+const matchesQuery = (record: Record<string, unknown>, query: string) => {
+  const normalizedQuery = normalizeString(query);
+  if (!normalizedQuery) return true;
+
+  return Object.values(record).some((value) => {
+    if (
+      value === null ||
+      value === undefined ||
+      typeof value === "object" ||
+      typeof value === "function"
+    ) {
+      return false;
+    }
+    return normalizeString(value).includes(normalizedQuery);
+  });
+};
+
+const applyFilters = (
+  data: Record<string, unknown>[],
+  filter: Record<string, unknown> | undefined,
+) => {
+  if (!filter) return data;
+
+  const { q, ...rest } = filter;
+  let filtered = data;
+
+  if (typeof q === "string" && q.trim()) {
+    filtered = filtered.filter((record) => matchesQuery(record, q));
+  }
+
+  Object.entries(rest).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") return;
+    filtered = filtered.filter((record) => record[key] === value);
+  });
+
+  return filtered;
+};
+
+const applySorting = (
+  data: Record<string, unknown>[],
+  sort: { field: string; order: "ASC" | "DESC" } | undefined,
+) => {
+  if (!sort?.field) return data;
+  const direction = sort.order === "DESC" ? -1 : 1;
+  const field = sort.field;
+
+  return [...data].sort((a, b) => {
+    const left = a[field];
+    const right = b[field];
+
+    if (left === right) return 0;
+    if (left === undefined || left === null) return 1 * direction;
+    if (right === undefined || right === null) return -1 * direction;
+
+    if (typeof left === "number" && typeof right === "number") {
+      return (left - right) * direction;
+    }
+
+    return String(left).localeCompare(String(right), "pt-PT") * direction;
+  });
+};
+
+const applyPagination = (
+  data: Record<string, unknown>[],
+  pagination: { page: number; perPage: number } | undefined,
+) => {
+  if (!pagination) return data;
+  const { page, perPage } = pagination;
+  const start = (page - 1) * perPage;
+  return data.slice(start, start + perPage);
+};
+
 export const adminDataProvider: DataProvider = {
-  getList: async (resource) => {
+  getList: async (resource, params) => {
     const gateway = getGateway(resource);
     if (!gateway?.getList) return { data: [], total: 0 };
 
-    const data = await gateway.getList();
+    const data = (await gateway.getList()) as Record<string, unknown>[];
+    const filtered = applyFilters(data, params?.filter);
+    const sorted = applySorting(filtered, params?.sort);
+    const paginated = applyPagination(sorted, params?.pagination);
 
     return {
-      data,
-      total: data.length,
+      data: paginated,
+      total: filtered.length,
     };
   },
 
