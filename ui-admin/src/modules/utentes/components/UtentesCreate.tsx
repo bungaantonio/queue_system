@@ -74,102 +74,104 @@ export const UtentesCreate = () => {
           onSubmit={onSubmit}
           sx={{ p: 0 }}
         >
-          <PageHeader
-            title="Novo Utente"
-            description="Registe identificação, biometria e prioridade de atendimento."
-            mb={1}
-          />
+          <Stack spacing={2}>
+            <PageHeader
+              title="Novo Utente"
+              description="Registe identificação, biometria e prioridade de atendimento."
+              mb={0}
+            />
 
-          <InfoCallout>
-            A biometria é obrigatória para vincular o utente ao fluxo de fila.
-          </InfoCallout>
+            <InfoCallout>
+              A biometria é obrigatória para vincular o utente ao fluxo de fila.
+            </InfoCallout>
 
-          <FormSection
-            title="Dados do utente"
-            description="Identificacao e contacto principal."
-            tone="primary"
-          >
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                gap: 2,
-                width: "100%",
-              }}
+            <FormSection
+              title="Dados do utente"
+              description="Identificação e contacto principal."
+              tone="primary"
             >
-              <TextInput
-                source="name"
-                label="Nome completo"
-                fullWidth
-                validate={[required(), minLength(3)]}
-              />
-              <TextInput
-                source="document_id"
-                label="Numero de identificacao"
-                fullWidth
-                validate={[required(), minLength(5)]}
-              />
-              <TextInput
-                source="phone"
-                label="Contacto telefonico"
-                fullWidth
-                validate={[required(), minLength(7)]}
-              />
-              <DateInput
-                source="birth_date"
-                label="Data de nascimento"
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                  gap: 2,
+                  width: "100%",
+                }}
+              >
+                <TextInput
+                  source="name"
+                  label="Nome completo"
+                  fullWidth
+                  validate={[required(), minLength(3)]}
+                />
+                <TextInput
+                  source="document_id"
+                  label="Número de identificação"
+                  fullWidth
+                  validate={[required(), minLength(5)]}
+                />
+                <TextInput
+                  source="phone"
+                  label="Contacto telefónico"
+                  fullWidth
+                  validate={[required(), minLength(7)]}
+                />
+                <DateInput
+                  source="birth_date"
+                  label="Data de nascimento"
+                  fullWidth
+                  validate={required()}
+                />
+              </Box>
+            </FormSection>
+
+            <FormSection
+              title="Biometria"
+              description="Captura obrigatória para autenticar o utente."
+              tone="success"
+            >
+              <BiometricInput source="credential_identifier" operatorId={42} />
+            </FormSection>
+
+            <FormSection
+              title="Prioridade e condição"
+              description="Informações para prioridade de atendimento."
+              tone="secondary"
+            >
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                  gap: 2,
+                  width: "100%",
+                }}
+              >
+                <BooleanInput source="is_pregnant" label="Utente gestante" />
+                <DateInput
+                  source="pregnant_until"
+                  label="Data prevista do parto"
+                  fullWidth
+                />
+                <BooleanInput
+                  source="is_disabled_temp"
+                  label="Mobilidade reduzida"
+                />
+                <DateInput
+                  source="disabled_until"
+                  label="Validade do atestado"
+                  fullWidth
+                />
+              </Box>
+
+              <SelectInput
+                source="attendance_type"
+                label="Tipo de atendimento"
+                choices={attendanceChoices}
                 fullWidth
                 validate={required()}
               />
-            </Box>
-          </FormSection>
-
-          <FormSection
-            title="Biometria"
-            description="Captura obrigatoria para autenticar o utente."
-            tone="success"
-          >
-            <BiometricInput source="credential_identifier" operatorId={42} />
-          </FormSection>
-
-          <FormSection
-            title="Prioridade e condicao"
-            description="Informacoes para prioridade de atendimento."
-            tone="secondary"
-          >
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                gap: 2,
-                width: "100%",
-              }}
-            >
-              <BooleanInput source="is_pregnant" label="Utente gestante" />
-              <DateInput
-                source="pregnant_until"
-                label="Data prevista parto"
-                fullWidth
-              />
-              <BooleanInput
-                source="is_disabled_temp"
-                label="Mobilidade reduzida"
-              />
-              <DateInput
-                source="disabled_until"
-                label="Validade do atestado"
-                fullWidth
-              />
-            </Box>
-
-            <SelectInput
-              source="attendance_type"
-              label="Tipo de atendimento"
-              choices={attendanceChoices}
-              fullWidth
-              validate={required()}
-            />
-          </FormSection>
+            </FormSection>
+          </Stack>
         </SimpleForm>
       </PageContainer>
     </Create>
@@ -199,7 +201,6 @@ const FormSection = ({
       elevation={0}
       sx={{
         p: { xs: 2, md: 2.5 },
-        mb: 2,
         borderRadius: 2,
         border: "1px solid",
         borderColor: alpha(toneColor, 0.3),
@@ -240,7 +241,6 @@ const InfoCallout = ({ children }: { children: ReactNode }) => {
     <Paper
       elevation={0}
       sx={{
-        mb: 2,
         p: 1.5,
         borderRadius: 2,
         border: "1px solid",

@@ -43,6 +43,19 @@ def _activate_operator_or_404(
     return op
 
 
+def _delete_operator_or_404(
+        db: Session,
+        operator_id: int,
+        acting_operator_id: int,
+) -> OperatorResponse:
+    op = OperatorService.delete_operator(
+        db, operator_id, acting_operator_id=acting_operator_id
+    )
+    if not op:
+        raise AppException("operator.not_found")
+    return op
+
+
 @router.post("/", response_model=OperatorResponse)
 def create_operator(
         payload: OperatorCreateRequest,
@@ -81,7 +94,7 @@ def delete_operator(
         db: Session = Depends(get_db),
         current_user=Depends(require_roles(OperatorRole.ADMIN))
 ):
-    return success_response(_deactivate_operator_or_404(
+    return success_response(_delete_operator_or_404(
         db=db,
         operator_id=operator_id,
         acting_operator_id=current_user.id,
@@ -126,4 +139,4 @@ def update_operator(
     )
     if not op:
         raise AppException("operator.not_found")
-    return success_response(op)
+    return success_response(op) 
