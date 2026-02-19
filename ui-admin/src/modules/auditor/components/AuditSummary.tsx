@@ -1,7 +1,7 @@
 // src/modules/auditor/components/AuditSummary.tsx
 import {
   Box,
-  Card,
+  Paper,
   Typography,
   Grid,
   Stack,
@@ -18,32 +18,27 @@ import {
 } from "lucide-react";
 import type { AuditChainSummary } from "../types";
 
-interface AuditStatCardProps {
-  title: string;
-  value: string | number;
-  icon: LucideIcon;
-  color: string;
-  helper?: string;
-}
-
 const StatCard = ({
   title,
   value,
   icon: Icon,
   color,
   helper,
-}: AuditStatCardProps) => (
-  <Card
+}: {
+  title: string;
+  value: string | number;
+  icon: LucideIcon;
+  color: string;
+  helper?: string;
+}) => (
+  <Paper
     elevation={0}
     sx={{
-      p: 1.5,
+      p: 1.75,
       borderRadius: 2,
       border: "1px solid",
-      borderColor: alpha(color, 0.25),
-      background: `linear-gradient(135deg, rgba(255,255,255,0.96) 0%, ${alpha(
-        color,
-        0.08,
-      )} 100%)`,
+      borderColor: alpha(color, 0.22),
+      background: `linear-gradient(135deg, #ffffff 0%, ${alpha(color, 0.07)} 100%)`,
       position: "relative",
       overflow: "hidden",
       "&::before": {
@@ -52,7 +47,7 @@ const StatCard = ({
         left: 0,
         top: 0,
         bottom: 0,
-        width: "5px",
+        width: "4px",
         bgcolor: color,
       },
     }}
@@ -62,9 +57,10 @@ const StatCard = ({
         sx={{
           p: 0.9,
           borderRadius: 1.5,
-          bgcolor: alpha(color, 0.12),
+          bgcolor: alpha(color, 0.1),
           color,
-          boxShadow: `0 6px 14px ${alpha(color, 0.18)}`,
+          display: "grid",
+          placeItems: "center",
         }}
       >
         <Icon size={18} />
@@ -83,18 +79,18 @@ const StatCard = ({
         </Typography>
         <Typography
           variant="h5"
-          sx={{ fontWeight: 900, fontVariantNumeric: "tabular-nums" }}
+          sx={{ fontWeight: 900, color, fontVariantNumeric: "tabular-nums" }}
         >
           {value}
         </Typography>
-        {helper ? (
+        {helper && (
           <Typography variant="caption" color="text.secondary">
             {helper}
           </Typography>
-        ) : null}
+        )}
       </Box>
     </Stack>
-  </Card>
+  </Paper>
 );
 
 export const AuditSummary = ({
@@ -110,76 +106,60 @@ export const AuditSummary = ({
       ? Math.round((summary.valid_records / summary.total_records) * 100)
       : 100;
 
+  const chainColor = summary.all_valid
+    ? theme.palette.success.main
+    : theme.palette.error.main;
+
   return (
     <Stack spacing={1.5} sx={{ mb: 2.5 }}>
       <Grid container spacing={1.5}>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard
-            title="Total Logs"
-            value={summary.total_records}
-            icon={Database}
-            color={theme.palette.primary.main}
-            helper="Base analisada"
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard
-            title="Válidos"
-            value={summary.valid_records}
-            icon={CheckCircle2}
-            color={theme.palette.success.main}
-            helper="Sem inconsistência"
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard
-            title="Inválidos"
-            value={summary.invalid_records}
-            icon={AlertTriangle}
-            color={theme.palette.error.main}
-            helper="Exigem revisão"
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard
-            title="Integridade"
-            value={`${integrityPct}%`}
-            icon={ShieldCheck}
-            color={
-              summary.all_valid
-                ? theme.palette.success.main
-                : theme.palette.error.main
-            }
-            helper={
-              summary.all_valid ? "Cadeia consistente" : "Risco detectado"
-            }
-          />
-        </Grid>
+        {[
+          {
+            title: "Total de Registos",
+            value: summary.total_records,
+            icon: Database,
+            color: theme.palette.primary.main,
+            helper: "Base analisada",
+          },
+          {
+            title: "Válidos",
+            value: summary.valid_records,
+            icon: CheckCircle2,
+            color: theme.palette.success.main,
+            helper: "Sem inconsistência",
+          },
+          {
+            title: "Inválidos",
+            value: summary.invalid_records,
+            icon: AlertTriangle,
+            color: theme.palette.error.main,
+            helper: "Exigem revisão",
+          },
+          {
+            title: "Integridade",
+            value: `${integrityPct}%`,
+            icon: ShieldCheck,
+            color: chainColor,
+            helper: summary.all_valid
+              ? "Cadeia consistente"
+              : "Risco detectado",
+          },
+        ].map((card) => (
+          <Grid key={card.title} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <StatCard {...card} />
+          </Grid>
+        ))}
       </Grid>
 
-      <Card
+      {/* Barra de saúde da cadeia */}
+      <Paper
         elevation={0}
         sx={{
-          p: 1.5,
+          p: 1.75,
           borderRadius: 2,
           border: "1px solid",
-          borderColor: summary.all_valid
-            ? (theme) => alpha(theme.palette.success.main, 0.25)
-            : (theme) => alpha(theme.palette.error.main, 0.25),
-          bgcolor: summary.all_valid
-            ? (theme) => alpha(theme.palette.success.main, 0.06)
-            : (theme) => alpha(theme.palette.error.main, 0.06),
-          background: summary.all_valid
-            ? (theme) =>
-                `linear-gradient(135deg, ${alpha(
-                  theme.palette.success.main,
-                  0.16,
-                )} 0%, ${alpha(theme.palette.background.paper, 0.96)} 100%)`
-            : (theme) =>
-                `linear-gradient(135deg, ${alpha(
-                  theme.palette.error.main,
-                  0.16,
-                )} 0%, ${alpha(theme.palette.background.paper, 0.96)} 100%)`,
+          borderColor: alpha(chainColor, 0.25),
+          background: `linear-gradient(135deg, ${alpha(chainColor, 0.1)} 0%, ${alpha(theme.palette.background.paper, 0.96)} 100%)`,
           position: "relative",
           overflow: "hidden",
           "&::before": {
@@ -188,8 +168,8 @@ export const AuditSummary = ({
             left: 0,
             top: 0,
             bottom: 0,
-            width: "6px",
-            bgcolor: summary.all_valid ? "success.main" : "error.main",
+            width: "4px",
+            bgcolor: chainColor,
           },
         }}
       >
@@ -198,17 +178,14 @@ export const AuditSummary = ({
             direction={{ xs: "column", sm: "row" }}
             justifyContent="space-between"
             alignItems={{ xs: "flex-start", sm: "center" }}
-            spacing={0.75}
+            spacing={0.5}
           >
             <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
-              SAÚDE DA CADEIA DE AUDITORIA
+              Saúde da cadeia de auditoria
             </Typography>
             <Typography
               variant="caption"
-              sx={{
-                fontWeight: 900,
-                color: summary.all_valid ? "success.dark" : "error.dark",
-              }}
+              sx={{ fontWeight: 900, color: chainColor }}
             >
               {summary.all_valid ? "ESTÁVEL" : "ATENÇÃO IMEDIATA"}
             </Typography>
@@ -217,10 +194,10 @@ export const AuditSummary = ({
             variant="determinate"
             value={integrityPct}
             color={summary.all_valid ? "success" : "error"}
-            sx={{ height: 8, borderRadius: 99 }}
+            sx={{ height: 6, borderRadius: 99 }}
           />
         </Stack>
-      </Card>
+      </Paper>
     </Stack>
   );
 };
