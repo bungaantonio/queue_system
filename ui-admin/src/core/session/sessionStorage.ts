@@ -11,6 +11,7 @@ export const sessionStore = {
 
   setAccessToken(token: string) {
     this.accessToken = token;
+    sessionStorage.setItem("access_token", token);
 
     try {
       const decoded = jwtDecode<JwtPayload>(token);
@@ -21,7 +22,13 @@ export const sessionStore = {
   },
 
   getAccessToken() {
-    return this.accessToken;
+    if (this.accessToken) return this.accessToken;
+    const stored = sessionStorage.getItem("access_token");
+    if (stored) {
+      this.setAccessToken(stored);
+      return stored;
+    }
+    return null;
   },
 
   setRefreshToken(token: string) {
@@ -56,6 +63,7 @@ export const sessionStore = {
 
   clear() {
     this.accessToken = null;
+    sessionStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("user_name");
     localStorage.removeItem("user_role");

@@ -1,4 +1,9 @@
-import { Menu, DashboardMenuItem, useSidebarState } from "react-admin";
+import {
+  Menu,
+  DashboardMenuItem,
+  useSidebarState,
+  usePermissions,
+} from "react-admin";
 import { ListSubheader, Box } from "@mui/material";
 import {
   LayoutDashboard,
@@ -33,6 +38,8 @@ const Section = ({
 
 export const MyMenu = () => {
   const [open] = useSidebarState();
+  const { permissions } = usePermissions<string>();
+  const role = permissions ?? null;
 
   return (
     <Menu>
@@ -59,16 +66,20 @@ export const MyMenu = () => {
 
       <Section open={open}>Sistema</Section>
       <Box sx={{ py: 0.5 }}>
-        <Menu.Item
-          to="/operators"
-          primaryText="Equipa"
-          leftIcon={<UserCog size={18} strokeWidth={2.5} />}
-        />
-        <Menu.Item
-          to="/audits"
-          primaryText="Auditoria"
-          leftIcon={<FileCheck size={18} strokeWidth={2.5} />}
-        />
+        {role === "admin" ? (
+          <Menu.Item
+            to="/operators"
+            primaryText="Equipa"
+            leftIcon={<UserCog size={18} strokeWidth={2.5} />}
+          />
+        ) : null}
+        {role === "auditor" ? (
+          <Menu.Item
+            to="/audits"
+            primaryText="Auditoria"
+            leftIcon={<FileCheck size={18} strokeWidth={2.5} />}
+          />
+        ) : null}
       </Box>
     </Menu>
   );

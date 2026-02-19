@@ -15,6 +15,7 @@ ERRORS: ErrorMap = {
     "operator.not_found": (404, "Operador não encontrado."),
     "operator.already_exists": (409, "Operador já cadastrado."),
     "operator.inactive": (403, "Operador desativado."),
+    "operator.self_delete_forbidden": (403, "Não é permitido eliminar o próprio operador logado."),
 
     # ================= QUEUE =================
     "queue.item_not_called": (400, "Item não está em estado de chamada."),
