@@ -4,9 +4,9 @@ import { ShieldCheck, ShieldAlert } from "lucide-react";
 import { useRecordContext } from "react-admin";
 
 export const AuditIntegrityBadge = ({
-  source = "valid",
-  value,
-}: {
+                                      source = "valid",
+                                      value,
+                                    }: {
   source?: string;
   value?: boolean;
 }) => {
@@ -23,36 +23,25 @@ export const AuditIntegrityBadge = ({
       alignItems="center"
       sx={{
         px: 1.25,
-        py: 0.5,
+        py: 0.6,
         borderRadius: 1.5,
         bgcolor: alpha(color, 0.08),
         border: "1px solid",
-        borderColor: alpha(color, 0.2),
-        position: "relative",
-        overflow: "hidden",
+        borderColor: alpha(color, 0.25),
         width: "fit-content",
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: "3px",
-          bgcolor: color,
-        },
       }}
     >
-      <Icon size={13} color={color} />
+      <Icon size={13} color={color} strokeWidth={2.5} />
       <Typography
-        variant="caption"
         sx={{
-          fontWeight: 900,
+          fontFamily: "monospace",
+          fontWeight: 700,
           color,
-          fontSize: "0.6rem",
-          letterSpacing: "0.06em",
+          fontSize: "0.62rem",
+          letterSpacing: "0.08em",
         }}
       >
-        {valid ? "REGISTO ÍNTEGRO" : "VIOLAÇÃO DETECTADA"}
+        {valid ? "ÍNTEGRO" : "VIOLAÇÃO"}
       </Typography>
     </Stack>
   );
