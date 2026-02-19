@@ -30,6 +30,7 @@ import { AtendimentoContext } from "../queue/components/AtendimentoProvider";
 import { useGetHeader } from "../auditor/hooks/useAuditSummary";
 import type { Operator } from "../operators/types";
 import { PageContainer } from "../shared/components/PageContainer";
+import { sessionStore } from "../../core/session/sessionStorage";
 import {
   DashboardTone,
   dashboardPanelSx,
@@ -38,6 +39,120 @@ import {
 } from "./dashboardTokens";
 
 export const DashboardPage = () => {
+  const user = sessionStore.getUser();
+  if (user?.role === "attendant") {
+    return <AttendantDashboard />;
+  }
+  return <AdminDashboard />;
+};
+
+const AttendantDashboard = () => {
+  const atendimento = useContext(AtendimentoContext);
+  const queue = atendimento?.queue ?? [];
+  const called = atendimento?.called ?? null;
+  const current = atendimento?.current ?? null;
+  const theme = useTheme();
+  const hasActiveCall = Boolean(called || current);
+  const queueTone: DashboardTone = queue.length > 5 ? "watch" : "ready";
+
+  return (
+    <PageContainer>
+      <Title title="Visão Geral" />
+
+      <Stack spacing={3}>
+        <Box sx={{ mb: 1 }}>
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            justifyContent="space-between"
+            alignItems={{ xs: "flex-start", md: "center" }}
+            spacing={2}
+            sx={{
+              pb: 3,
+              borderBottom: (theme) =>
+                `2px solid ${alpha(theme.palette.divider, 0.6)}`,
+            }}
+          >
+            <Stack spacing={0.5}>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 900,
+                  background: `linear-gradient(135deg, ${theme.palette.text.primary} 0%, ${alpha(
+                    theme.palette.primary.main,
+                    0.8,
+                  )} 100%)`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Atendimento em curso
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  maxWidth: 600,
+                  lineHeight: 1.6,
+                }}
+              >
+                Estado da fila e chamadas pendentes para o operador.
+              </Typography>
+            </Stack>
+            <Button
+              component={Link}
+              to="/atendimento"
+              variant="contained"
+              endIcon={<ArrowRight size={16} />}
+              sx={{
+                width: { xs: "100%", sm: "auto" },
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                px: 3,
+                py: 1.25,
+                boxShadow: (theme) =>
+                  `0 4px 14px ${alpha(theme.palette.primary.main, 0.3)}`,
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  transform: "translateY(-2px)",
+                  boxShadow: (theme) =>
+                    `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
+                },
+              }}
+            >
+              Abrir Atendimento
+            </Button>
+          </Stack>
+        </Box>
+
+        <Grid container spacing={2.5}>
+          {[
+            {
+              title: "Fila em Espera",
+              value: queue.length,
+              icon: Clock3,
+              tone: queueTone,
+            },
+            {
+              title: "Chamada Ativa",
+              value: hasActiveCall ? "SIM" : "NÃO",
+              icon: BellRing,
+              tone: (hasActiveCall ? "flow" : "stable") as DashboardTone,
+            },
+          ].map((stat) => (
+            <Grid size={{ xs: 12, sm: 6, xl: 3 }} key={stat.title}>
+              <StatCard {...stat} />
+            </Grid>
+          ))}
+        </Grid>
+      </Stack>
+    </PageContainer>
+  );
+};
+
+const AdminDashboard = () => {
   const atendimento = useContext(AtendimentoContext);
   const { summary } = useGetHeader();
   const { data: operators = [] } = useGetList<Operator>("operators");
