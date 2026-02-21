@@ -141,7 +141,8 @@ const EditHeader = () => {
             Conta técnica detectada
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Esta conta é protegida. Edição, ativação e eliminação foram bloqueadas.
+            Esta conta é protegida. Edição, ativação e eliminação foram
+            bloqueadas.
           </Typography>
         </Paper>
       ) : null}

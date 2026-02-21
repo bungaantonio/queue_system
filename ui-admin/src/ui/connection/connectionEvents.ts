@@ -40,10 +40,7 @@ export const useConnectionStatus = () => {
         handleServerUnavailable,
       );
       window.removeEventListener("qms:server-available", handleServerAvailable);
-      window.removeEventListener(
-        "qms:sse-disconnected",
-        handleSseDisconnected,
-      );
+      window.removeEventListener("qms:sse-disconnected", handleSseDisconnected);
       window.removeEventListener("qms:sse-connected", handleSseConnected);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);

@@ -121,8 +121,7 @@ export const adminDataProvider: DataProvider = {
     params: GetListParams & QueryFunctionContext,
   ): Promise<GetListResult<RecordType>> => {
     const gateway = getGateway(resource);
-    if (!gateway?.getList)
-      return { data: [] as RecordType[], total: 0 };
+    if (!gateway?.getList) return { data: [] as RecordType[], total: 0 };
 
     const data = (await gateway.getList()) as Record<string, unknown>[];
     const filtered = applyFilters(data, params?.filter);

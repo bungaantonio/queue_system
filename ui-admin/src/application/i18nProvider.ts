@@ -135,7 +135,8 @@ export const i18nProvider: I18nProvider = {
     return key;
   },
   changeLocale: async (locale: string) => {
-    currentLocale = locale in messages ? (locale as keyof typeof messages) : "pt-PT";
+    currentLocale =
+      locale in messages ? (locale as keyof typeof messages) : "pt-PT";
   },
   getLocale: () => currentLocale,
 };
