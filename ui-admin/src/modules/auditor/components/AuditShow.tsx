@@ -188,6 +188,7 @@ const CryptoPanel = () => {
   if (!record) return null;
 
   const hashMatch = record.previous_hash_matches;
+  const contentOk = record.stored_hash === record.recalculated_hash;
   const matchColor = hashMatch ? "success" : "error";
 
   return (
@@ -267,6 +268,15 @@ const CryptoPanel = () => {
             }}
           >
             CONCATENAÇÃO COM HASH ANTERIOR: {hashMatch ? "VÁLIDA" : "FALHOU"}
+          </Typography>
+          <Typography color={contentOk ? "success.main" : "error.main"}>
+            ASSINATURA DO REGISTRO: {contentOk ? "ÍNTEGRA" : "CORROMPIDA"}
+          </Typography>
+          <Typography
+            color={record.previous_hash_matches ? "success.main" : "error.main"}
+          >
+            VÍNCULO COM ANTERIOR:{" "}
+            {record.previous_hash_matches ? "VÁLIDO" : "QUEBRADO"}
           </Typography>
         </Box>
 

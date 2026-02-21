@@ -4,9 +4,9 @@ import { ShieldCheck, ShieldAlert } from "lucide-react";
 import { useRecordContext } from "react-admin";
 
 export const AuditIntegrityBadge = ({
-                                      source = "valid",
-                                      value,
-                                    }: {
+  source = "valid",
+  value,
+}: {
   source?: string;
   value?: boolean;
 }) => {
