@@ -41,7 +41,6 @@ export const AuditMetricsList = () => (
     <List
       title="Métricas"
       filters={filters}
-      filterDefaultValues={{ cenario: "todos" }}
       sort={{ field: "id", order: "DESC" }}
       perPage={25}
       actions={<MetricsActions />}
@@ -76,12 +75,18 @@ export const AuditMetricsList = () => (
             sx={{ fontFamily: "monospace", fontWeight: 700, fontSize: "0.8rem" }}
           />
           <TextField source="cenario" label="Cenário" />
-          <TextField source="tipo" label="Tipo" />
-          <TextField source="status" label="Status" />
+          <FunctionField
+            label="Tipo"
+            render={(record: AttendanceMetric) => toPtType(record.tipo)}
+          />
+          <FunctionField
+            label="Estado"
+            render={(record: AttendanceMetric) => toPtStatus(record.status)}
+          />
           <FunctionField
             label="Biometria"
             render={(record: AttendanceMetric) =>
-              record.biometria === null ? "N/A" : record.biometria ? "SIM" : "NÃO"
+              record.biometria === null ? "N/D" : record.biometria ? "Sim" : "Não"
             }
           />
           <FunctionField
@@ -119,7 +124,8 @@ export const AuditMetricsList = () => (
 const MetricsActions = () => {
   const notify = useNotify();
   const { filterValues } = useListContext<AttendanceMetric>();
-  const cenario = String(filterValues?.cenario ?? "todos");
+  const cenario =
+    typeof filterValues?.cenario === "string" ? filterValues.cenario : undefined;
 
   const handleExport = async () => {
     try {
@@ -191,17 +197,37 @@ const MetricsGridHeader = () => {
 };
 
 const formatDateTime = (value: string | null) => {
-  if (!value) return "N/A";
+  if (!value) return "N/D";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleString("pt-PT");
 };
 
 const formatDuration = (seconds: number | null) => {
-  if (seconds === null || Number.isNaN(seconds)) return "N/A";
+  if (seconds === null || Number.isNaN(seconds)) return "N/D";
   const whole = Math.max(0, Math.round(seconds));
   const mins = Math.floor(whole / 60);
   const secs = whole % 60;
   return `${mins}m ${String(secs).padStart(2, "0")}s`;
 };
 
+const toPtType = (value: string | null) => {
+  if (!value) return "N/D";
+  const normalized = value.toLowerCase();
+  if (normalized === "normal") return "Normal";
+  if (normalized === "priority") return "Prioritário";
+  if (normalized === "urgent") return "Urgente";
+  return value;
+};
+
+const toPtStatus = (value: string | null) => {
+  if (!value) return "N/D";
+  const normalized = value.toLowerCase();
+  if (normalized === "waiting") return "Em espera";
+  if (normalized === "called_pending") return "Chamado (pendente)";
+  if (normalized === "being_served") return "Em atendimento";
+  if (normalized === "called") return "Chamado";
+  if (normalized === "finished" || normalized === "done") return "Concluído";
+  if (normalized === "cancelled" || normalized === "canceled") return "Cancelado";
+  return value;
+};

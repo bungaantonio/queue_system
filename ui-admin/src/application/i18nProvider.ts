@@ -71,6 +71,9 @@ const ptPT = {
       last: "Última",
       next: "Seguinte",
       no_results: "Sem resultados.",
+      no_filtered_results:
+        "Nenhum resultado encontrado com os filtros atuais.",
+      clear_filters: "Limpar filtros",
       page_range_info: "%{offsetBegin}-%{offsetEnd} de %{total}",
       page_rows_per_page: "Linhas por página",
       prev: "Anterior",
