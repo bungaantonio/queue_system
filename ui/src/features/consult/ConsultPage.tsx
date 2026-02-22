@@ -12,13 +12,29 @@ export default function ConsultPage() {
   const ticketId = searchParams.get("ticket") || "";
   const [inputValue, setInputValue] = useState(ticketId);
 
-  const { position, isCalled, isBeingServed, totalWaiting } =
+  const {
+    position,
+    isCalled,
+    isBeingServed,
+    isInvalidLookup,
+    totalWaiting,
+    slaMinutes,
+  } =
     useConsultData(ticketId);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (inputValue) setSearchParams({ ticket: inputValue.toUpperCase() });
   };
+  const peopleAhead = position ? Math.max(position - 1, 0) : null;
+  const waitingMessage =
+    position === 1
+      ? "É o próximo a ser chamado"
+      : peopleAhead === 1
+        ? "Existe 1 utente à sua frente"
+        : peopleAhead && peopleAhead > 1
+          ? `Existem ${peopleAhead} utentes à sua frente`
+          : "Aguardando atualização da fila";
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-[#F8FAFC] flex flex-col font-sans text-slate-900">
@@ -83,6 +99,23 @@ export default function ConsultPage() {
                 Utilize o formulário acima para consultar o seu ticket
               </p>
             </Motion.div>
+          ) : isInvalidLookup ? (
+            <Motion.div
+              key="invalid"
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="bg-rose-50 border-2 border-rose-200 p-6 sm:p-8 rounded-[2.5rem] sm:rounded-[3rem] text-center"
+            >
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 block mb-3">
+                Ticket não encontrado
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black text-rose-700 uppercase tracking-tight">
+                {ticketId}
+              </h2>
+              <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.12em] text-rose-400">
+                Verifique o código e tente novamente.
+              </p>
+            </Motion.div>
           ) : isCalled ? (
             /* ESTADO: CHAMADO (Match com o Overlay da TV) */
             <Motion.div
@@ -101,10 +134,10 @@ export default function ConsultPage() {
                 </h2>
                 <div className="bg-white rounded-3xl p-6 shadow-xl">
                   <p className="text-indigo-900/40 text-[10px] font-black uppercase mb-1">
-                    Dirija-se ao
+                    Estado atual
                   </p>
                   <p className="text-indigo-600 text-4xl font-black uppercase tracking-tighter">
-                    Balcão 01
+                    Chamada ativa
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-indigo-100">
@@ -154,7 +187,7 @@ export default function ConsultPage() {
               <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-indigo-500/10 to-transparent" />
               <div className="relative text-center">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 block mb-4">
-                  Acompanhe a sua posição na fila
+                  A sua posição na fila
                 </span>
                 <div className="flex items-center justify-center">
                   <span className="text-7xl sm:text-[10rem] font-black text-white leading-none tracking-tighter tabular-nums">
@@ -164,7 +197,7 @@ export default function ConsultPage() {
                 <div className="mt-4 flex flex-col items-center gap-2">
                   <div className="h-1 w-12 bg-indigo-600 rounded-full" />
                   <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">
-                    Ainda existem utentes à sua frente
+                    {waitingMessage}
                   </p>
                 </div>
               </div>
@@ -216,10 +249,13 @@ export default function ConsultPage() {
           <div className="h-8 w-px bg-slate-200" />
           <div className="flex flex-col text-right">
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-              Tempo Médio
+              SLA Atual
             </span>
             <span className="text-xl font-black text-indigo-600">
-              ~12 <span className="text-xs text-indigo-300 uppercase">Min</span>
+              {slaMinutes ?? "-"}{" "}
+              <span className="text-xs text-indigo-300 uppercase">
+                {slaMinutes ? "Min" : "N/D"}
+              </span>
             </span>
           </div>
         </div>

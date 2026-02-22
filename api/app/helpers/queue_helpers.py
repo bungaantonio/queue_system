@@ -1,5 +1,17 @@
 # app/helpers/queue_helpers.py
+import re
 from app.models.queue_item import QueueItem
+
+BI_PATTERN = re.compile(r"^\d{9}[A-Z]{2}\d{3}$")
+
+
+def build_doc_hint(id_number: str | None) -> str | None:
+    if not id_number:
+        return None
+    normalized = id_number.strip().upper()
+    if not BI_PATTERN.fullmatch(normalized):
+        return None
+    return normalized[-5:]
 
 
 def map_to_queue_list(item: QueueItem) -> dict | None:
@@ -15,7 +27,7 @@ def map_to_queue_list(item: QueueItem) -> dict | None:
         if len(name_parts) > 1
         else item.user.name
     )
-    id_hint = item.user.id_number[-5:] if item.user.id_number else None
+    id_hint = build_doc_hint(item.user.id_number)
 
     return {
         "id": item.id,
@@ -42,7 +54,7 @@ def map_to_queue_detail(item: QueueItem) -> dict | None:
         if len(name_parts) > 1
         else item.user.name
     )
-    id_number = item.user.id_number[-5:] if item.user.id_number else None
+    id_number = build_doc_hint(item.user.id_number)
     phone_safe = f"****{item.user.phone[-4:]}" if item.user.phone else None
 
     return {
