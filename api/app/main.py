@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.base import Base
 from app.db.database import engine
 from app.db.seed_system_operator import bootstrap_system_operators
+from app.db.seed_scenarios import bootstrap_scenarios
 
 from app.routers import (
     auth_router,
@@ -15,7 +16,7 @@ from app.routers import (
 )
 from app.routers.queue_router import queue_api
 from app.routers.monitoring_router import monitoring_router, setup_monitoring_middleware
-from app.api.routers import credential_routers, utentes
+from app.api.routers import credential_routers, metrics, utentes
 
 from app.core.exception_handlers import register_exception_handlers
 
@@ -37,8 +38,8 @@ origins = [o.strip() for o in origins_env.split(",") if o.strip()]
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 🔹 Startup: garante que SYSTEM e DEFAULT ADMIN existem
     bootstrap_system_operators()
+    bootstrap_scenarios()
     yield
     # 🔹 Shutdown: nenhuma ação adicional necessária
 
@@ -77,6 +78,7 @@ app.include_router(
 app.include_router(audit_router.router, prefix="/api/v1/audits", tags=["Audits"])
 app.include_router(utentes.router, prefix="/api/v1", tags=["Utentes"])
 app.include_router(dedicated_router.router, prefix="/api/v1", tags=["Ticket"])
+app.include_router(metrics.router, prefix="/api/v1/metrics", tags=["Métricas de Atendimento"])
 
 register_exception_handlers(app)
 

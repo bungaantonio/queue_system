@@ -4,4 +4,5 @@ export interface HttpPort {
   put<T>(path: string, body?: unknown): Promise<T>;
   patch<T>(path: string, body?: unknown): Promise<T>;
   delete(path: string): Promise<void>;
+  download(path: string): Promise<Blob>;
 }

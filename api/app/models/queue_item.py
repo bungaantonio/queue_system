@@ -21,6 +21,9 @@ class QueueItem(Base):
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
+    scenario_id = Column(
+        Integer, ForeignKey("scenarios.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     status = Column(String(32), nullable=False, default=QueueStatus.WAITING)
     position = Column(Integer, nullable=False)
@@ -42,6 +45,7 @@ class QueueItem(Base):
     credential_verified = Column(Boolean, default=False, nullable=False)
 
     user = relationship("User", back_populates="queue_items", lazy="joined")
+    scenario = relationship("Scenario", back_populates="queue_items", lazy="joined")
 
     __table_args__ = (
         Index("ix_queue_items_status_priority", "status", "priority_score"),

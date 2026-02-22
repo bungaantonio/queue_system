@@ -55,7 +55,8 @@ def executar_cenario(nome_cenario, total_utentes, pesos_prioridade, min_atendime
         payload = {
             "user": {"name": gerar_nome_ficticio(), "document_id": doc, "phone": "900", "birth_date": "1990-01-01", "is_pregnant": False, "is_disabled_temp": False},
             "credential": {"identifier": cred},
-            "attendance_type": tipo
+            "attendance_type": tipo,
+            "cenario": nome_cenario,
         }
         
         t_entrada = datetime.now()
