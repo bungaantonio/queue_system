@@ -123,10 +123,53 @@ const request = async <T>(
   return parseResponseData<T>(res);
 };
 
+const requestBlob = async (path: string): Promise<Blob> => {
+  const url = `${CONFIG.API_BASE_URL}${path}`;
+
+  const fetchWithToken = async (tok: string) =>
+    fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${tok}`,
+      },
+    });
+
+  let token = sessionStore.getAccessToken();
+  if (!token) {
+    token = await refreshAccessToken();
+  }
+
+  let res: Response;
+  try {
+    res = await fetchWithToken(token);
+  } catch {
+    throw networkError();
+  }
+  notifyServerAvailable();
+
+  if (res.status === 401) {
+    token = await refreshAccessToken();
+    try {
+      res = await fetchWithToken(token);
+    } catch {
+      throw networkError();
+    }
+    notifyServerAvailable();
+  }
+
+  if (!res.ok) {
+    const errorBody = await parseJSON(res);
+    throw new ApiError(res.status, errorBody);
+  }
+
+  return res.blob();
+};
+
 export const httpClient: HttpPort = {
   get: <T>(path: string) => request<T>("GET", path),
   post: <T>(path: string, body?: unknown) => request<T>("POST", path, body),
   put: <T>(path: string, body?: unknown) => request<T>("PUT", path, body),
   patch: <T>(path: string, body?: unknown) => request<T>("PATCH", path, body),
   delete: (path: string) => request<void>("DELETE", path),
+  download: (path: string) => requestBlob(path),
 };

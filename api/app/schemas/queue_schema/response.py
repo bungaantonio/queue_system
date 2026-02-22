@@ -3,7 +3,19 @@ from pydantic import BaseModel, ConfigDict, computed_field
 from datetime import date
 from datetime import datetime, timezone
 from typing import Optional, List
+import re
 from app.models.enums import QueueStatus, AttendanceType
+
+BI_PATTERN = re.compile(r"^\d{9}[A-Z]{2}\d{3}$")
+
+
+def build_doc_hint(id_number: Optional[str]) -> Optional[str]:
+    if not id_number:
+        return None
+    normalized = id_number.strip().upper()
+    if not BI_PATTERN.fullmatch(normalized):
+        return None
+    return normalized[-5:]
 
 
 # --------------------------
@@ -26,7 +38,7 @@ class QueueListItem(BaseModel):
             if len(name_parts) > 1
             else item.user.name
         )
-        id_hint = item.user.id_number[-5:] if item.user.id_number else None
+        id_hint = build_doc_hint(item.user.id_number)
         return cls(
             id=item.id,
             position=item.position,
@@ -123,7 +135,7 @@ class QueueDetailItem(BaseModel):
             if len(name_parts) > 1
             else item.user.name
         )
-        doc_hint = item.user.id_number[-5:] if item.user.id_number else None
+        doc_hint = build_doc_hint(item.user.id_number)
 
         return cls(
             id=item.id,
@@ -200,7 +212,7 @@ class QueueItemSchema(BaseModel):
     def ticket(self) -> Optional[str]:
         if not self.user or not self.user.id_number:
             return None
-        return self.user.id_number[-5:]
+        return build_doc_hint(self.user.id_number)
 
 
 class QueueStateSchema(BaseModel):

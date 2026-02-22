@@ -106,21 +106,8 @@ export const StatusHero = ({ user, isPending }: StatusHeroProps) => {
             fontVariantNumeric: "tabular-nums",
           }}
         >
-          {user.position}
+          {user.ticket}
         </Typography>
-        {user.ticket && (
-          <Typography
-            variant="caption"
-            sx={{
-              fontFamily: "monospace",
-              fontWeight: 900,
-              letterSpacing: "0.1em",
-              color: "primary.main",
-            }}
-          >
-            {user.ticket}
-          </Typography>
-        )}
       </Stack>
       <Typography
         variant="h5"

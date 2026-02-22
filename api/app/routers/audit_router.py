@@ -88,3 +88,15 @@ def verify_audit_chain(
     )
 
     return success_response(verify)
+
+
+@router.patch("/{audit_id}/investigate", response_model=ApiResponse[AuditVerificationDetail])
+def investigate_audit(
+        audit_id: int,
+        note: str,
+        db: Session = Depends(get_db),
+        current_user=Depends(require_roles(OperatorRole.AUDITOR)),
+):
+    result = AuditService.investigate_event(db, audit_id, note, current_user)
+
+    return success_response(result)

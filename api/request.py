@@ -7,7 +7,7 @@ import time
 # ==============================
 
 BASE_URL = "http://127.0.0.1:8000/api/v1/queue/register"
-TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzEyMjc0NDUsImV4cCI6MTc3MTIyODA0NSwianRpIjoiMGY4ZGJkOTAxYjg5NGNjYjkwNzY4NzlmZGMyYjg5ZTIifQ.Yb-nYFnNQ525LCyFTXRphaVnC3SUkWK3tM0kFcB1mcA"
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwic3ViIjoiYWRtaW4iLCJpYXQiOjE3NzE3ODcyNjIsImV4cCI6MTc3MTc4Nzg2MiwianRpIjoiZDhmODRkN2MxNjVkNDkwYTg2ZTE1MzhkNDg4MTcwYjcifQ.bKpHHrUvGRJ0ODmjA4OKoidwddpDStZoF6mPHgyHDt8"
 
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",

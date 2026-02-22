@@ -7,6 +7,7 @@ from app.helpers.priority_policy import calculate_priority
 from app.helpers.sla_policy import calculate_sla
 from app.models.enums import QueueStatus, AttendanceType
 from app.models.queue_item import QueueItem
+from app.models.scenario import Scenario
 
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ def _insert(
     operator_id: int,
     status: QueueStatus = QueueStatus.WAITING,
     attendance_type: AttendanceType = AttendanceType.NORMAL,
+    scenario_id: int | None = None,
     allow_duplicate: bool = False,
 ) -> QueueItem:
     """
@@ -48,9 +50,18 @@ def _insert(
     )
     # --------------
 
+    if scenario_id is None:
+        default_scenario = db.query(Scenario).filter(Scenario.code == "PRODUCAO").first()
+        if not default_scenario:
+            default_scenario = Scenario(code="PRODUCAO", name="Produção", is_active=True)
+            db.add(default_scenario)
+            db.flush()
+        scenario_id = default_scenario.id
+
     # Cria o item de fila
     item = QueueItem(
         user_id=user.id,
+        scenario_id=scenario_id,
         status=status,
         position=max_position + 1,
         timestamp=datetime.now(timezone.utc),
@@ -80,6 +91,7 @@ def enqueue_user(
     user,
     operator_id: int,
     attendance_type: AttendanceType = AttendanceType.NORMAL,
+    scenario_id: int | None = None,
 ) -> QueueItem:
     """
     Insere o cidadão na fila, caso ainda não esteja.
@@ -90,6 +102,7 @@ def enqueue_user(
         operator_id=operator_id,
         status=QueueStatus.WAITING,
         attendance_type=attendance_type,
+        scenario_id=scenario_id,
         allow_duplicate=False,
     )
 
@@ -99,6 +112,7 @@ def requeue_user(
     user,
     operator_id: int,
     attendance_type: AttendanceType = AttendanceType.NORMAL,
+    scenario_id: int | None = None,
 ) -> QueueItem:
     """
     Reinsere o cidadão na fila (novo registro, mesmo usuário).
@@ -109,5 +123,6 @@ def requeue_user(
         operator_id=operator_id,
         status=QueueStatus.WAITING,
         attendance_type=attendance_type,
+        scenario_id=scenario_id,
         allow_duplicate=True,
     )
