@@ -345,7 +345,7 @@ const AdminDashboard = () => {
                   label="Gestão de fila"
                   detail={
                     queue.length > 5
-                      ? `Fila com ${queue.length} utentes. Reforçar guichês.`
+                      ? `Fila com ${queue.length} utentes. Reforçar balcões.`
                       : "Fila sob controle operacional."
                   }
                 />

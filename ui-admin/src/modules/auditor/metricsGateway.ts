@@ -5,7 +5,8 @@ import type { AttendanceMetric } from "./metricsTypes";
 export const metricsGateway = {
   getList: async (params?: { cenario?: string }): Promise<AttendanceMetric[]> => {
     const query = new URLSearchParams();
-    if (params?.cenario) query.set("cenario", params.cenario);
+    const cenario = normalizeScenario(params?.cenario);
+    if (cenario) query.set("cenario", cenario);
 
     const suffix = query.toString();
     const metricsPath = suffix ? `/metrics/dados?${suffix}` : "/metrics/dados";
@@ -20,7 +21,8 @@ export const metricsGateway = {
 
   exportCsv: async (cenario?: string): Promise<void> => {
     const query = new URLSearchParams();
-    if (cenario) query.set("cenario", cenario);
+    const normalizedScenario = normalizeScenario(cenario);
+    if (normalizedScenario) query.set("cenario", normalizedScenario);
 
     const suffix = query.toString();
     const metricsPath = suffix
@@ -33,7 +35,7 @@ export const metricsGateway = {
     const bomCsvBlob = new Blob(["\uFEFF", csvText], {
       type: "text/csv;charset=utf-8",
     });
-    const sanitizedScenario = (cenario ?? "cenario")
+    const sanitizedScenario = (normalizedScenario ?? "cenario")
       .trim()
       .replace(/\s+/g, "_")
       .replace(/[^\w-]/g, "");
@@ -49,6 +51,16 @@ export const metricsGateway = {
     anchor.remove();
     URL.revokeObjectURL(objectUrl);
   },
+};
+
+const normalizeScenario = (value?: string) => {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return undefined;
+
+  const lower = normalized.toLowerCase();
+  if (lower === "todos" || lower === "all" || lower === "*") return undefined;
+
+  return normalized;
 };
 
 const getWith404Fallback = async <T>(primary: string, fallback: string) => {
