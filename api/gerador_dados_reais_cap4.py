@@ -8,6 +8,30 @@ from datetime import datetime
 BASE_URL = "http://192.168.18.6:8000/api/v1"
 USER, PASS = "admin", "123"
 
+FIRST_NAMES = [
+    "Mateus", "Ana", "Joao", "Marta", "Paulo", "Helena", "Afonso", "Carla",
+    "Nelson", "Lidia", "Carlos", "Teresa", "Manuel", "Fatima", "Dario", "Rute"
+]
+
+LAST_NAMES = [
+    "Silva", "Lopes", "Gomes", "Pereira", "Mendes", "Ferreira", "Filipe", "Costa",
+    "Domingos", "Santos", "Quissanga", "Tavares", "Pedro", "Chaves", "Miguel", "Matos"
+]
+
+PROVINCE_CODES = ["LA", "BO", "UE", "CN", "CS"]
+
+
+def gerar_nome_ficticio() -> str:
+    return f"{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}"
+
+
+def gerar_document_id_valido() -> str:
+    parte_inicial = f"{random.randint(0, 999_999_999):09d}"
+    provincia = random.choice(PROVINCE_CODES)
+    parte_final = f"{random.randint(0, 999):03d}"
+    return f"{parte_inicial}{provincia}{parte_final}"
+
+
 def obter_token():
     try:
         res = requests.post(f"{BASE_URL}/auth/login", json={"username": USER, "password": PASS})
@@ -25,11 +49,11 @@ def executar_cenario(nome_cenario, total_utentes, pesos_prioridade, min_atendime
     # 1. REGISTRO EM MASSA (Criação da carga inicial)
     for i in range(total_utentes):
         tipo = random.choices(["normal", "priority", "urgent"], weights=pesos_prioridade)[0]
-        doc = f"DOC-{nome_cenario}-{ts}-{i}"
+        doc = gerar_document_id_valido()
         cred = f"CRED-{nome_cenario}-{ts}-{i}"
         
         payload = {
-            "user": {"name": f"Utente {i}", "document_id": doc, "phone": "900", "birth_date": "1990-01-01", "is_pregnant": False, "is_disabled_temp": False},
+            "user": {"name": gerar_nome_ficticio(), "document_id": doc, "phone": "900", "birth_date": "1990-01-01", "is_pregnant": False, "is_disabled_temp": False},
             "credential": {"identifier": cred},
             "attendance_type": tipo
         }
