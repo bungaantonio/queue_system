@@ -66,6 +66,7 @@ def entry(
         identifier=request.identifier,
         operator_id=operator_id,
         attendance_type=AttendanceType.NORMAL,
+        cenario=request.cenario,
     )
 
     db.commit()

@@ -8,6 +8,7 @@ import type {
 import { operatorsGateway } from "../modules/operators/operatorsGateway";
 import { utentesGateway } from "../modules/utentes/utentesGateway";
 import { auditorGateway } from "../modules/auditor/auditorGateway";
+import { metricsGateway } from "../modules/auditor/metricsGateway";
 import { ApiError } from "../core/http/ApiError";
 
 interface ResourceGateway {
@@ -22,6 +23,7 @@ const resourceMap: Record<string, ResourceGateway> = {
   operators: operatorsGateway,
   utentes: utentesGateway,
   audits: auditorGateway,
+  "audit-metrics": metricsGateway,
 };
 
 const uiOnlyResources = new Set(["atendimento"]);
@@ -123,7 +125,10 @@ export const adminDataProvider: DataProvider = {
     const gateway = getGateway(resource);
     if (!gateway?.getList) return { data: [] as RecordType[], total: 0 };
 
-    const data = (await gateway.getList()) as Record<string, unknown>[];
+    const data = (await gateway.getList(params?.filter ?? {})) as Record<
+      string,
+      unknown
+    >[];
     const filtered = applyFilters(data, params?.filter);
     const sorted = applySorting(filtered, params?.sort);
     const paginated = applyPagination(sorted, params?.pagination);

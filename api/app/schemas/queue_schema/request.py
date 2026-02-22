@@ -15,6 +15,11 @@ class QueueRegister(BaseModel):
     user: UserCreate
     credential: CredentialRegister
     attendance_type: AttendanceType = AttendanceType.NORMAL
+    cenario: str | None = Field(
+        default=None,
+        description="Cenário do fluxo (opcional). Quando ausente, usa PRODUCAO.",
+        max_length=100,
+    )
 
 
 class QuickEntryRequest(BaseModel):
@@ -25,6 +30,11 @@ class QuickEntryRequest(BaseModel):
     identifier: str = Field(
         ...,
         description="Identificador único da credencial capturada.",
+    )
+    cenario: str | None = Field(
+        default=None,
+        description="Cenário do fluxo (opcional). Quando ausente, usa PRODUCAO.",
+        max_length=100,
     )
 
 

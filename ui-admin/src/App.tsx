@@ -21,6 +21,7 @@ import { UtentesEdit } from "./modules/utentes/components/UtentesEdit.tsx";
 
 import { AuditList } from "./modules/auditor/components/AuditList";
 import { AuditShow } from "./modules/auditor/components/AuditShow";
+import { AuditMetricsList } from "./modules/auditor/components/AuditMetricsList";
 
 import { SessionExpiredPage } from "./modules/shared/components/SessionExpiredPage";
 import { NotAuthorizedPage } from "./modules/shared/components/NotAuthorizedPage";
@@ -34,6 +35,7 @@ import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import ManageAccountsRoundedIcon from "@mui/icons-material/ManageAccountsRounded";
 import RecentActorsRoundedIcon from "@mui/icons-material/RecentActorsRounded";
 import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
+import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 
 export const App = () => (
   <AtendimentoProvider>
@@ -81,6 +83,12 @@ export const App = () => (
         show={withRole(AuditShow, ["auditor"])}
         icon={FactCheckRoundedIcon}
         options={{ label: "Auditoria" }}
+      />
+      <Resource
+        name="audit-metrics"
+        list={withRole(AuditMetricsList, ["auditor"])}
+        icon={QueryStatsRoundedIcon}
+        options={{ label: "Métricas" }}
       />
       <CustomRoutes>
         <Route path="/session-expired" element={<SessionExpiredPage />} />

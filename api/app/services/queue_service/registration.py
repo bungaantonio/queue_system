@@ -11,6 +11,7 @@ from app.models.user import User
 from app.models.user_credential import UserCredential
 
 from app.helpers.audit_helpers import audit_queue_action, build_audit_details
+from app.services.scenario_service import ScenarioService
 
 
 
@@ -21,6 +22,8 @@ def create_user_with_credential_and_queue(db, request, operator_id):
     )
     if user_exists:
         raise AppException("queue.user_already_registered")
+
+    scenario = ScenarioService.resolve(db, request.cenario)
 
     # Criação do utilizador
     db_user = create_user(db, request.user, operator_id=operator_id)
@@ -40,7 +43,13 @@ def create_user_with_credential_and_queue(db, request, operator_id):
             pass
 
     # Cria ‘item’ de fila se não existir
-    queue_item = enqueue_user(db, db_user, operator_id, request.attendance_type)
+    queue_item = enqueue_user(
+        db,
+        db_user,
+        operator_id,
+        request.attendance_type,
+        scenario_id=scenario.id,
+    )
 
     audit_queue_action(
         db,
@@ -53,6 +62,7 @@ def create_user_with_credential_and_queue(db, request, operator_id):
             extra={
                 "attendance_type": request.attendance_type,
                 "priority_score": queue_item.priority_score,
+                "cenario": scenario.code,
             },
         ),
     )
