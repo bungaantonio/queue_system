@@ -47,7 +47,7 @@ export default function ActiveUserCard() {
         <div className="text-right shrink-0">
           {isOverdue ? (
             <>
-              <span className="text-[clamp(12px,1.05vw,16px)] font-black uppercase tracking-[0.12em] text-amber-600 leading-none">
+              <span className="text-[clamp(14px,1.05vw,18px)] font-black uppercase tracking-[0.12em] text-amber-600 leading-none">
                 Atendimento quase concluído
               </span>
               <span className="text-[clamp(8px,0.75vw,10px)] font-black uppercase tracking-[0.2em] text-slate-400 block mt-1">
