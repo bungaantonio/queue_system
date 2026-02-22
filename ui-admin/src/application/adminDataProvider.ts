@@ -77,7 +77,14 @@ const applyFilters = (
 
   Object.entries(rest).forEach(([key, value]) => {
     if (value === undefined || value === null || value === "") return;
-    filtered = filtered.filter((record) => record[key] === value);
+    filtered = filtered.filter((record) => {
+      const recordValue = record[key];
+      if (typeof value === "string") {
+        if (recordValue === null || recordValue === undefined) return false;
+        return normalizeString(recordValue).includes(normalizeString(value));
+      }
+      return recordValue === value;
+    });
   });
 
   return filtered;
