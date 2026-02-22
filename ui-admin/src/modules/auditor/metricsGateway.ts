@@ -3,19 +3,11 @@ import { ApiError } from "../../core/http/ApiError";
 import type { AttendanceMetric } from "./metricsTypes";
 
 export const metricsGateway = {
-  getList: async (params?: { cenario?: string }): Promise<AttendanceMetric[]> => {
-    const query = new URLSearchParams();
-    const cenario = normalizeScenario(params?.cenario);
-    if (cenario) query.set("cenario", cenario);
+  getList: async (): Promise<AttendanceMetric[]> => {
+    const metricsPath = "/metrics/dados";
+    const rootPath = "/dados";
 
-    const suffix = query.toString();
-    const metricsPath = suffix ? `/metrics/dados?${suffix}` : "/metrics/dados";
-    const rootPath = suffix ? `/dados?${suffix}` : "/dados";
-
-    const data = await getWith404Fallback<AttendanceMetric[]>(
-      metricsPath,
-      rootPath,
-    );
+    const data = await getWith404Fallback<AttendanceMetric[]>(metricsPath, rootPath);
     return Array.isArray(data) ? data : [];
   },
 

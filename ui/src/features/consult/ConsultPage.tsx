@@ -44,7 +44,7 @@ export default function ConsultPage() {
           <div className="flex items-center gap-2 mb-0.5">
             <div className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">
-              Sistema de Filas
+              QMS Display
             </span>
           </div>
           <h1 className="text-xl font-black text-slate-900 uppercase tracking-tighter">

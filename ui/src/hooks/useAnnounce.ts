@@ -9,6 +9,7 @@ interface User {
   id: number;
   short_name: string;
   ticket: string;
+  timestamp?: string;
 }
 
 interface Options {
@@ -19,7 +20,7 @@ interface Options {
 }
 
 const STRICT_MODE_DEDUPE_WINDOW_MS = 1200;
-let lastGlobalAnnounce: { id: number; at: number } | null = null;
+let lastGlobalAnnounce: { key: string; at: number } | null = null;
 
 export function useAnnounce(
   calledUser: User | null,
@@ -30,21 +31,25 @@ export function useAnnounce(
     scheduleMs,
   }: Options = {},
 ) {
-  const lastAnnouncedId = useRef<number | null>(null);
+  const lastAnnouncedKey = useRef<string | null>(null);
+  const scheduleKey = scheduleMs?.join(",") ?? "";
+  const announceKey = calledUser
+    ? `${calledUser.id}|${calledUser.ticket}|${calledUser.timestamp ?? ""}`
+    : "";
 
   useEffect(() => {
     if (!calledUser) return;
     if (!isAudioAllowed()) return;
-    if (lastAnnouncedId.current === calledUser.id) return;
+    if (lastAnnouncedKey.current === announceKey) return;
 
     // Evita disparo duplo em desenvolvimento (StrictMode).
     const now = Date.now();
     if (
       lastGlobalAnnounce &&
-      lastGlobalAnnounce.id === calledUser.id &&
+      lastGlobalAnnounce.key === announceKey &&
       now - lastGlobalAnnounce.at < STRICT_MODE_DEDUPE_WINDOW_MS
     ) {
-      lastAnnouncedId.current = calledUser.id;
+      lastAnnouncedKey.current = announceKey;
       return;
     }
 
@@ -73,11 +78,11 @@ export function useAnnounce(
       timers.push(timer);
     }
 
-    lastAnnouncedId.current = calledUser.id;
-    lastGlobalAnnounce = { id: calledUser.id, at: now };
+    lastAnnouncedKey.current = announceKey;
+    lastGlobalAnnounce = { key: announceKey, at: now };
 
     return () => {
       timers.forEach((t) => window.clearTimeout(t));
     };
-  }, [calledUser?.id, repetitions, interval, deskLabel, scheduleMs]);
+  }, [announceKey, calledUser?.id, repetitions, interval, deskLabel, scheduleKey]);
 }
