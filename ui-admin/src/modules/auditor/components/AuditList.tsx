@@ -15,8 +15,9 @@ import {
   Typography,
   alpha,
   useTheme,
+  Tooltip,
 } from "@mui/material";
-import { ShieldAlert, ShieldCheck } from "lucide-react";
+import { ShieldAlert, ShieldCheck, Search } from "lucide-react";
 import { AuditSummary } from "./AuditSummary";
 import { AuditIntegrityBadge } from "./AuditIntegrityBadge";
 import { useGetHeader } from "../hooks/useAuditSummary";
@@ -42,7 +43,7 @@ export const AuditList = () => {
     <PageContainer>
       <PageHeader
         title="Integridade Operacional"
-        description="Priorize eventos inválidos e confirme concatenação criptográfica."
+        description="Monitorização de provas criptográficas e gestão de incidentes de integridade."
       />
 
       {loading && <Skeleton variant="rounded" height={180} sx={{ mb: 2.5 }} />}
@@ -50,13 +51,17 @@ export const AuditList = () => {
         <AuditCallout
           tone="warning"
           title="Resumo indisponível"
-          description="Falha ao carregar o resumo da auditoria."
+          description="Falha ao sincronizar com o serviço de validação de cadeia."
           sx={{ mb: 2.5 }}
         />
       )}
       {!loading && !error && <AuditSummary summary={summary} />}
 
-      <List title="Auditoria e Histórico" sx={listMainTransparentSx}>
+      <List
+        title="Auditoria e Histórico"
+        sx={listMainTransparentSx}
+        sort={{ field: "timestamp", order: "DESC" }} // Mostrar os mais recentes primeiro
+      >
         <Paper
           elevation={0}
           sx={{
@@ -66,7 +71,7 @@ export const AuditList = () => {
             overflow: "hidden",
           }}
         >
-          {/* Cabeçalho técnico */}
+          {/* Cabeçalho técnico do Datagrid */}
           <Box
             sx={{
               px: 2.5,
@@ -84,99 +89,99 @@ export const AuditList = () => {
                 variant="subtitle2"
                 sx={{ fontWeight: 800, lineHeight: 1.2 }}
               >
-                Registo de eventos
+                Registo de Eventos Auditados
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Ordenado por horário · Clique num evento para inspecionar
+                Verificação em tempo real · Clique para inspeção forense
               </Typography>
             </Box>
-            {summary && !summary.all_valid && (
-              <Stack
-                direction="row"
-                spacing={0.75}
-                alignItems="center"
-                sx={{
-                  px: 1.25,
-                  py: 0.6,
-                  borderRadius: 1.5,
-                  bgcolor: alpha(theme.palette.error.main, 0.08),
-                  border: "1px solid",
-                  borderColor: alpha(theme.palette.error.main, 0.25),
-                }}
-              >
-                <ShieldAlert size={13} color={theme.palette.error.main} />
-                <Typography
+
+            <Stack direction="row" spacing={1.5}>
+              {summary && !summary.all_valid && (
+                <Stack
+                  direction="row"
+                  spacing={0.75}
+                  alignItems="center"
                   sx={{
-                    fontFamily: "monospace",
-                    fontWeight: 700,
-                    fontSize: "0.65rem",
-                    color: "error.main",
-                    letterSpacing: "0.06em",
+                    px: 1.25,
+                    py: 0.6,
+                    borderRadius: 1.5,
+                    bgcolor: alpha(theme.palette.error.main, 0.08),
+                    border: "1px solid",
+                    borderColor: alpha(theme.palette.error.main, 0.25),
                   }}
                 >
-                  {summary.invalid_records} VIOLAÇÃO(ÕES)
-                </Typography>
-              </Stack>
-            )}
-            {summary?.all_valid && (
-              <Stack
-                direction="row"
-                spacing={0.75}
-                alignItems="center"
-                sx={{
-                  px: 1.25,
-                  py: 0.6,
-                  borderRadius: 1.5,
-                  bgcolor: alpha(theme.palette.success.main, 0.08),
-                  border: "1px solid",
-                  borderColor: alpha(theme.palette.success.main, 0.25),
-                }}
-              >
-                <ShieldCheck size={13} color={theme.palette.success.main} />
-                <Typography
+                  <ShieldAlert size={13} color={theme.palette.error.main} />
+                  <Typography
+                    sx={{
+                      fontFamily: "monospace",
+                      fontWeight: 700,
+                      fontSize: "0.65rem",
+                      color: "error.main",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    {summary.invalid_records} VIOLAÇÃO(ÕES) DETECTADA(S)
+                  </Typography>
+                </Stack>
+              )}
+              {summary?.all_valid && (
+                <Stack
+                  direction="row"
+                  spacing={0.75}
+                  alignItems="center"
                   sx={{
-                    fontFamily: "monospace",
-                    fontWeight: 700,
-                    fontSize: "0.65rem",
-                    color: "success.dark",
-                    letterSpacing: "0.06em",
+                    px: 1.25,
+                    py: 0.6,
+                    borderRadius: 1.5,
+                    bgcolor: alpha(theme.palette.success.main, 0.08),
+                    border: "1px solid",
+                    borderColor: alpha(theme.palette.success.main, 0.25),
                   }}
                 >
-                  CADEIA ÍNTEGRA
-                </Typography>
-              </Stack>
-            )}
+                  <ShieldCheck size={13} color={theme.palette.success.main} />
+                  <Typography
+                    sx={{
+                      fontFamily: "monospace",
+                      fontWeight: 700,
+                      fontSize: "0.65rem",
+                      color: "success.dark",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    CADEIA TOTALMENTE ÍNTEGRA
+                  </Typography>
+                </Stack>
+              )}
+            </Stack>
           </Box>
 
           <Datagrid
             rowClick="show"
             bulkActionButtons={false}
-            rowSx={(record: AuditVerificationDetail) =>
-              record.valid
-                ? {}
-                : {
-                    bgcolor: alpha(theme.palette.error.main, 0.05),
-                    borderLeft: `3px solid ${theme.palette.error.main}`,
-                  }
-            }
+            rowSx={(record: AuditVerificationDetail) => {
+              if (record.valid) return {};
+              // Se for inválido mas já tiver nota, usa um tom de alerta mais suave (laranja)
+              // Se for inválido e SEM nota, usa o tom de erro forte (vermelho)
+              const hasNote = !!record.investigation_note;
+              const color = hasNote
+                ? theme.palette.warning.main
+                : theme.palette.error.main;
+
+              return {
+                bgcolor: alpha(color, 0.05),
+                borderLeft: `4px solid ${color}`,
+                transition: "background-color 0.2s",
+                "&:hover": { bgcolor: alpha(color, 0.08) },
+              };
+            }}
             sx={{
               ...datagridBaseSx,
               ...datagridHoverSx,
               "& .RaDatagrid-root": { boxShadow: "none" },
-              "& .RaDatagrid-tableWrapper": {
-                maxHeight: "60vh",
-                overflow: "auto",
-              },
-              "& .MuiTableHead-root": {
-                position: "sticky",
-                top: 0,
-                zIndex: 2,
-              },
               "& .MuiTableCell-head": {
                 bgcolor: "background.paper",
-              },
-              "& .column-operator_id, & .column-user_id": {
-                display: { xs: "none", md: "table-cell" },
+                fontWeight: 700,
               },
             }}
           >
@@ -190,18 +195,29 @@ export const AuditList = () => {
                 fontSize: "0.75rem",
               }}
             />
+
             <FunctionField
               label="Evento"
               render={(record: AuditVerificationDetail) => (
-                <StatusChip
-                  label={String(record.action || "N/A").toUpperCase()}
-                  color={record.valid ? "primary" : "error"}
-                  variant={record.valid ? "outlined" : "filled"}
-                />
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <StatusChip
+                    label={String(record.action || "N/A").toUpperCase()}
+                    color={record.valid ? "primary" : "error"}
+                    variant={record.valid ? "outlined" : "filled"}
+                  />
+                  {/* Ícone de Investigação: mostra se o auditor já tratou o caso */}
+                  {record.investigation_note && (
+                    <Tooltip title="Evento com nota de investigação técnica">
+                      <Search size={14} color={theme.palette.warning.main} />
+                    </Tooltip>
+                  )}
+                </Stack>
               )}
             />
-            <TextField source="operator_id" label="Operador" />
-            <TextField source="user_id" label="Utente" />
+
+            <TextField source="operator_username" label="Operador" />
+            <TextField source="user_name" label="Utente" />
+
             <DateField
               source="timestamp"
               label="Horário"
@@ -212,7 +228,31 @@ export const AuditList = () => {
                 color: "text.secondary",
               }}
             />
+
+            {/* O Badge agora mostra ícones de causa raiz (Dados vs Cadeia) conforme atualizámos antes */}
             <AuditIntegrityBadge source="valid" />
+
+            {/* Nova coluna para ver quem investigou diretamente na lista */}
+            <FunctionField
+              label="Análise"
+              render={(record: AuditVerificationDetail) =>
+                record.investigated_by_id ? (
+                  <Typography
+                    variant="caption"
+                    sx={{ fontWeight: 600, color: "text.secondary" }}
+                  >
+                    Revisto #{record.investigated_by_id}
+                  </Typography>
+                ) : record.valid ? null : (
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "error.main", fontWeight: 700 }}
+                  >
+                    PENDENTE
+                  </Typography>
+                )
+              }
+            />
           </Datagrid>
         </Paper>
       </List>
