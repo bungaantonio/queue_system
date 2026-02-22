@@ -1,7 +1,8 @@
 // src/components/AudioOnboarding.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
+  AUDIO_BLOCKED_EVENT,
   isAudioAllowed,
   requestAudioPermission,
 } from "../utils/audioPermission";
@@ -10,12 +11,21 @@ import { beepManager } from "../services/beepManager";
 
 export default function AudioOnboarding() {
   const [visible, setVisible] = useState(!isAudioAllowed());
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const onBlocked = () => setVisible(true);
+    window.addEventListener(AUDIO_BLOCKED_EVENT, onBlocked);
+    return () => window.removeEventListener(AUDIO_BLOCKED_EVENT, onBlocked);
+  }, []);
 
   const handleStart = async () => {
-    setVisible(false);
+    setLoading(true);
     beepManager.initBeep();
     await beepManager.warmup().catch(() => undefined);
-    await requestAudioPermission();
+    const allowed = await requestAudioPermission();
+    setVisible(!allowed);
+    setLoading(false);
   };
 
   return (
@@ -40,9 +50,10 @@ export default function AudioOnboarding() {
             </p>
             <button
               onClick={handleStart}
+              disabled={loading}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-6 rounded-[1.5rem] transition-all active:scale-95 shadow-xl shadow-indigo-200 text-xl uppercase tracking-widest"
             >
-              Habilitar Áudio Operacional
+              {loading ? "A ativar..." : "Habilitar Áudio Operacional"}
             </button>
           </div>
         </motion.div>

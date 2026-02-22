@@ -11,6 +11,7 @@ import {
   Ticket,
   UserCog,
   FileCheck,
+  ChartColumnIncreasing,
 } from "lucide-react";
 
 const Section = ({
@@ -66,7 +67,7 @@ export const MyMenu = () => {
 
       <Section open={open}>Sistema</Section>
       <Box sx={{ py: 0.5 }}>
-        {role === "admin" ? (
+        {role === "admin" || role === "auditor" ? (
           <Menu.Item
             to="/operators"
             primaryText="Equipa"
@@ -78,6 +79,13 @@ export const MyMenu = () => {
             to="/audits"
             primaryText="Auditoria"
             leftIcon={<FileCheck size={18} strokeWidth={2.5} />}
+          />
+        ) : null}
+        {role === "auditor" ? (
+          <Menu.Item
+            to="/audit-metrics"
+            primaryText="Métricas"
+            leftIcon={<ChartColumnIncreasing size={18} strokeWidth={2.5} />}
           />
         ) : null}
       </Box>

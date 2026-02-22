@@ -1,6 +1,12 @@
 // src/services/beepManager.ts
+import {
+  isAutoplayBlockedError,
+  notifyAudioBlocked,
+} from "../utils/audioPermission";
+
 class BeepManager {
   private beepAudio: HTMLAudioElement | null = null;
+  private static readonly BEEP_TIMEOUT_MS = 5000;
 
   initBeep(src: string = "/sounds/notification.mp3") {
     if (!this.beepAudio) {
@@ -32,12 +38,36 @@ class BeepManager {
 
     console.log("[beepManager] Tocar beep...");
     return new Promise((resolve) => {
-      this.beepAudio!.onended = () => {
-        console.log("[beepManager] Beep finalizado.");
+      const audio = this.beepAudio!;
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        window.clearTimeout(timeoutId);
+        audio.onended = null;
+        audio.onerror = null;
         resolve();
       };
-      this.beepAudio!.currentTime = 0;
-      this.beepAudio!.play().catch(() => resolve());
+
+      const timeoutId = window.setTimeout(() => {
+        console.warn("[beepManager] Timeout do beep, seguindo fluxo.");
+        finish();
+      }, BeepManager.BEEP_TIMEOUT_MS);
+
+      audio.onended = () => {
+        console.log("[beepManager] Beep finalizado.");
+        finish();
+      };
+      audio.onerror = () => {
+        console.warn("[beepManager] Falha no beep, seguindo fluxo.");
+        finish();
+      };
+
+      audio.currentTime = 0;
+      audio.play().catch((err) => {
+        if (isAutoplayBlockedError(err)) notifyAudioBlocked();
+        finish();
+      });
     });
   }
 }

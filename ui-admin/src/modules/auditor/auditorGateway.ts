@@ -28,6 +28,16 @@ export const auditorGateway = {
     );
     return { ...res, id: res.id };
   },
+
+  investigate: async (
+    id: number,
+    note: string,
+  ): Promise<AuditVerificationDetail> => {
+    // Enviamos via query param conforme definido no seu router FastAPI
+    return httpClient.patch<AuditVerificationDetail>(
+      `/audits/${id}/investigate?note=${encodeURIComponent(note)}`,
+    );
+  },
 };
 
 function buildQuery(params?: Record<string, any>): string {

@@ -20,13 +20,13 @@ def create_audit(
     """
     audit = Audit(
         action=action.strip(),
-        details=details,
+        details=details or {},
         user_id=user_id,
         queue_item_id=queue_item_id,
         credential_id=credential_id,
         operator_id=operator_id,
         hashed_previous=hashed_previous,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(timezone.utc).replace(microsecond=0)
     )
 
     # Gera hash do registro
@@ -61,7 +61,7 @@ def get_audits(
         query = query.filter(Audit.timestamp >= start)
     if end is not None:
         query = query.filter(Audit.timestamp <= end)
-    return query.order_by(Audit.timestamp.asc()).offset(skip).limit(limit).all()
+    return query.order_by(Audit.id.asc()).offset(skip).limit(limit).all()
 
 
 def get_last_audit(db: Session) -> Optional[Audit]:
@@ -70,7 +70,7 @@ def get_last_audit(db: Session) -> Optional[Audit]:
 
 
 def get_all_audits(db: Session) -> list[Audit]:
-    """Retorna todos os registros de auditoria ordenados por ID ascendente."""
+    """Retorna todos os registos de auditoria ordenados por ID ascendente."""
     return db.query(Audit).order_by(Audit.id.asc()).all()
 
 
@@ -89,3 +89,18 @@ def get_previous_audit(db: Session, audit_id: int) -> Optional[Audit]:
         .order_by(Audit.id.desc())
         .first()
     )
+
+def update_audit_investigation(
+    db: Session,
+    audit_id: int,
+    note: str,
+    operator_id: int
+) -> Optional[Audit]:
+    audit = db.query(Audit).filter(Audit.id == audit_id).first()
+    if audit:
+        audit.investigation_note = note
+        audit.investigated_at = datetime.now(timezone.utc)
+        audit.investigated_by_id = operator_id
+        db.commit()
+        db.refresh(audit)
+    return audit

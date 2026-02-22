@@ -117,7 +117,10 @@ export const UtentesEdit = () => (
                 description="Vínculo de identidade biométrica."
                 sx={{ height: { lg: "100%" } }}
               >
-                <BiometricInput source="credential_identifier" operatorId={42} />
+                <BiometricInput
+                  source="credential_identifier"
+                  operatorId={42}
+                />
               </FormSection>
             </Box>
 

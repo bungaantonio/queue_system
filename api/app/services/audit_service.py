@@ -2,6 +2,8 @@ import logging
 from datetime import datetime
 from typing import List, Optional, cast
 from sqlalchemy.orm import Session
+
+from app.core.exceptions import AppException
 from app.models.audit import Audit
 from app.models.operator import Operator
 from app.models.user import User
@@ -22,11 +24,11 @@ class AuditService:
 
     @staticmethod
     def _sanitize_reference_ids(
-        db: Session,
-        operator_id: Optional[int],
-        user_id: Optional[int],
-        queue_item_id: Optional[int],
-        credential_id: Optional[int],
+            db: Session,
+            operator_id: Optional[int],
+            user_id: Optional[int],
+            queue_item_id: Optional[int],
+            credential_id: Optional[int],
     ) -> tuple[Optional[int], Optional[int], Optional[int], Optional[int]]:
         sanitized_operator_id = operator_id
         sanitized_user_id = user_id
@@ -58,13 +60,13 @@ class AuditService:
 
     @staticmethod
     def log_action(
-        db: Session,
-        action: str,
-        operator_id: Optional[int] = None,
-        user_id: Optional[int] = None,
-        queue_item_id: Optional[int] = None,
-        credential_id: Optional[int] = None,
-        details: Optional[dict] = None,
+            db: Session,
+            action: str,
+            operator_id: Optional[int] = None,
+            user_id: Optional[int] = None,
+            queue_item_id: Optional[int] = None,
+            credential_id: Optional[int] = None,
+            details: Optional[dict] = None,
     ) -> Audit:
         """Cria um registro de auditoria com hash encadeado."""
         last_audit = audit_crud.get_last_audit(db)
@@ -108,41 +110,35 @@ class AuditService:
 
     @staticmethod
     def _to_verification_detail(
-        audit: Audit, previous_hash: Optional[str]
+            audit: Audit, previous_hash: Optional[str]
     ) -> AuditVerificationDetail:
-        audit_hashed_previous = cast(Optional[str], audit.hashed_previous)
-        audit_hashed_record = cast(str, audit.hashed_record)
         recalculated = audit.compute_record_hash()
-        prev_match = (
-            previous_hash == audit_hashed_previous
-            if previous_hash
-            else (previous_hash is None)
-        )
-        valid = recalculated == audit_hashed_record and prev_match
+        stored_hash = cast(str, audit.hashed_record)
 
-        if isinstance(audit.details, dict):
-            details = audit.details
-        else:
-            details = {}
-            logger.warning(
-                "Audit %s details têm tipo inesperado: %s",
-                audit.id,
-                type(audit.details),
-            )
+        # 1. Integridade dos Dados (Assinatura)
+        content_ok = (recalculated == stored_hash)
+
+        # 2. Integridade da Cadeia (Elo)
+        audit_prev = audit.hashed_previous if audit.hashed_previous else None
+        target_prev = previous_hash if previous_hash else None
+        chain_ok = (audit_prev == target_prev)
 
         return AuditVerificationDetail(
             id=cast(int, audit.id),
             action=cast(str, audit.action),
-            operator_id=cast(Optional[int], audit.operator_id),
-            user_id=cast(Optional[int], audit.user_id),
-            queue_item_id=cast(Optional[int], audit.queue_item_id),
-            credential_id=cast(Optional[int], audit.credential_id),
+            operator_id=audit.operator_id,
+            operator_username=audit.operator.username if audit.operator else "SISTEMA",
+            user_id=audit.user_id,
+            user_name=audit.user.name if audit.user else "N/A",
+            queue_item_id=audit.queue_item_id,
+            credential_id=audit.credential_id,
             recalculated_hash=recalculated,
-            stored_hash=audit_hashed_record,
-            previous_hash_matches=prev_match,
-            valid=valid,
-            details=details,
-            timestamp=cast(datetime, audit.timestamp),
+            stored_hash=stored_hash,
+            content_integrity=content_ok,
+            previous_hash_matches=chain_ok,
+            valid=(content_ok and chain_ok),
+            details=audit.details or {},
+            timestamp=audit.timestamp,
         )
 
     @staticmethod
@@ -163,7 +159,7 @@ class AuditService:
 
     @staticmethod
     def verify_single_audit(
-        db: Session, audit_id: int
+            db: Session, audit_id: int
     ) -> Optional[AuditVerificationDetail]:
         audit = audit_crud.get_audit_by_id(db, audit_id)
         if not audit:
@@ -176,13 +172,13 @@ class AuditService:
 
     @staticmethod
     def generate_audit_report(
-        db: Session,
-        user_id: Optional[int] = None,
-        action: Optional[str] = None,
-        start: Optional[datetime] = None,
-        end: Optional[datetime] = None,
-        skip: int = 0,
-        limit: int = 100,
+            db: Session,
+            user_id: Optional[int] = None,
+            action: Optional[str] = None,
+            start: Optional[datetime] = None,
+            end: Optional[datetime] = None,
+            skip: int = 0,
+            limit: int = 100,
     ) -> List[AuditVerificationDetail]:
         audits = audit_crud.get_audits(
             db=db,
@@ -208,5 +204,26 @@ class AuditService:
             )
             last_hash = cast(str, audit.hashed_record)
 
-        logger.info("Audit report generated: %d records", len(report))
         return report
+
+    @staticmethod
+    def investigate_event(
+            db: Session,
+            audit_id: int,
+            note: str,
+            current_user
+    ) -> AuditVerificationDetail:
+        # 1. Solicita ao CRUD a atualização dos dados
+        audit = audit_crud.update_audit_investigation(
+            db, audit_id, note, current_user.id
+        )
+
+        if not audit:
+            raise AppException("audit.not_found")
+
+        # 2. Orquestra a obtenção de dados necessários para a verificação completa
+        prev_audit = audit_crud.get_previous_audit(db, audit.id)
+        prev_hash = prev_audit.hashed_record if prev_audit else None
+
+        # 3. Transforma o Model em Schema de Verificação (lógica central do Service)
+        return AuditService._to_verification_detail(audit, prev_hash)

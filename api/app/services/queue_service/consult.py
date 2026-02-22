@@ -14,6 +14,7 @@ from app.crud.queue import (
 from app.models.queue_item import QueueItem
 from app.core.exceptions import AppException
 from app.helpers.audit_helpers import audit_quick_entry, audit_queue_token_exposed
+from app.services.scenario_service import ScenarioService
 
 
 # 🔹 Consulta simples: cada função tem 1 responsabilidade
@@ -50,6 +51,7 @@ def quick_entry_user(
     identifier: str,
     operator_id: int,
     attendance_type: AttendanceType = AttendanceType.NORMAL,
+    cenario: str | None = None,
 ) -> QueueItem:
 
     credential = get_by_identifier(db, identifier)
@@ -57,6 +59,7 @@ def quick_entry_user(
         raise AppException("credential.not_found")
 
     user = credential.user
+    scenario = ScenarioService.resolve(db, cenario)
 
     queue_item = get_existing_queue_item(db, user.id)
     if queue_item:
@@ -67,6 +70,7 @@ def quick_entry_user(
         user=user,
         operator_id=operator_id,
         attendance_type=attendance_type,
+        scenario_id=scenario.id,
     )
 
     audit_quick_entry(

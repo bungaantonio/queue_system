@@ -14,55 +14,45 @@ export const atendimentoGateway = {
   },
 
   callNext: async (): Promise<QueueSnapshot> => {
-    const payload = await httpClient.post<unknown>("/queue/call-next");
-    const snapshot = normalizeQueueSnapshot(payload);
-    if (!snapshot) {
-      throw new Error("Resposta inválida de /queue/call-next");
-    }
-    return snapshot;
+    return mutateAndSync("/queue/call-next");
   },
 
   finish: async (): Promise<QueueSnapshot> => {
-    const payload = await httpClient.post<unknown>("/queue/finish");
-    const snapshot = normalizeQueueSnapshot(payload);
-    if (!snapshot) {
-      throw new Error("Resposta inválida de /queue/finish");
-    }
-    return snapshot;
+    return mutateAndSync("/queue/finish");
   },
 
   skip: async (): Promise<QueueSnapshot> => {
-    const payload = await httpClient.post<unknown>("/queue/skip");
-    const snapshot = normalizeQueueSnapshot(payload);
-    if (!snapshot) {
-      throw new Error("Resposta inválida de /queue/skip");
-    }
-    return snapshot;
+    return mutateAndSync("/queue/skip");
   },
 
   cancel: async (item_id: number): Promise<QueueSnapshot> => {
-    const payload = await httpClient.post<unknown>("/queue/cancel", {
+    return mutateAndSync("/queue/cancel", {
       item_id,
     });
-    const snapshot = normalizeQueueSnapshot(payload);
-    if (!snapshot) {
-      throw new Error("Resposta inválida de /queue/cancel");
-    }
-    return snapshot;
   },
 
   requeue: async (
     user_id: number,
     attendance_type: string,
   ): Promise<QueueSnapshot> => {
-    const payload = await httpClient.post<unknown>("/queue/requeue", {
+    return mutateAndSync("/queue/requeue", {
       user_id,
       attendance_type,
     });
-    const snapshot = normalizeQueueSnapshot(payload);
-    if (!snapshot) {
-      throw new Error("Resposta inválida de /queue/requeue");
-    }
-    return snapshot;
   },
+};
+
+const mutateAndSync = async (
+  path: string,
+  body?: Record<string, unknown>,
+): Promise<QueueSnapshot> => {
+  await httpClient.post<unknown>(path, body);
+
+  const payload = await httpClient.get<unknown>("/queue/waiting-and-called");
+  const snapshot = normalizeQueueSnapshot(payload);
+  if (!snapshot) {
+    throw new Error(`Resposta inválida ao sincronizar fila após ${path}`);
+  }
+
+  return snapshot;
 };

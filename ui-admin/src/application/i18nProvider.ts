@@ -71,6 +71,9 @@ const ptPT = {
       last: "Última",
       next: "Seguinte",
       no_results: "Sem resultados.",
+      no_filtered_results:
+        "Nenhum resultado encontrado com os filtros atuais.",
+      clear_filters: "Limpar filtros",
       page_range_info: "%{offsetBegin}-%{offsetEnd} de %{total}",
       page_rows_per_page: "Linhas por página",
       prev: "Anterior",
@@ -84,6 +87,8 @@ const ptPT = {
       loading: "A carregar",
       not_found: "Não encontrado",
       show: "Ver %{name} #%{id}",
+      empty: "Nenhum registo encontrado",
+      invite: "Clique para adicionar um novo item",
     },
     validation: {
       email: "Email inválido.",
@@ -135,7 +140,8 @@ export const i18nProvider: I18nProvider = {
     return key;
   },
   changeLocale: async (locale: string) => {
-    currentLocale = locale in messages ? (locale as keyof typeof messages) : "pt-PT";
+    currentLocale =
+      locale in messages ? (locale as keyof typeof messages) : "pt-PT";
   },
   getLocale: () => currentLocale,
 };
