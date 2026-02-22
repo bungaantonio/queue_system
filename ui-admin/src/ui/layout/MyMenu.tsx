@@ -66,7 +66,7 @@ export const MyMenu = () => {
 
       <Section open={open}>Sistema</Section>
       <Box sx={{ py: 0.5 }}>
-        {role === "admin" ? (
+        {role === "admin" || role === "auditor" ? (
           <Menu.Item
             to="/operators"
             primaryText="Equipa"

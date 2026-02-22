@@ -43,13 +43,13 @@ export const App = () => (
       authProvider={adminAuthProvider}
       dataProvider={adminDataProvider}
       i18nProvider={i18nProvider}
-      dashboard={DashboardPage}
+      dashboard={withRole(DashboardPage, ["admin", "auditor"])}
       disableTelemetry
     >
       {/* Painel de Atendimento */}
       <Resource
         name="atendimento"
-        list={AtendimentoPanel}
+        list={withRole(AtendimentoPanel, ["admin", "attendant"])}
         icon={SupportAgentRoundedIcon}
         options={{ label: "Painel de Atendimento" }}
       />
@@ -57,7 +57,7 @@ export const App = () => (
       {/* Operadores */}
       <Resource
         name="operators"
-        list={withRole(OperatorsList, ["admin"])}
+        list={withRole(OperatorsList, ["admin", "auditor"])}
         edit={withRole(OperatorsEdit, ["admin"])}
         create={withRole(OperatorsCreate, ["admin"])}
         icon={ManageAccountsRoundedIcon}
@@ -67,8 +67,8 @@ export const App = () => (
       {/* Utentes */}
       <Resource
         name="utentes"
-        list={withRole(UtentesList, ["admin", "attendant"])}
-        edit={withRole(UtentesEdit, ["admin", "attendant"])}
+        list={withRole(UtentesList, ["admin", "attendant", "auditor"])}
+        edit={withRole(UtentesEdit, ["admin"])}
         create={withRole(UtentesCreate, ["admin", "attendant"])}
         icon={RecentActorsRoundedIcon}
         options={{ label: "Utentes" }}

@@ -84,6 +84,8 @@ const ptPT = {
       loading: "A carregar",
       not_found: "Não encontrado",
       show: "Ver %{name} #%{id}",
+      empty: "Nenhum registo encontrado",
+      invite: "Clique para adicionar um novo item",
     },
     validation: {
       email: "Email inválido.",

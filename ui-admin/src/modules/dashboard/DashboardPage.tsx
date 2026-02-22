@@ -152,6 +152,10 @@ const AttendantDashboard = () => {
   );
 };
 
+// src/modules/dashboard/DashboardPage.tsx
+
+// ... (imports permanecem iguais aos que enviaste)
+
 const AdminDashboard = () => {
   const atendimento = useContext(AtendimentoContext);
   const { summary } = useGetHeader();
@@ -162,6 +166,7 @@ const AdminDashboard = () => {
   const current = atendimento?.current ?? null;
 
   const theme = useTheme();
+
   const activeOperators = useMemo(
     () => operators.filter((op) => op.active).length,
     [operators],
@@ -171,8 +176,15 @@ const AdminDashboard = () => {
     [operators],
   );
 
-  const hasActiveCall = Boolean(called || current);
   const hasAlerts = summary ? !summary.all_valid : false;
+
+  // 1. Variável agora utilizada abaixo para resolver ESLint
+  const integrityPct =
+    summary && summary.total_records > 0
+      ? Math.round((summary.valid_records / summary.total_records) * 100)
+      : 100;
+
+  const hasActiveCall = Boolean(called || current);
   const queueTone: DashboardTone = queue.length > 5 ? "watch" : "ready";
   const integrityTone: DashboardTone = hasAlerts ? "rigor" : "ready";
 
@@ -212,13 +224,10 @@ const AdminDashboard = () => {
               </Typography>
               <Typography
                 variant="body2"
-                sx={{
-                  color: "text.secondary",
-                  maxWidth: 600,
-                  lineHeight: 1.6,
-                }}
+                sx={{ color: "text.secondary", maxWidth: 600, lineHeight: 1.6 }}
               >
-                Priorize ações por estado: fluxo, vigilância e integridade.
+                Priorize ações por estado: fluxo, vigilância e integridade
+                criptográfica.
               </Typography>
             </Stack>
             <Stack
@@ -227,6 +236,15 @@ const AdminDashboard = () => {
               alignItems={{ xs: "stretch", sm: "center" }}
               sx={{ width: { xs: "100%", lg: "auto" } }}
             >
+              {/* Alerta de topo para auditoria */}
+              {hasAlerts && (
+                <Chip
+                  icon={<ShieldAlert size={12} />}
+                  label="VIOLAÇÃO DETECTADA"
+                  color="error"
+                  sx={{ fontWeight: 800, fontSize: "0.62rem" }}
+                />
+              )}
               <Chip
                 icon={<UserCog size={12} />}
                 label={`${attendantsOnline} ATENDENTES ONLINE`}
@@ -238,11 +256,6 @@ const AdminDashboard = () => {
                   border: "1px solid",
                   borderColor: (theme) =>
                     alpha(theme.palette.success.main, 0.28),
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    bgcolor: (theme) => alpha(theme.palette.success.main, 0.18),
-                    transform: "scale(1.02)",
-                  },
                 }}
               />
               <Button
@@ -251,23 +264,13 @@ const AdminDashboard = () => {
                 variant="contained"
                 endIcon={<ArrowRight size={16} />}
                 sx={{
-                  width: { xs: "100%", sm: "auto" },
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: 0.5,
                   px: 3,
-                  py: 1.25,
-                  boxShadow: (theme) =>
-                    `0 4px 14px ${alpha(theme.palette.primary.main, 0.3)}`,
-                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                    boxShadow: (theme) =>
-                      `0 8px 24px ${alpha(theme.palette.primary.main, 0.4)}`,
-                  },
                 }}
               >
-                Abrir Atendimento
+                Atendimento
               </Button>
             </Stack>
           </Stack>
@@ -294,14 +297,20 @@ const AdminDashboard = () => {
               tone: "ready" as DashboardTone,
             },
             {
-              title: "Integridade",
-              value: hasAlerts ? "ALERTA" : "OK",
+              title: "Saúde da Cadeia",
+              value: `${integrityPct}%`, // 2. Uso da variável aqui para coerência e correção de ESLint
               icon: hasAlerts ? ShieldAlert : ShieldCheck,
               tone: integrityTone,
             },
           ].map((stat) => (
             <Grid size={{ xs: 12, sm: 6, xl: 3 }} key={stat.title}>
-              <StatCard {...stat} />
+              {/* 3. Correção do erro TS 2322 via passagem explícita de props */}
+              <StatCard
+                title={stat.title}
+                value={stat.value}
+                icon={stat.icon}
+                tone={stat.tone as DashboardTone}
+              />
             </Grid>
           ))}
         </Grid>
@@ -332,7 +341,7 @@ const AdminDashboard = () => {
               </Stack>
               <Stack spacing={1.5}>
                 <PriorityRow
-                  state={queue.length > 5 ? "watch" : "ready"}
+                  state={queueTone}
                   label="Gestão de fila"
                   detail={
                     queue.length > 5
@@ -348,16 +357,16 @@ const AdminDashboard = () => {
                       ? `Aguardando confirmação de ${called.name}.`
                       : current
                         ? `Em atendimento: ${current.name}.`
-                        : "Sem chamada pendente no momento."
+                        : "Sem chamada pendente."
                   }
                 />
                 <PriorityRow
-                  state={hasAlerts ? "rigor" : "ready"}
+                  state={integrityTone}
                   label="Integridade de auditoria"
                   detail={
                     hasAlerts
-                      ? `${summary?.invalid_records ?? 0} registro(s) inconsistentes.`
-                      : "Cadeia de auditoria consistente."
+                      ? `${summary?.invalid_records ?? 0} registro(s) inconsistentes. Inspecione.`
+                      : "Cadeia de auditoria consistente e verificada."
                   }
                 />
               </Stack>
@@ -407,15 +416,17 @@ const AdminDashboard = () => {
                   }
                 />
                 <RiskTag
-                  icon={ShieldCheck}
-                  label="Integridade"
-                  value={hasAlerts ? "Revisão necessária" : "Verificada"}
-                  tone={hasAlerts ? "rigor" : "ready"}
+                  icon={hasAlerts ? ShieldAlert : ShieldCheck}
+                  label="Segurança de Dados"
+                  value={hasAlerts ? "Crítico" : "Seguro"}
+                  tone={integrityTone}
                 />
                 <RiskTag
                   icon={CheckCircle2}
-                  label="Capacidade de atendimento"
-                  value={attendantsOnline > 0 ? "Operacional" : "Crítico"}
+                  label="Disponibilidade de Atendimento"
+                  value={
+                    attendantsOnline > 0 ? "Operacional" : "0 Atendentes Online"
+                  }
                   tone={attendantsOnline > 0 ? "ready" : "rigor"}
                 />
               </Stack>
@@ -426,6 +437,8 @@ const AdminDashboard = () => {
     </PageContainer>
   );
 };
+
+// ... (PriorityRow e RiskTag permanecem iguais ao que enviaste)
 
 const PriorityRow = ({
   state,
