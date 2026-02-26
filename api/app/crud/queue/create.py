@@ -33,8 +33,8 @@ def _insert(
         if existing_item:
             return existing_item
 
-    # Calcula posição
-    max_position = get_next_position(db)
+    # Calcula próxima posição disponível
+    next_position = get_next_position(db)
 
     # Calcula prioridade
     priority_score, priority_reason = calculate_priority(user, attendance_type)
@@ -63,7 +63,7 @@ def _insert(
         user_id=user.id,
         scenario_id=scenario_id,
         status=status,
-        position=max_position + 1,
+        position=next_position,
         timestamp=datetime.now(timezone.utc),
         priority_score=priority_score,
         priority_reason=priority_reason,
