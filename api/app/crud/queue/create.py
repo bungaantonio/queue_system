@@ -46,7 +46,7 @@ def _insert(
     logger.info(
         f"Inserindo usuário {user.name} ({user.id}), Attendance: {attendance_type}, "
         f"Priority: {priority_score} ({priority_reason}), SLA: {sla_minutes}min, "
-        f"Max position: {max_position}"
+        f"Max position: {next_position}"
     )
     # --------------
 

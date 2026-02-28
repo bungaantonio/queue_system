@@ -81,7 +81,7 @@ export const MyMenu = () => {
             leftIcon={<FileCheck size={18} strokeWidth={2.5} />}
           />
         ) : null}
-        {role === "auditor" ? (
+        {role === "admin" || role === "auditor" ? (
           <Menu.Item
             to="/audit-metrics"
             primaryText="Métricas"
