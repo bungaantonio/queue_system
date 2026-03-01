@@ -7,3 +7,4 @@ api/logs_atendimento_real_tese.csv
 api/validacao_hipoteses.csv
 api/simulador_cenarios.py
 !codigo-fonte.txt
+.env
