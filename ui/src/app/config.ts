@@ -1,5 +1,5 @@
   // src/app/config.ts
-  const rawApiBaseUrl = import.meta.env.UI_VITE_API_BASE_URL ?? "";
+  const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
   const normalizedApiBaseUrl = rawApiBaseUrl.replace(/\/+$/, "");
 
   export const CONFIG = {
