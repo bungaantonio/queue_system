@@ -1,6 +1,6 @@
 # TO DO
 
-## Development Workflow (Daily)
+## Development Workflow
 
 ### Regras
 
