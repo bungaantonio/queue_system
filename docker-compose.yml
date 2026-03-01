@@ -1,5 +1,5 @@
 services:
-  # API
+  # FastAPI
   app:
     build:
       context: ./api
@@ -12,7 +12,7 @@ services:
     ports:
       - "8000:8000"
 
-  # UI
+  # React UI
   ui:
     build:
       context: ./ui
@@ -25,7 +25,7 @@ services:
     ports:
       - "3101:80"
 
-  # UI Admin
+  # React Admin
   ui-admin:
     build:
       context: ./ui-admin
@@ -38,7 +38,7 @@ services:
     ports:
       - "3102:80"
 
-  # Banco de dados Postgres
+  # Postgres
   db:
     image: postgres:15
     container_name: fastapi-db
