@@ -12,27 +12,31 @@ services:
     ports:
       - "8000:8000"
 
-  # UI Admin
-  ui-admin:
-    build:
-      context: ./ui-admin
-      dockerfile: Dockerfile.ui-admin
-    container_name: ui-admin
-    depends_on:
-      - app
-    ports:
-      - "3002:80"
-
   # UI
   ui:
     build:
       context: ./ui
       dockerfile: Dockerfile.ui
+      args:
+        VITE_API_BASE_URL: ${UI_VITE_API_BASE_URL:-http://localhost:8000/api/v1}
     container_name: ui
     depends_on:
       - app
     ports:
-      - "3001:80"
+      - "3101:80"
+
+  # UI Admin
+  ui-admin:
+    build:
+      context: ./ui-admin
+      dockerfile: Dockerfile.ui-admin
+      args:
+        VITE_API_BASE_URL: ${UI_ADMIN_VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+    container_name: ui-admin
+    depends_on:
+      - app
+    ports:
+      - "3102:80"
 
   # Banco de dados Postgres
   db:
