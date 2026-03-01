@@ -1,28 +1,28 @@
-# Build stage
+# Stage 1: build
 FROM node:20-slim AS build
 
 WORKDIR /app
 
-# Copia manifests
+# Copia package.json e package-lock.json para cache
 COPY package*.json ./
 
 # Instala dependências
 RUN npm install
 
-# Copia código
+# Copia todo o código da UI
 COPY . .
 
 # Build da aplicação
 RUN npm run build
 
-# Runtime stage
+# Stage 2: produção
 FROM nginx:alpine
 
 # Copia build para Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expõe porta padrão HTTP
+# Expõe porta 80
 EXPOSE 80
 
-# Inicia Nginx
+# Comando padrão
 CMD ["nginx", "-g", "daemon off;"]
