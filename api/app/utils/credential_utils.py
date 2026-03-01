@@ -48,9 +48,4 @@ def validate_call_token(
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
 
-    # DEBUG: Remova após testar
-    print(
-        f"DEBUG TOKEN: Agora: {now} | Expira em: {expires_at} | Bate? {presented_token == stored_token}"
-    )
-
     return presented_token == stored_token and expires_at > now

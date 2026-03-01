@@ -35,12 +35,20 @@ class CredentialAuthService:
         if not user_credential:
             raise AppException("credential.not_found")
 
-        # 3. COMPARAÇÃO DE TEXTO SIMPLES
+        # 3. Valida call token e expiração
+        if not utils.validate_call_token(
+            presented_token=presented_call_token,
+            stored_token=item.call_token,
+            expires_at=item.call_token_expires_at,
+        ):
+            raise AppException("queue.invalid_call_token")
+
+        # 4. COMPARAÇÃO DE TEXTO SIMPLES
         # Como o Middleware enviou o template do cache dele, as strings devem ser idênticas.
         if input_credential != user_credential.identifier:
             raise AppException("credential.mismatch")
 
-        # 4. Sucesso! Marca como em atendimento
+        # 5. Sucesso! Marca como em atendimento
         mark_credential_verified(db, item)
         set_being_served(db, item)
         db.commit()

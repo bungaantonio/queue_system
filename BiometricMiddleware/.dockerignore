@@ -1,0 +1,20 @@
+bin/
+obj/
+TestResults/
+
+# Local secrets/config
+.env
+.env.*
+
+# User/system files
+.vs/
+*.user
+*.suo
+*.cache
+*.pdb
+.DS_Store
+Thumbs.db
+
+# VCS
+.git
+.gitignore

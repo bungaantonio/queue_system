@@ -24,7 +24,7 @@ def get_dados_metricas(
         description="Filtro de cenário (ex.: Cenario_A, Cenario_B, todos).",
     ),
     db: Session = Depends(get_db),
-    current_user = Depends(require_roles(OperatorRole.AUDITOR)),
+    current_user=Depends(require_roles(OperatorRole.AUDITOR, OperatorRole.ADMIN)),
 ):
     # O serviço devolve uma LISTA de objetos, não um CSV
     result = MetricsService.get_lista_metricas(db, cenario)
@@ -38,7 +38,7 @@ def exportar_metricas_para_csv(
         description="Filtro de cenário (ex.: Cenario_A, Cenario_B, todos).",
     ),
     db: Session = Depends(get_db),
-    current_user=Depends(require_roles(OperatorRole.AUDITOR)),
+    current_user=Depends(require_roles(OperatorRole.AUDITOR, OperatorRole.ADMIN)),
 ):
     """
     Exporta os logs de atendimento reais em formato CSV para análise de métricas.

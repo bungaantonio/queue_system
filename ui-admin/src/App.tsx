@@ -86,7 +86,7 @@ export const App = () => (
       />
       <Resource
         name="audit-metrics"
-        list={withRole(AuditMetricsList, ["auditor"])}
+        list={withRole(AuditMetricsList, ["admin", "auditor"])}
         icon={QueryStatsRoundedIcon}
         options={{ label: "Métricas" }}
       />

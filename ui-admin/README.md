@@ -1,4 +1,4 @@
-# ui-admin | Queue Admin
+# ui-admin | QMS Admin
 
 ## Installation
 

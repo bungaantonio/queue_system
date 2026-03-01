@@ -133,7 +133,7 @@ def cancel_active_user(db: Session, item_id: int, operator_id: int) -> QueueItem
     """Cancela o atendimento do utilizador ativo."""
     queue_item = get_queue_item_by_id(db, item_id)
     if not queue_item:
-        raise AppException("queue.no_active_user")
+        raise AppException("queue.no_active_service")
 
     cancelled_item = mark_as_cancelled(db, queue_item)
 
