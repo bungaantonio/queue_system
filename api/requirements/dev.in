@@ -10,3 +10,6 @@ pandas
 pip-tools
 matplotlib
 seaborn
+plotly
+kaleido
+nbformat>=4.2.0

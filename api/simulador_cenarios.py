@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from dataclasses import dataclass
 from typing import Any
 import uuid
@@ -15,7 +15,13 @@ USER, PASS = "admin", "123"
 OPERATOR_ID = 1
 REPEATS_PER_SCENARIO = 3 # Repetir cada cenário N vezes para gerar mais dados e permitir análise de variabilidade
 BASE_SEED = 1000 # Base para geração de números aleatórios. Cada cenário e repetição terá uma seed diferente (base + número da repetição) para garantir reprodutibilidade.
-TICK_SECONDS = 0.5 # A cada tick, o operador tenta chamar o próximo da fila. Se não houver progresso (nenhuma chamada, autenticação ou finalização), conta como idle. O cenário termina quando processamos todos os usuários ou atingimos um número máximo de ticks ociosos (max_idle_ticks), para evitar loops infinitos em casos de falhas.
+# Relogio simulado:
+# - Cada tick representa um intervalo de tempo de negocio (segundos simulados).
+# - O tempo real pode ser acelerado para a execucao nao demorar horas.
+SIMULATION_MODE = "realista"  # "rapido" | "realista"
+TICK_SIM_SECONDS = 30.0
+REAL_SECONDS_PER_SIM_MINUTE = 0.02  # 1 minuto simulado = 0.02s reais
+ENABLE_REAL_SLEEP = True
 MAX_REGISTER_RETRIES = 5
 EXECUTION_TAG = datetime.now().strftime("%Y%m%d%H%M%S")
 PENDING_WATCHDOG_TICKS = 8
@@ -75,9 +81,9 @@ class ScenarioConfig:
     name: str
     total_users: int
     priority_weights: list[float]
-    min_service: float
-    max_service: float
-    arrival_probability: float
+    min_service_min: float
+    max_service_min: float
+    arrival_probability_per_minute: float
     no_show_probability: float
     initial_backlog: int
 
@@ -87,9 +93,9 @@ SCENARIOS = [
         name="Cenario_A",
         total_users=30,
         priority_weights=[0.7, 0.2, 0.1],
-        min_service=1,
-        max_service=2,
-        arrival_probability=0.60,
+        min_service_min=4,
+        max_service_min=6,
+        arrival_probability_per_minute=0.35,
         no_show_probability=0.08,
         initial_backlog=10,
     ),
@@ -97,9 +103,9 @@ SCENARIOS = [
         name="Cenario_B",
         total_users=40,
         priority_weights=[0.3, 0.4, 0.3],
-        min_service=2,
-        max_service=4,
-        arrival_probability=0.70,
+        min_service_min=6,
+        max_service_min=10,
+        arrival_probability_per_minute=0.45,
         no_show_probability=0.10,
         initial_backlog=14,
     ),
@@ -107,9 +113,9 @@ SCENARIOS = [
         name="Cenario_C",
         total_users=60,
         priority_weights=[0.2, 0.4, 0.4],
-        min_service=3,
-        max_service=5,
-        arrival_probability=0.80,
+        min_service_min=8,
+        max_service_min=14,
+        arrival_probability_per_minute=0.55,
         no_show_probability=0.12,
         initial_backlog=20,
     ),
@@ -170,8 +176,18 @@ def request_with_reauth(
         return None
 
 
-def now_str() -> str:
-    return datetime.now().isoformat(sep=" ", timespec="microseconds")
+def sim_now_str(sim_start: datetime, sim_elapsed_seconds: float) -> str:
+    instante = sim_start + timedelta(seconds=sim_elapsed_seconds)
+    return instante.isoformat(sep=" ", timespec="microseconds")
+
+
+def prob_por_tick(prob_por_minuto: float, tick_sim_seconds: float) -> float:
+    """
+    Converte probabilidade de chegada por minuto para probabilidade por tick simulado.
+    """
+    p = max(0.0, min(1.0, prob_por_minuto))
+    frac_min = tick_sim_seconds / 60.0
+    return 1.0 - ((1.0 - p) ** frac_min)
 
 
 def get_error_code(res: requests.Response | None) -> str | None:
@@ -267,6 +283,9 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
     rng = random.Random(seed)
     logs: list[dict[str, Any]] = []
     by_item_id: dict[int, dict[str, Any]] = {}
+    sim_start = datetime.now().replace(microsecond=0)
+    sim_elapsed_seconds = 0.0
+    arrival_probability_tick = prob_por_tick(cfg.arrival_probability_per_minute, TICK_SIM_SECONDS)
 
     created = 0
     processed = 0
@@ -275,7 +294,23 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
     pending_watch_item_id: int | None = None
     pending_watch_ticks = 0
 
-    print(f"\nIniciando {cfg.name} | run_id={run_id} | seed={seed} | total={cfg.total_users}")
+    def avancar_tempo_sim(segundos_simulados: float) -> None:
+        nonlocal sim_elapsed_seconds
+        segundos_simulados = max(0.0, float(segundos_simulados))
+        sim_elapsed_seconds += segundos_simulados
+
+        if SIMULATION_MODE == "rapido":
+            return
+
+        if ENABLE_REAL_SLEEP and REAL_SECONDS_PER_SIM_MINUTE > 0:
+            segundos_reais = (segundos_simulados / 60.0) * REAL_SECONDS_PER_SIM_MINUTE
+            if segundos_reais > 0:
+                time.sleep(segundos_reais)
+
+    print(
+        f"\nIniciando {cfg.name} | run_id={run_id} | seed={seed} | total={cfg.total_users} "
+        f"| modo={SIMULATION_MODE} | tick_sim={TICK_SIM_SECONDS}s | p_chegada_tick={arrival_probability_tick:.3f}"
+    )
 
     while processed < cfg.total_users and idle_ticks < max_idle_ticks:
         houve_progresso = False
@@ -283,7 +318,7 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
         # 1) Chegadas dinamicas
         if (
             created < cfg.total_users
-            and rng.random() < cfg.arrival_probability
+            and rng.random() < arrival_probability_tick
             and pending_watch_ticks == 0
         ):
             tipo = rng.choices(["normal", "priority", "urgent"], weights=cfg.priority_weights)[0]
@@ -296,7 +331,7 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
                 is_disabled=is_disabled,
                 tipo=tipo,
             )
-            t_entrada = now_str()
+            t_entrada = sim_now_str(sim_start, sim_elapsed_seconds)
 
             for _attempt in range(1, MAX_REGISTER_RETRIES + 1):
                 # Evita colisao entre execucoes diferentes (credenciais repetidas)
@@ -419,7 +454,7 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
         if item is not None:
             curr_id = item.get("id")
             if curr_id is None:
-                time.sleep(TICK_SECONDS)
+                avancar_tempo_sim(TICK_SIM_SECONDS)
                 idle_ticks += 1
                 continue
 
@@ -456,7 +491,7 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
 
             rec = by_item_id[curr_id]
             rec["call_http"] = call_http if call_http is not None else rec.get("call_http")
-            rec["t_chamada"] = now_str()
+            rec["t_chamada"] = sim_now_str(sim_start, sim_elapsed_seconds)
 
             # No-show
             if allow_no_show and rng.random() < cfg.no_show_probability:
@@ -479,7 +514,7 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
                     rec["motivo_final"] = "no_show_cancel_failed"
 
                 rec["biometria"] = "N/A"
-                rec["t_fim"] = now_str()
+                rec["t_fim"] = sim_now_str(sim_start, sim_elapsed_seconds)
                 processed += 1
                 houve_progresso = True
                 pending_watch_item_id = None
@@ -503,12 +538,13 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
                 except Exception:
                     rec["auth_http"] = -1
 
-                rec["t_auth"] = now_str()
+                rec["t_auth"] = sim_now_str(sim_start, sim_elapsed_seconds)
                 rec["auth_ok"] = 1 if rec["auth_http"] in [200, 201] else 0
                 rec["biometria"] = "success" if rec["auth_ok"] == 1 else "fail"
 
                 if rec["auth_ok"] == 1:
-                    time.sleep(rng.uniform(cfg.min_service, cfg.max_service))
+                    service_sim_seconds = rng.uniform(cfg.min_service_min, cfg.max_service_min) * 60.0
+                    avancar_tempo_sim(service_sim_seconds)
                     try:
                         res_finish = request_with_reauth(
                             "POST",
@@ -523,7 +559,7 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
                     if rec["finish_ok"] == 1:
                         rec["status_final"] = "done"
                         rec["motivo_final"] = "auth_and_finish_ok"
-                        rec["t_fim"] = now_str()
+                        rec["t_fim"] = sim_now_str(sim_start, sim_elapsed_seconds)
                         processed += 1
                         houve_progresso = True
                         pending_watch_item_id = None
@@ -540,7 +576,7 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
                         except Exception:
                             rec["cancel_http"] = -1
 
-                        rec["t_fim"] = now_str()
+                        rec["t_fim"] = sim_now_str(sim_start, sim_elapsed_seconds)
                         if rec["cancel_http"] in [200, 201]:
                             rec["status_final"] = "cancelled_after_finish_fail"
                             rec["motivo_final"] = "finish_failed_but_cancelled"
@@ -563,7 +599,7 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
                     except Exception:
                         rec["cancel_http"] = -1
 
-                    rec["t_fim"] = now_str()
+                    rec["t_fim"] = sim_now_str(sim_start, sim_elapsed_seconds)
                     if rec["cancel_http"] in [200, 201]:
                         rec["status_final"] = "cancelled_after_auth_fail"
                         rec["motivo_final"] = "auth_failed_but_cancelled"
@@ -591,7 +627,7 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
                     watchdog_rec["cancel_http"] = -1
                 watchdog_rec["status_final"] = "cancelled_by_watchdog"
                 watchdog_rec["motivo_final"] = "pending_verification_watchdog"
-                watchdog_rec["t_fim"] = now_str()
+                watchdog_rec["t_fim"] = sim_now_str(sim_start, sim_elapsed_seconds)
                 processed += 1
                 houve_progresso = True
             pending_watch_item_id = None
@@ -602,10 +638,16 @@ def executar_cenario(cfg: ScenarioConfig, run_id: str, seed: int, headers: dict[
         else:
             idle_ticks += 1
 
-        time.sleep(TICK_SECONDS)
+        avancar_tempo_sim(TICK_SIM_SECONDS)
 
     if idle_ticks >= max_idle_ticks:
         print(f"[WARN] Encerrado por max_idle_ticks: {cfg.name} | run_id={run_id}")
+
+    sim_total_min = sim_elapsed_seconds / 60.0
+    print(
+        f"Concluido {cfg.name} | run_id={run_id} | criados={created} | processados={processed} "
+        f"| duracao_simulada={sim_total_min:.2f} min"
+    )
 
     return logs
 
