@@ -18,7 +18,7 @@ services:
       context: ./ui
       dockerfile: Dockerfile.ui
       args:
-        VITE_API_BASE_URL: ${UI_VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
     container_name: ui
     depends_on:
       - app
@@ -31,7 +31,7 @@ services:
       context: ./ui-admin
       dockerfile: Dockerfile.ui-admin
       args:
-        VITE_API_BASE_URL: ${UI_ADMIN_VITE_API_BASE_URL:-http://localhost:8000/api/v1}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
     container_name: ui-admin
     depends_on:
       - app
