@@ -16,7 +16,7 @@ npm run dev
 ```
 
 * Vite inicia o servidor de desenvolvimento com hot reload
-* Acesse a UI Admin em <http://localhost:3002>
+* Acesse a UI Admin em <http://localhost:3102>
 
 ## Build produção
 
