@@ -2,7 +2,7 @@ services:
   # API
   app:
     build:
-      context: .
+      context: ./api
       dockerfile: Dockerfile.api
     container_name: fastapi-app
     env_file:
