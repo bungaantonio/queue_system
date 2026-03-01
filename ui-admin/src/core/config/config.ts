@@ -1,6 +1,5 @@
 // src/core/config/config.ts
-const rawApiBaseUrl =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1";
+const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
 const normalizedApiBaseUrl = rawApiBaseUrl.replace(/\/+$/, "");
 
 export const CONFIG = {
