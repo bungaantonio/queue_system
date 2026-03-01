@@ -40,7 +40,7 @@ const refreshAccessToken = async (): Promise<string> => {
   const refreshToken = sessionStore.getRefreshToken();
   if (!refreshToken) {
     sessionStore.clear();
-    throw new ApiError(401, { detail: "Sessão expirada" });
+    throw new ApiError(401, { detail: "Não autenticado" });
   }
 
   let refreshRes: Response;
@@ -89,7 +89,12 @@ const request = async <T>(
     });
 
   let token = sessionStore.getAccessToken();
+  const refreshToken = sessionStore.getRefreshToken();
+
   if (!token) {
+    if (!refreshToken) {
+      throw new ApiError(401, { detail: "Não autenticado" });
+    }
     token = await refreshAccessToken();
   }
 
@@ -135,7 +140,12 @@ const requestBlob = async (path: string): Promise<Blob> => {
     });
 
   let token = sessionStore.getAccessToken();
+  const refreshToken = sessionStore.getRefreshToken();
+
   if (!token) {
+    if (!refreshToken) {
+      throw new ApiError(401, { detail: "Não autenticado" });
+    }
     token = await refreshAccessToken();
   }
 
