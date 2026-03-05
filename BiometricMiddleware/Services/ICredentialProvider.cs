@@ -1,6 +1,6 @@
 namespace BiometricMiddleware.Services
 {
-    public interface ICredentialProvider
+    public interface ICredentialProvider : IDisposable
     {
         /// <summary>
         /// Captura o identificador biométrico do usuário (via hardware ou simulação).
@@ -12,5 +12,8 @@ namespace BiometricMiddleware.Services
         /// <param name="expectedHash">Opcional: hash esperado para validação</param>
         /// <returns>Uma string representando o identificador da digital</returns>
         Task<string> CaptureIdentifierAsync(CancellationToken ct = default);
+
+        /// Compara dois templates biométricos
+        int MatchTemplates(string template1, string template2);
     }
 }

@@ -21,8 +21,11 @@ class Program
         });
 
         var listenerLogger = loggerFactory.CreateLogger<QueueListener>();
-        var biometricLogger = loggerFactory.CreateLogger<ZKBiometricProvider>();
-        ICredentialProvider biometricProvider = new ZKBiometricProvider(biometricLogger);
+        BiometricProviderType providerType = ResolveProviderType(args);
+
+        ICredentialProvider biometricProvider =
+        BiometricProviderFactory.Create(providerType, loggerFactory);
+
         var listener = new QueueListener(listenerLogger, baseUrl, operatorId, biometricProvider);
 
         using var cts = new CancellationTokenSource();
@@ -55,9 +58,7 @@ class Program
         }
         finally
         {
-            if (biometricProvider is IDisposable disposable)
-                disposable.Dispose();
-
+            biometricProvider.Dispose();
             Console.WriteLine("[Middleware] Processo finalizado.");
         }
     }
@@ -80,6 +81,21 @@ class Program
             return operatorId;
 
         return 42;
+    }
+
+    private static BiometricProviderType ResolveProviderType(string[] args)
+    {
+        string? argValue = GetArgValue(args, "--provider");
+        string? envValue = Environment.GetEnvironmentVariable("BIOMETRIC_PROVIDER");
+
+        string raw = !string.IsNullOrWhiteSpace(argValue)
+            ? argValue
+            : envValue ?? "ZKTeco";
+
+        if (Enum.TryParse<BiometricProviderType>(raw, true, out var provider))
+            return provider;
+
+        return BiometricProviderType.ZKTeco;
     }
 
     private static LogLevel ResolveLogLevel(string[] args)

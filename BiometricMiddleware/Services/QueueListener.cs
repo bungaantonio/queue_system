@@ -125,7 +125,7 @@ namespace BiometricMiddleware.Services
 
                     foreach (var cred in _cachedCredentials)
                     {
-                        int score = ((ZKBiometricProvider)_biometricProvider).MatchTemplates(capturedTemplate, cred.Template);
+                        int score = _biometricProvider.MatchTemplates(capturedTemplate, cred.Template);
                         if (score > highestScore) { matchedUser = cred; highestScore = score; }
                     }
 
