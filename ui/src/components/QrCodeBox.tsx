@@ -7,10 +7,9 @@ export default function QrCodeBox({ reduced = false }: { reduced?: boolean }) {
   const { calledUser } = useQueueStream();
 
   // 1. Dinamismo de URL:
-  // Aponta para o próprio endereço do Frontend (ex: http://192.168.1.50:5173/consultar)
   const baseUrl = window.location.origin;
   const ticketParam = calledUser ? `?ticket=${calledUser.ticket}` : "";
-  const finalUrl = `${baseUrl}/consultar${ticketParam}`;
+  const finalUrl = `${baseUrl}/#/consultar${ticketParam}`;
 
   const inkColor = "#0F172A"; // Slate-900: Contraste máximo para scanners de telemóvel
 
